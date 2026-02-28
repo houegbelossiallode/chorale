@@ -1,0 +1,10 @@
+﻿#47 C:/Users/HP 450 G7/.gemini/antigravity/scratch/chorale_app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate/Foundation/Http/Kernel->sendRequestThroughRouter(Object(Illuminate/Http/Request))
+#48 C:/Users/HP 450 G7/.gemini/antigravity/scratch/chorale_app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate/Foundation/Http/Kernel->handle(Object(Illuminate/Http/Request))
+#49 C:/Users/HP 450 G7/.gemini/antigravity/scratch/chorale_app/public/index.php(20): Illuminate/Foundation/Application->handleRequest(Object(Illuminate/Http/Request))
+#50 C:/Users/HP 450 G7/.gemini/antigravity/scratch/chorale_app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('C://Users//HP 450...')
+#51 {main}
+"} 
+[2026-02-25 12:10:53] local.ERROR: Maximum execution time of 60 seconds exceeded {"userId":2,"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at C:/Users/HP 450 G7/.gemini/antigravity/scratch/chorale_app/vendor/laravel/framework/src/Illuminate/Database/Connection.php:827)
+[stacktrace]
+#0 {main}
+"} 
