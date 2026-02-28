@@ -63,6 +63,24 @@
                 }
             @endphp
 
+
+            {{-- Paroles / Texte --}}
+            @if($chant->parole)
+            <div class="bg-white rounded-3xl shadow-material-lg p-10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#7367F0]/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <h3 class="text-xs font-black text-[#7367F0] uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                        <div class="w-8 h-[2px] bg-[#7367F0]"></div>
+                        Paroles & Texte
+                    </h3>
+                    <div class="whitespace-pre-wrap text-lg text-slate-700 leading-relaxed font-serif italic text-center max-w-2xl mx-auto">
+                        {{ $chant->parole }}
+                    </div>
+                </div>
+            </div>
+            @endif  
+
+
             @if($partitions->isNotEmpty())
             <div class="bg-white rounded-3xl shadow-material-lg overflow-hidden border border-gray-100" x-data="{ activeTab: '{{ $partitions->first()->id }}' }">
                 {{-- Tab Header --}}
@@ -106,21 +124,7 @@
             </div>
             @endif
 
-            {{-- Paroles / Texte --}}
-            @if($chant->parole)
-            <div class="bg-white rounded-3xl shadow-material-lg p-10 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[#7367F0]/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
-                <div class="relative z-10">
-                    <h3 class="text-xs font-black text-[#7367F0] uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
-                        <div class="w-8 h-[2px] bg-[#7367F0]"></div>
-                        Paroles & Texte
-                    </h3>
-                    <div class="whitespace-pre-wrap text-lg text-slate-700 leading-relaxed font-serif italic text-center max-w-2xl mx-auto">
-                        {{ $chant->parole }}
-                    </div>
-                </div>
-            </div>
-            @endif
+            
         </div>
 
         {{-- RIGHT COLUMN: Interactive Widgets (4 cols) --}}
@@ -162,10 +166,15 @@
                             <p class="text-[10px] font-bold text-[#7367F0] uppercase tracking-widest mb-3 text-center">Écouter ma prise</p>
                             <audio id="audioPreview" controls class="w-full h-8 custom-audio"></audio>
                         </div>
-                        <button id="uploadBtn" class="w-full py-4 bg-[#7367F0] text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-[#685dd8] transition-all shadow-lg hover:shadow-[#7367F0]/30 group">
-                            <svg class="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                            Envoyer pour Feedback
-                        </button>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="discardBtn" class="py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all">
+                                Recommencer
+                            </button>
+                            <button id="uploadBtn" class="w-full py-4 bg-[#7367F0] text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-[#685dd8] transition-all shadow-lg hover:shadow-[#7367F0]/30 group">
+                                <svg class="w-5 h-5 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Envoyer
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,12 +191,17 @@
                     @foreach($enregistrements as $rec)
                     <div class="p-4 rounded-2xl border border-slate-50 bg-slate-50/30 hover:bg-slate-50 transition-colors">
                         <div class="flex justify-between items-center mb-3">
-                            <span class="text-[10px] font-black text-slate-400 font-mono">{{ $rec->created_at->format('d/m/Y H:i') }}</span>
-                            @if($rec->chef_comment)
-                                <span class="px-2 py-0.5 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded">Avis Reçu</span>
-                            @else
-                                <span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[8px] font-black uppercase rounded text-nowrap">En attente</span>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-black text-slate-400 font-mono">{{ $rec->created_at->format('d/m/Y H:i') }}</span>
+                                @if($rec->chef_comment)
+                                    <span class="px-2 py-0.5 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded">Avis Reçu</span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[8px] font-black uppercase rounded text-nowrap">En attente</span>
+                                @endif
+                            </div>
+                            <button onclick="deleteRecording({{ $rec->id }})" class="p-1.5 text-slate-300 hover:text-red-500 transition-colors" title="Supprimer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
                         <audio controls class="w-full h-6 mb-3 custom-audio-mini"></audio>
                         
@@ -304,6 +318,7 @@
     const previewContainer = document.getElementById('previewContainer');
     const audioPreview = document.getElementById('audioPreview');
     const uploadBtn = document.getElementById('uploadBtn');
+    const discardBtn = document.getElementById('discardBtn');
 
     startBtn.onclick = async () => {
         try {
@@ -348,6 +363,17 @@
         stopBtn.classList.add('hidden');
     };
 
+    discardBtn.onclick = () => {
+        audioChunks = [];
+        audioBlob = null;
+        audioPreview.src = '';
+        previewContainer.classList.add('hidden');
+        statusLabel.textContent = "PRÊT À ENREGISTRER";
+        statusLabel.classList.remove('text-red-500', 'animate-pulse');
+        timerElem.classList.add('hidden');
+        timerElem.textContent = "00:00";
+    };
+
     function animateBars(stream) {
         const ctx = new AudioContext();
         const src = ctx.createMediaStreamSource(stream);
@@ -383,5 +409,18 @@
         } catch (err) { alert("Erreur lors de l'envoi."); }
         finally { uploadBtn.disabled = false; uploadBtn.innerHTML = originalText; }
     };
+
+    async function deleteRecording(id) {
+        if (!confirm('Supprimer cet enregistrement définitivement ?')) return;
+        try {
+            const res = await fetch(`/choriste/enregistrements/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            });
+            const result = await res.json();
+            if (result.success) window.location.reload();
+            else alert("Erreur: " + result.message);
+        } catch (err) { alert("Erreur lors de la suppression."); }
+    }
 </script>
 @endpush

@@ -69,6 +69,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('events/images/{image}', [\App\Http\Controllers\Admin\EventController::class, 'deleteImage'])->name('events.delete-image');
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     Route::post('fichier-chants', [\App\Http\Controllers\Admin\FichierChantController::class, 'store'])->name('fichier-chants.store');
+    Route::post('chants/{chant}/record', [\App\Http\Controllers\Admin\FichierChantController::class, 'record'])->name('chants.record');
     Route::delete('fichier-chants/{fichierChant}', [\App\Http\Controllers\Admin\FichierChantController::class, 'destroy'])->name('fichier-chants.destroy');
 });
 
@@ -82,6 +83,7 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
 
     // Enregistrements
     Route::post('/enregistrements', [\App\Http\Controllers\Choriste\EnregistrementController::class, 'store'])->name('enregistrements.store');
+    Route::delete('/enregistrements/{enregistrement}', [\App\Http\Controllers\Choriste\EnregistrementController::class, 'destroy'])->name('enregistrements.destroy');
 });
 
 // Admin Enregistrements Feedback

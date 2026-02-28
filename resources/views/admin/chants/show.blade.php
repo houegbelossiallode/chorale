@@ -39,6 +39,21 @@
         {{-- LEFT: Paroles + Partition principale --}}
         <div class="lg:col-span-2 space-y-6">
 
+            {{-- Paroles --}}
+            @if($chant->parole)
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-gray-100 pb-3 mb-6 flex items-center gap-2">
+                    <div class="w-8 h-8 bg-[#7367F0]/10 rounded-lg flex items-center justify-center text-[#7367F0]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                        </svg>
+                    </div>
+                    Paroles
+                </h2>
+                <div class="prose max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap text-sm font-medium">{{ $chant->parole }}</div>
+            </div>
+            @endif
+
             {{-- Partition principale (PDF Viewer) --}}
             @if($chant->file_path)
             <div class="bg-white rounded-xl shadow-material overflow-hidden">
@@ -60,21 +75,6 @@
                     </a>
                 </div>
                 <iframe src="{{ $chant->file_path }}#toolbar=0" class="w-full h-[600px]" frameborder="0"></iframe>
-            </div>
-            @endif
-
-            {{-- Paroles --}}
-            @if($chant->parole)
-            <div class="bg-white rounded-xl shadow-material p-8">
-                <h2 class="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-gray-100 pb-3 mb-6 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-[#7367F0]/10 rounded-lg flex items-center justify-center text-[#7367F0]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                        </svg>
-                    </div>
-                    Paroles
-                </h2>
-                <div class="prose max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap text-sm font-medium">{{ $chant->parole }}</div>
             </div>
             @endif
 
@@ -174,9 +174,18 @@
                                         @endif
                                     </div>
 
-                                    <svg class="w-4 h-4 text-slate-300 group-hover:text-[#7367F0] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                    </svg>
+                                    <div class="flex items-center gap-2">
+                                        <form action="{{ route('admin.fichier-chants.destroy', $fichier->id) }}" method="POST" onsubmit="return confirm('Supprimer cette ressource ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </form>
+                                        <svg class="w-4 h-4 text-slate-300 group-hover:text-[#7367F0] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </div>
                                 </a>
                                 @endforeach
                             </div>
@@ -196,8 +205,192 @@
                 </div>
             </div>
 
+            {{-- Enregistrement (Recorder) --}}
+            <div class="bg-white rounded-xl shadow-material p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-[#7367F0]/5 rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
+                
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-gray-100 pb-3 mb-6 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-[#7367F0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                    Enregistrer une voix
+                </h3>
+
+                <div class="space-y-6" id="recorder-container">
+                    {{-- Pupitre Selector --}}
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Pupitre concerné</label>
+                        <select id="pupitre_id" class="w-full bg-slate-50 border-gray-200 rounded-lg text-sm font-medium focus:ring-[#7367F0]/20 focus:border-[#7367F0]">
+                            <option value="">Tous les pupitres</option>
+                            @foreach($pupitres as $p)
+                                <option value="{{ $p->id }}">{{ $p->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center py-8 bg-slate-50/50 rounded-2xl relative overflow-hidden group">
+                        <div id="visualizer-bg" class="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center gap-0.5 px-2">
+                            @for ($i = 0; $i < 40; $i++)
+                                <div class="v-bar w-1 bg-[#7367F0] rounded-full h-4 transition-all duration-75"></div>
+                            @endfor
+                        </div>
+
+                        <button id="startBtn" class="relative z-10 w-16 h-16 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-all hover:scale-105 group active:scale-95">
+                            <div class="w-5 h-5 bg-white rounded-full"></div>
+                        </button>
+                        <button id="stopBtn" class="relative z-10 w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-black transition-all hover:scale-105 active:scale-95 hidden">
+                            <div class="w-5 h-5 bg-white rounded-sm"></div>
+                        </button>
+
+                        <div id="recorderStatus" class="mt-4 text-center relative z-10">
+                            <p id="statusLabel" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Prêt à enregistrer</p>
+                            <p id="timer" class="text-2xl font-mono text-slate-800 font-black hidden">00:00</p>
+                        </div>
+                    </div>
+
+                    <div id="previewContainer" class="hidden animate-fade-in space-y-4">
+                        <div class="p-3 bg-[#7367F0]/5 rounded-xl border border-[#7367F0]/10">
+                            <audio id="audioPreview" controls class="w-full h-8"></audio>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="discardBtn" class="py-3 bg-slate-100 text-slate-600 text-sm font-bold rounded-xl hover:bg-slate-200 transition-all">
+                                Recommencer
+                            </button>
+                            <button id="uploadBtn" class="py-3 bg-[#7367F0] text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#685dd8] transition-all shadow-md">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let timerInterval;
+    let startTime;
+    let audioBlob;
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const timerElem = document.getElementById('timer');
+    const statusLabel = document.getElementById('statusLabel');
+    const previewContainer = document.getElementById('previewContainer');
+    const audioPreview = document.getElementById('audioPreview');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const discardBtn = document.getElementById('discardBtn');
+    const pupitreSelect = document.getElementById('pupitre_id');
+
+    startBtn.onclick = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            timerElem.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+            statusLabel.textContent = "EN COURS...";
+            statusLabel.classList.add('text-red-500', 'animate-pulse');
+            
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const diff = Math.floor((Date.now() - startTime) / 1000);
+                timerElem.textContent = `${Math.floor(diff / 60).toString().padStart(2, '0')}:${(diff % 60).toString().padStart(2, '0')}`;
+            }, 1000);
+            
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+            
+            mediaRecorder.onstop = () => {
+                audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioPreview.src = URL.createObjectURL(audioBlob);
+                previewContainer.classList.remove('hidden');
+                statusLabel.textContent = "TERMINÉ";
+                statusLabel.classList.remove('text-red-500', 'animate-pulse');
+                stream.getTracks().forEach(t => t.stop());
+            };
+            
+            audioChunks = [];
+            mediaRecorder.start();
+            animateBars(stream);
+
+        } catch (err) { alert("Micro inaccessible !"); }
+    };
+
+    stopBtn.onclick = () => {
+        mediaRecorder.stop();
+        clearInterval(timerInterval);
+        startBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+    };
+
+    discardBtn.onclick = () => {
+        audioChunks = [];
+        audioBlob = null;
+        audioPreview.src = '';
+        previewContainer.classList.add('hidden');
+        statusLabel.textContent = "PRÊT À ENREGISTRER";
+        statusLabel.classList.remove('text-red-500', 'animate-pulse');
+        timerElem.classList.add('hidden');
+        timerElem.textContent = "00:00";
+    };
+
+    function animateBars(stream) {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = ctx.createMediaStreamSource(stream);
+        const anlyz = ctx.createAnalyser();
+        src.connect(anlyz);
+        const data = new Uint8Array(anlyz.frequencyBinCount);
+        const bars = document.querySelectorAll('.v-bar');
+        function draw() {
+            if (mediaRecorder.state !== 'recording') return;
+            requestAnimationFrame(draw);
+            anlyz.getByteFrequencyData(data);
+            bars.forEach((b, i) => {
+                const height = data[i % 40] / 3 + 4;
+                b.style.height = `${height}px`;
+            });
+        }
+        draw();
+    }
+
+    uploadBtn.onclick = async () => {
+        const originalText = uploadBtn.innerHTML;
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<span class="animate-spin mr-2">◌</span> Envoi...';
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'record.webm');
+        if (pupitreSelect.value) {
+            formData.append('pupitre_id', pupitreSelect.value);
+        }
+
+        try {
+            const res = await fetch('{{ route("admin.chants.record", $chant->id) }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: formData
+            });
+            const result = await res.json();
+            if (result.success) window.location.reload();
+            else alert("Erreur: " + result.message);
+        } catch (err) { alert("Erreur lors de l'envoi."); }
+        finally { uploadBtn.disabled = false; uploadBtn.innerHTML = originalText; }
+    };
+</script>
+
+<style>
+.v-bar { transition: height 0.1s ease; }
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+</style>
+@endpush
 @endsection

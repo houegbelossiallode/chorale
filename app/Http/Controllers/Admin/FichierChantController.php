@@ -78,6 +78,40 @@ class FichierChantController extends Controller
         return back()->with('error', 'Échec de l\'upload. Vérifiez que le fichier est correct et que Supabase est accessible.');
     }
 
+    public function record(Request $request, Chant $chant)
+    {
+        $request->validate([
+            'audio' => 'required|file',
+            'pupitre_id' => 'nullable|exists:pupitres,id',
+        ]);
+
+        $file = $request->file('audio');
+        $filename = 'record-' . uniqid() . '.webm';
+        $path = "chants/{$chant->id}/audios/" . Str::slug($chant->title) . '-' . $filename;
+
+        \Log::info('Admin Record: Uploading to Supabase path = ' . $path);
+        $filePath = $this->supabase->uploadFile('imgs', $path, $file);
+
+        if ($filePath) {
+            FichierChant::create([
+                'chant_id' => $chant->id,
+                'pupitre_id' => $request->pupitre_id ?: null,
+                'type' => 'audio',
+                'file_path' => $filePath,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Enregistrement sauvegardé en tant que ressource audio.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Échec de l\'upload de l\'enregistrement.'
+        ], 500);
+    }
+
     public function destroy(FichierChant $fichierChant)
     {
         if ($fichierChant->type !== 'youtube') {

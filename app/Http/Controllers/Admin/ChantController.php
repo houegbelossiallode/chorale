@@ -73,7 +73,8 @@ class ChantController extends Controller
     public function show(Chant $chant)
     {
         $chant->load(['fichiers.pupitre']);
-        return view('admin.chants.show', compact('chant'));
+        $pupitres = \App\Models\Pupitre::all();
+        return view('admin.chants.show', compact('chant', 'pupitres'));
     }
 
     /**

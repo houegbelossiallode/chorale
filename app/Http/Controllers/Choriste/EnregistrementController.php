@@ -56,4 +56,20 @@ class EnregistrementController extends Controller
             'message' => 'Échec de l\'upload vers Supabase.'
         ], 500);
     }
+
+    public function destroy(Enregistrement $enregistrement)
+    {
+        if ($enregistrement->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Action non autorisée.'], 403);
+        }
+
+        // Extraire le chemin relatif à partir de l'URL publique
+        $urlPrefix = $this->supabase->url . '/storage/v1/object/public/imgs/';
+        $filePath = str_replace($urlPrefix, '', $enregistrement->file_path);
+
+        $this->supabase->deleteFile('imgs', $filePath);
+        $enregistrement->delete();
+
+        return response()->json(['success' => true, 'message' => 'Enregistrement supprimé.']);
+    }
 }
