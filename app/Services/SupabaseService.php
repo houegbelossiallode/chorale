@@ -57,7 +57,11 @@ class SupabaseService
             ->post($this->url . '/storage/v1/object/' . $bucket . '/' . $path);
 
         if ($response->failed()) {
-            Log::error('Supabase Storage Upload Error: ' . $response->body());
+            Log::error('Supabase Storage Upload Error: ' . $response->status() . ' - ' . $response->body(), [
+                'bucket' => $bucket,
+                'path' => $path,
+                'mime' => $file->getMimeType()
+            ]);
             return null;
         }
 

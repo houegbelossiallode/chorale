@@ -7,6 +7,7 @@ use App\Models\Enregistrement;
 use App\Services\SupabaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EnregistrementController extends Controller
@@ -23,9 +24,17 @@ class EnregistrementController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('Choriste Enregistrement store attempt', $request->except('audio'));
+        Log::info('Has audio file: ' . ($request->hasFile('audio') ? 'yes' : 'no'));
+
+        if ($request->hasFile('audio')) {
+            Log::info('Audio MIME type: ' . $request->file('audio')->getMimeType());
+            Log::info('Audio Extension: ' . $request->file('audio')->getClientOriginalExtension());
+        }
+
         $request->validate([
             'chant_id' => 'required|exists:chants,id',
-            'audio' => 'required|file|mimes:webm,mp3,wav',
+            'audio' => 'required|file', // Simplified for debugging
         ]);
 
         $user = Auth::user();
