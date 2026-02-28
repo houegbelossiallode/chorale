@@ -111,20 +111,20 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
                         @foreach([10, 25, 50, 100, 200] as $val)
                         <button @click="amount = {{ $val * 500 }}; custom = false" :class="amount === {{ $val * 500 }} && !custom ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 border-transparent scale-105' : 'bg-gray-50 text-gray-700 border-gray-100 hover:border-amber-300 hover:bg-amber-50'" class="relative py-4 sm:py-5 rounded-2xl font-extrabold text-sm sm:text-lg border-2 transition-all duration-300">
-                            {{ number_format($val * 500, 0, ',', ' ') }}
+                            {{ number_format($val, 0, ',', ' ') }}
                         </button>
                         @endforeach
                         <button @click="custom = true; amount = 0" :class="custom ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 border-transparent scale-105' : 'bg-gray-50 text-gray-700 border-gray-100 hover:border-amber-300'" class="py-4 sm:py-5 rounded-2xl font-bold text-sm sm:text-lg border-2 transition-all duration-300">Autre</button>
                     </div>
 
                     <!-- Currency Label (FCFA) -->
-                    <div class="text-center mb-4">
+                    <!-- <div class="text-center mb-4">
                         <span class="text-xs font-black text-amber-600 uppercase tracking-widest">Paiement en FCFA</span>
-                    </div>
+                    </div> -->
 
                     <!-- Custom Input -->
                     <div x-show="custom" x-transition class="mb-8">
-                        <input type="number" x-model.number="amount" placeholder="Montant en FCFA" class="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-center text-3xl font-extrabold text-gray-900 focus:ring-0 focus:border-amber-400 outline-none transition-all">
+                        <input type="number" x-model.number="amount" placeholder="Montant" class="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-center text-3xl font-extrabold text-gray-900 focus:ring-0 focus:border-amber-400 outline-none transition-all">
                     </div>
 
                     <!-- Frequency -->
