@@ -53,10 +53,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('pupitres', \App\Http\Controllers\Admin\PupitreController::class);
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
     Route::resource('chants', \App\Http\Controllers\Admin\ChantController::class);
-    Route::resource('finance-categories', \App\Http\Controllers\Admin\FinanceCategoryController::class);
-    Route::resource('transactions', \App\Http\Controllers\Admin\TransactionController::class);
-    Route::get('finance/export-csv', [\App\Http\Controllers\Admin\FinanceReportController::class, 'exportCSV'])->name('finance.export.csv');
-    Route::get('finance/report-pdf', [\App\Http\Controllers\Admin\FinanceReportController::class, 'reportPDF'])->name('finance.report.pdf');
+    Route::name('finance.')->group(function () {
+        Route::resource('finance-categories', \App\Http\Controllers\Admin\FinanceCategoryController::class);
+        Route::resource('transactions', \App\Http\Controllers\Admin\TransactionController::class);
+        Route::get('finance/export-csv', [\App\Http\Controllers\Admin\FinanceReportController::class, 'exportCSV'])->name('export.csv');
+        Route::get('finance/report-pdf', [\App\Http\Controllers\Admin\FinanceReportController::class, 'reportPDF'])->name('report.pdf');
+    });
     Route::resource('projets', \App\Http\Controllers\Admin\ProjectController::class);
     Route::resource('donations', \App\Http\Controllers\Admin\DonationController::class);
     Route::resource('repetitions', \App\Http\Controllers\Admin\RepetitionController::class);
@@ -65,7 +67,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('presences', \App\Http\Controllers\Admin\PresenceController::class);
     Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
     Route::resource('menus', \App\Http\Controllers\Admin\MenuController::class);
-    Route::resource('sous-menus', \App\Http\Controllers\Admin\SousMenuController::class);
+    Route::resource('sousmenus', \App\Http\Controllers\Admin\SousMenuController::class);
     Route::resource('events/types', \App\Http\Controllers\Admin\TypeController::class);
     Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
     Route::delete('events/images/{image}', [\App\Http\Controllers\Admin\EventController::class, 'deleteImage'])->name('events.delete-image');

@@ -68,7 +68,7 @@
                         class="pl-4 space-y-1 mt-1">
                         @foreach($menu->sousMenus as $sm)
                             @php
-                                $smUrl = url(ltrim($sm->url, '/'));
+                                $smUrl = Route::has($sm->url) ? route($sm->url) : url($sm->url);
                                 $isActive = request()->url() == $smUrl;
                             @endphp
                             <a href="{{ $smUrl }}"

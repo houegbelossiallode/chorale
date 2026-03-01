@@ -18,7 +18,7 @@ class FinanceMenuSeeder extends Seeder
         );
 
         \App\Models\SousMenu::updateOrCreate(
-            ['url' => 'admin.transactions.index'],
+            ['url' => 'admin.finance.transactions.index'],
             [
                 'name' => 'Journal de Caisse',
                 'menu_id' => $menu->id,
@@ -28,7 +28,7 @@ class FinanceMenuSeeder extends Seeder
         );
 
         \App\Models\SousMenu::updateOrCreate(
-            ['url' => 'admin.finance-categories.index'],
+            ['url' => 'admin.finance.finance-categories.index'],
             [
                 'name' => 'Catégories Finances',
                 'menu_id' => $menu->id,

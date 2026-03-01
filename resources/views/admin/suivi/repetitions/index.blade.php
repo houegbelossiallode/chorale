@@ -29,24 +29,24 @@
             this.repModal = true;
         }
     }">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-[#444050]">Gestion des Répétitions</h1>
-                <p class="text-slate-500 text-sm">Organisez les séances de travail et suivez l'assiduité du chœur.</p>
+                <h1 class="text-xl md:text-2xl font-bold text-[#444050]">Gestion des Répétitions</h1>
+                <p class="text-slate-500 text-xs md:text-sm">Organisez les séances et suivez l'assiduité.</p>
             </div>
-            <div class="flex items-center gap-3">
-                <button @click="autoModal = true" class="btn-primary-outline flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <button @click="autoModal = true" class="btn-primary-outline flex items-center justify-center gap-2 text-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-12a2 2 0 002-2z" />
                     </svg>
-                    Planification Automatique
+                    Planification Auto
                 </button>
-                <button @click="openModal()" class="btn-primary flex items-center gap-2">
+                <button @click="openModal()" class="btn-primary flex items-center justify-center gap-2 text-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Programmer une Séance
+                    Séance Manuelle
                 </button>
             </div>
         </div>
@@ -59,7 +59,8 @@
         @endif
 
         <div class="bg-white rounded-2xl shadow-material border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto">
+            <!-- Desktop Table -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr
@@ -172,12 +173,64 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Card List -->
+            <div class="md:hidden divide-y divide-gray-100">
+                @forelse($repetitions as $rep)
+                    <div class="p-5 space-y-4 bg-white hover:bg-slate-50 transition-colors">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-start gap-4 flex-1 min-w-0">
+                                <div class="w-12 h-12 rounded-2xl bg-[#7367F0]/10 flex flex-col items-center justify-center text-[#7367F0] shrink-0">
+                                    <span class="text-[10px] font-black uppercase tracking-tighter">{{ \Carbon\Carbon::parse($rep->start_time)->format('M') }}</span>
+                                    <span class="text-lg font-black leading-none">{{ \Carbon\Carbon::parse($rep->start_time)->format('d') }}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="font-black text-[#444050] text-base uppercase tracking-tight truncate">{{ $rep->titre }}</h3>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ \Carbon\Carbon::parse($rep->start_time)->format('H:i') }} — {{ \Carbon\Carbon::parse($rep->end_time)->format('H:i') }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0 bg-slate-50 rounded-xl p-1">
+                                <a href="{{ route('admin.repetitions.show', $rep->id) }}" class="w-9 h-9 rounded-lg flex items-center justify-center text-[#7367F0] hover:bg-white hover:shadow-sm transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                </a>
+                                <button @click="openModal({{ json_encode($rep) }})" class="w-9 h-9 rounded-lg flex items-center justify-center text-orange-500 hover:bg-white hover:shadow-sm transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                </button>
+                                <form action="{{ route('admin.repetitions.destroy', $rep->id) }}" method="POST" onsubmit="return confirm('Annuler ?');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="w-9 h-9 rounded-lg flex items-center justify-center text-red-500 hover:bg-white hover:shadow-sm transition-all">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3 py-3 border-y border-slate-50">
+                            <div class="flex items-center gap-3 text-slate-500 min-w-0">
+                                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                </div>
+                                <span class="text-xs font-bold uppercase tracking-widest truncate">{{ $rep->lieu }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="px-3 py-1 bg-[#28C76F]/10 text-[#28C76F] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#28C76F]/20">
+                                {{ $rep->presences_count }} POINTÉS
+                            </span>
+                            @if($rep->description)
+                                <p class="text-[10px] text-slate-400 font-medium italic truncate max-w-[150px]">{{ $rep->description }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-10 text-center text-slate-400 italic">Aucune répétition.</div>
+                @endforelse
+            </div>
         </div>
 
         <div x-show="repModal"
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" x-cloak
             x-transition.opacity>
-            <div class="bg-white rounded-2xl w-full max-w-md shadow-material-lg overflow-hidden flex flex-col max-h-[90vh]"
+            <div class="bg-white rounded-2xl w-full max-w-md shadow-material-lg overflow-hidden flex flex-col max-h-[90vh] mx-2"
                 @click.away="repModal = false">
                 <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <h3 class="font-bold text-lg text-[#444050] uppercase tracking-tight"

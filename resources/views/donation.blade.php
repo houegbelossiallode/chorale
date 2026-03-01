@@ -110,7 +110,7 @@
                     <!-- Amount Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
                         @foreach([10, 25, 50, 100, 200] as $val)
-                        <button @click="amount = {{ $val * 500 }}; custom = false" :class="amount === {{ $val * 500 }} && !custom ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 border-transparent scale-105' : 'bg-gray-50 text-gray-700 border-gray-100 hover:border-amber-300 hover:bg-amber-50'" class="relative py-4 sm:py-5 rounded-2xl font-extrabold text-sm sm:text-lg border-2 transition-all duration-300">
+                        <button @click="amount = {{ $val}}; custom = false" :class="amount === {{ $val}} && !custom ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 border-transparent scale-105' : 'bg-gray-50 text-gray-700 border-gray-100 hover:border-amber-300 hover:bg-amber-50'" class="relative py-4 sm:py-5 rounded-2xl font-extrabold text-sm sm:text-lg border-2 transition-all duration-300">
                             {{ number_format($val, 0, ',', ' ') }}
                         </button>
                         @endforeach
@@ -161,7 +161,7 @@
                     <button @click="pay()" class="relative w-full py-6 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white rounded-2xl font-extrabold text-xl overflow-hidden hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 hover:scale-[1.02] group">
                         <span class="relative z-10 flex items-center justify-center gap-3">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                            Donner <span x-text="amount"></span> FCFA
+                            Donner <span x-text="amount"></span>
                         </span>
                         <div class="absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </button>

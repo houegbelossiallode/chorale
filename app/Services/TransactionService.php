@@ -42,6 +42,37 @@ class TransactionService
     }
 
     /**
+     * Mettre à jour une transaction et ajuster le solde.
+     */
+    public function updateTransaction(TransactionFinanciere $transaction, array $data)
+    {
+        return DB::transaction(function () use ($transaction, $data) {
+            $caisse = $transaction->caisse;
+
+            if ($caisse) {
+                // 1. Annuler l'ancien impact sur le solde
+                if ($transaction->type === 'recette') {
+                    $caisse->decrement('solde', $transaction->montant);
+                } else {
+                    $caisse->increment('solde', $transaction->montant);
+                }
+
+                // 2. Appliquer le nouvel impact
+                if ($data['type'] === 'recette') {
+                    $caisse->increment('solde', $data['montant']);
+                } else {
+                    $caisse->decrement('solde', $data['montant']);
+                }
+            }
+
+            // 3. Mettre à jour la transaction
+            $transaction->update($data);
+
+            return $transaction;
+        });
+    }
+
+    /**
      * Annuler une transaction et restaurer le solde.
      */
     public function deleteTransaction(TransactionFinanciere $transaction)

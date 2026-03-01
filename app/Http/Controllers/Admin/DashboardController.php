@@ -42,7 +42,7 @@ class DashboardController extends Controller
             'latest_members' => User::latest()->take(5)->get(),
             'total_recettes' => $totalRecettes,
             'total_depenses' => $totalDepenses,
-            'solde' => \App\Models\Caisse::where('nom', 'Caisse Principale')->first()->solde ?? ($totalRecettes - $totalDepenses),
+            'solde' => ($caisse = \App\Models\Caisse::where('nom', 'Caisse Principale')->first()) ? $caisse->solde : ($totalRecettes - $totalDepenses),
         ];
 
         $recettesParCategorie = \App\Models\TransactionFinanciere::where('type', 'recette')

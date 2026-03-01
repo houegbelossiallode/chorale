@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Saisie Transaction')
+@section('title', 'Modifier Transaction')
 
 @section('content')
     <div class="w-full">
@@ -12,18 +12,19 @@
                 </svg>
                 Retour au journal
             </a>
-            <h1 class="text-2xl font-bold text-[#444050]">Enregistrer une opération</h1>
-            <p class="text-slate-500 text-sm">Saisissez les détails de la recette ou de la dépense.</p>
+            <h1 class="text-2xl font-bold text-[#444050]">Modifier l'opération</h1>
+            <p class="text-slate-500 text-sm">Ajustez les détails de la transaction.</p>
         </div>
 
-        <form action="{{ route('admin.finance.transactions.store') }}" method="POST">
+        <form action="{{ route('admin.finance.transactions.update', $transaction->id) }}" method="POST">
             @csrf
+            @method('PUT')
             <div class="bg-white rounded-xl shadow-material overflow-hidden">
                 <div class="p-4 md:p-8 space-y-6">
                     <div>
                         <label
                             class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Description</label>
-                        <input type="text" name="description" value="{{ old('description') }}"
+                        <input type="text" name="description" value="{{ old('description', $transaction->description) }}"
                             class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                             placeholder="Ex: Achat de partitions" required>
                         @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -36,8 +37,10 @@
                             <select name="type"
                                 class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                                 required>
-                                <option value="recette">Recette (+)</option>
-                                <option value="depense">Dépense (-)</option>
+                                <option value="recette" {{ $transaction->type == 'recette' ? 'selected' : '' }}>Recette (+)
+                                </option>
+                                <option value="depense" {{ $transaction->type == 'depense' ? 'selected' : '' }}>Dépense (-)
+                                </option>
                             </select>
                         </div>
                         <div>
@@ -47,7 +50,9 @@
                                 class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                                 required>
                                 @foreach($categories as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->libelle }} ({{ ucfirst($cat->type) }})</option>
+                                    <option value="{{ $cat->id }}" {{ $transaction->categorie_id == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->libelle }} ({{ ucfirst($cat->type) }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -57,7 +62,7 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Montant
                                 (FCFA)</label>
-                            <input type="number" name="montant" value="{{ old('montant') }}"
+                            <input type="number" name="montant" value="{{ old('montant', $transaction->montant) }}"
                                 class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                                 placeholder="0" required>
                             @error('montant') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -65,7 +70,7 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Référence /
                                 N° Pièce</label>
-                            <input type="text" name="reference" value="{{ old('reference') }}"
+                            <input type="text" name="reference" value="{{ old('reference', $transaction->reference) }}"
                                 class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                                 placeholder="Optionnel">
                         </div>
@@ -75,8 +80,7 @@
                 <div class="p-4 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col md:flex-row justify-end gap-3">
                     <a href="{{ route('admin.finance.transactions.index') }}"
                         class="order-2 md:order-1 px-6 py-2.5 rounded-lg text-slate-600 font-medium hover:bg-slate-200 text-center transition-all">Annuler</a>
-                    <button type="submit" class="order-1 md:order-2 btn-primary px-10 w-full md:w-auto">Enregistrer
-                        l'opération</button>
+                    <button type="submit" class="order-1 md:order-2 btn-primary px-10">Mettre à jour l'opération</button>
                 </div>
             </div>
         </form>

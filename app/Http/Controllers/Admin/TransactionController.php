@@ -29,7 +29,8 @@ class TransactionController extends Controller
 
         $totalRecettes = TransactionFinanciere::where('type', 'recette')->sum('montant');
         $totalDepenses = TransactionFinanciere::where('type', 'depense')->sum('montant');
-        $solde = \App\Models\Caisse::where('nom', 'Caisse Principale')->first()->solde ?? ($totalRecettes - $totalDepenses);
+        $caisse = \App\Models\Caisse::where('nom', 'Caisse Principale')->first();
+        $solde = $caisse ? $caisse->solde : ($totalRecettes - $totalDepenses);
 
         return view('admin.finance.transactions.index', compact('transactions', 'categories', 'solde', 'totalRecettes', 'totalDepenses'));
     }
@@ -38,6 +39,12 @@ class TransactionController extends Controller
     {
         $categories = CategorieFinanciere::all();
         return view('admin.finance.transactions.create', compact('categories'));
+    }
+
+    public function edit(TransactionFinanciere $transaction)
+    {
+        $categories = CategorieFinanciere::all();
+        return view('admin.finance.transactions.edit', compact('transaction', 'categories'));
     }
 
     public function store(Request $request)
@@ -54,6 +61,22 @@ class TransactionController extends Controller
         $transactionService->recordTransaction($validated);
 
         return redirect()->route('admin.finance.transactions.index')->with('success', 'Transaction enregistrée et caisse mise à jour.');
+    }
+
+    public function update(Request $request, TransactionFinanciere $transaction)
+    {
+        $validated = $request->validate([
+            'description' => 'required|string|max:255',
+            'type' => 'required|in:recette,depense',
+            'categorie_id' => 'required|exists:categorie_financieres,id',
+            'montant' => 'required|numeric|min:0',
+            'reference' => 'nullable|string|max:255',
+        ]);
+
+        $transactionService = app(\App\Services\TransactionService::class);
+        $transactionService->updateTransaction($transaction, $validated);
+
+        return redirect()->route('admin.finance.transactions.index')->with('success', 'Transaction mise à jour et caisse ajustée.');
     }
 
     public function destroy(TransactionFinanciere $transaction)
