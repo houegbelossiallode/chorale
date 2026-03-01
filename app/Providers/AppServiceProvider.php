@@ -39,18 +39,18 @@ class AppServiceProvider extends ServiceProvider
 
             $menus = [];
             if ($user && $user->role) {
-                $accessibleSousMenus = $user->role->permissions->where('is_granted', true)->pluck('sous_menu_id')->toArray();
+                $accessibleSousMenus = $user->role->permissions->where('is_granted',true)->pluck('sous_menu_id')->toArray();
 
                 $menus = Menu::with([
                     'sousmenus' => function ($query) use ($accessibleSousMenus) {
                         $query->whereIn('id', $accessibleSousMenus)
-                            ->where('actif', 'OUI')
-                            ->where('is_show', 'OUI');
+                            ->where('actif','OUI')
+                            ->where('is_show','OUI');
                     }
                 ])->whereHas('sousmenus', function ($query) use ($accessibleSousMenus) {
                     $query->whereIn('id', $accessibleSousMenus)
-                        ->where('actif', 'OUI')
-                        ->where('is_show', 'OUI');
+                        ->where('actif','OUI')
+                        ->where('is_show','OUI');
                 })->get();
             }
 

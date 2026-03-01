@@ -16,7 +16,11 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::withCount('permissions')->get();
+        $roles = Role::withCount([
+            'permissions' => function ($query) {
+                $query->where('is_granted', true);
+            }
+        ])->get();
         return view('admin.roles.index', compact('roles'));
     }
 
@@ -49,7 +53,7 @@ class RoleController extends Controller
     {
         $modules = Module::with(['menus.sousMenus'])->get();
         $permissions = RolePermission::where('role_id', $role->id)->pluck('is_granted', 'sous_menu_id')->toArray();
-        
+
         return view('admin.roles.edit', compact('role', 'modules', 'permissions'));
     }
 
@@ -87,6 +91,6 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        
+
     }
 }
