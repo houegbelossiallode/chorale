@@ -70,12 +70,26 @@ class DonationController extends Controller
             );
 
             // 2. Enregistrer le don
-            Donation::create([
+            $donation = Donation::create([
                 'donateur_id' => $donateur->id,
                 'amount' => $amount,
                 'payment_method' => 'KKIAPAY',
                 'reference_transaction' => $transactionId,
             ]);
+
+            // 3. Créer la transaction financière associée et créditer la caisse
+            $categorieDons = \App\Models\CategorieFinanciere::where('libelle', 'Dons')->first();
+            $transactionService = app(\App\Services\TransactionService::class);
+
+            $tx = $transactionService->recordTransaction([
+                'description' => "Don de " . $donateur->name . " (Ref: $transactionId)",
+                'type' => 'recette',
+                'categorie_id' => $categorieDons->id ?? 1, // Fallback au cas où
+                'montant' => $amount,
+                'reference' => $transactionId,
+            ]);
+
+            $donation->update(['transaction_id' => $tx->id]);
 
             return view('donation-success', [
                 'amount' => $amount,

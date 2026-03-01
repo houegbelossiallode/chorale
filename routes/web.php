@@ -55,6 +55,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('chants', \App\Http\Controllers\Admin\ChantController::class);
     Route::resource('finance-categories', \App\Http\Controllers\Admin\FinanceCategoryController::class);
     Route::resource('transactions', \App\Http\Controllers\Admin\TransactionController::class);
+    Route::get('finance/export-csv', [\App\Http\Controllers\Admin\FinanceReportController::class, 'exportCSV'])->name('finance.export.csv');
+    Route::get('finance/report-pdf', [\App\Http\Controllers\Admin\FinanceReportController::class, 'reportPDF'])->name('finance.report.pdf');
     Route::resource('projets', \App\Http\Controllers\Admin\ProjectController::class);
     Route::resource('donations', \App\Http\Controllers\Admin\DonationController::class);
     Route::resource('repetitions', \App\Http\Controllers\Admin\RepetitionController::class);

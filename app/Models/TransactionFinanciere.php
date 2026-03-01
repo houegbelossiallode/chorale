@@ -8,7 +8,13 @@ class TransactionFinanciere extends Model
 {
     protected $guarded = [''];
 
-    public function categorie(){
-        return $this->belongsTo(CategorieFinanciere::class);
+    public function categorie()
+    {
+        return $this->belongsTo(CategorieFinanciere::class, 'categorie_id');
+    }
+
+    public function caisse()
+    {
+        return $this->belongsTo(Caisse::class);
     }
 }

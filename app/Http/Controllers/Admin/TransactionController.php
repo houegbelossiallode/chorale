@@ -26,10 +26,10 @@ class TransactionController extends Controller
 
         $transactions = $query->paginate(20);
         $categories = CategorieFinanciere::all();
-        
+
         $totalRecettes = TransactionFinanciere::where('type', 'recette')->sum('montant');
         $totalDepenses = TransactionFinanciere::where('type', 'depense')->sum('montant');
-        $solde = $totalRecettes - $totalDepenses;
+        $solde = \App\Models\Caisse::where('nom', 'Caisse Principale')->first()->solde ?? ($totalRecettes - $totalDepenses);
 
         return view('admin.finance.transactions.index', compact('transactions', 'categories', 'solde', 'totalRecettes', 'totalDepenses'));
     }
@@ -50,14 +50,17 @@ class TransactionController extends Controller
             'reference' => 'nullable|string|max:255',
         ]);
 
-        TransactionFinanciere::create($validated);
+        $transactionService = app(\App\Services\TransactionService::class);
+        $transactionService->recordTransaction($validated);
 
-        return redirect()->route('admin.finance.transactions.index')->with('success', 'Transaction enregistrée.');
+        return redirect()->route('admin.finance.transactions.index')->with('success', 'Transaction enregistrée et caisse mise à jour.');
     }
 
     public function destroy(TransactionFinanciere $transaction)
     {
-        $transaction->delete();
-        return back()->with('success', 'Transaction supprimée.');
+        $transactionService = app(\App\Services\TransactionService::class);
+        $transactionService->deleteTransaction($transaction);
+
+        return back()->with('success', 'Transaction supprimée et solde caisse ajusté.');
     }
 }

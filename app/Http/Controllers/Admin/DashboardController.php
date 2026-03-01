@@ -29,6 +29,9 @@ class DashboardController extends Controller
      */
     private function adminDashboard()
     {
+        $totalRecettes = \App\Models\TransactionFinanciere::where('type', 'recette')->sum('montant');
+        $totalDepenses = \App\Models\TransactionFinanciere::where('type', 'depense')->sum('montant');
+
         $stats = [
             'my_events_count' => Event::where('start_at', '>=', now())->count(),
             'presence_rate' => rand(80, 100),
@@ -37,9 +40,23 @@ class DashboardController extends Controller
             'upcoming_events' => Event::where('start_at', '>=', now())->count(),
             'total_posts' => Post::count(),
             'latest_members' => User::latest()->take(5)->get(),
+            'total_recettes' => $totalRecettes,
+            'total_depenses' => $totalDepenses,
+            'solde' => \App\Models\Caisse::where('nom', 'Caisse Principale')->first()->solde ?? ($totalRecettes - $totalDepenses),
         ];
 
-        return view('dashboard.admin', compact('stats'));
+        $recettesParCategorie = \App\Models\TransactionFinanciere::where('type', 'recette')
+            ->select('categorie_id', \DB::raw('sum(montant) as total'))
+            ->groupBy('categorie_id')
+            ->with('categorie')
+            ->get();
+
+        $chartData = [
+            'labels' => $recettesParCategorie->map(fn($r) => $r->categorie->libelle),
+            'data' => $recettesParCategorie->map(fn($r) => $r->total),
+        ];
+
+        return view('dashboard.admin', compact('stats', 'chartData'));
     }
 
     /**

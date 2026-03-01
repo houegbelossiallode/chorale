@@ -64,10 +64,10 @@
 
                             <h3
                                 class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight">
-                                {{ Str::limit($event->title, 45) }}
+                                {{ Str::limit($event->title, 40) }}
                             </h3>
                             <p class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-[40px]">
-                                {{ Str::limit($event->description, 80) }}
+                                {{ Str::limit($event->description, 70) }}
                             </p>
 
                             @if($event->location)
