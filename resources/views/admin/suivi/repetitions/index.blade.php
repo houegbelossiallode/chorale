@@ -20,7 +20,7 @@
                 this.formData.end_time = rep.end_time.substring(0, 16);
                 this.formData.lieu = rep.lieu;
                 this.formData.description = rep.description;
-                this.actionUrl = `/dashboard/repetitions/${rep.id}`;
+                this.actionUrl = `/admin/repetitions/${rep.id}`;
             } else {
                 this.editMode = false;
                 this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };

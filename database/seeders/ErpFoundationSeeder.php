@@ -23,49 +23,49 @@ class ErpFoundationSeeder extends Seeder
         $structure = [
             'Configuration' => [
                 'Paramètres' => [
-                    'Général' => '/dashboard/config/general',
-                    'Structure Navigation' => '/dashboard/modules'
+                    'Général' => '/admin/config/general',
+                    'Structure Navigation' => '/admin/modules'
                 ]
             ],
             'Accès' => [
                 'Sécurité' => [
-                    'Rôles' => '/dashboard/roles'
+                    'Rôles' => '/admin/roles'
                 ]
             ],
             'Organisation' => [
                 'Membres' => [
-                    'Liste des Choristes' => '/dashboard/members'
+                    'Liste des Choristes' => '/admin/members'
                 ],
                 'Suivi' => [
-                    'Présences' => '/dashboard/repetitions'
+                    'Présences' => '/admin/repetitions'
                 ]
             ],
             'Répertoire' => [
                 'Musique' => [
-                    'Chants' => '/dashboard/chants'
+                    'Chants' => '/admin/chants'
                 ]
             ],
             'Finances' => [
                 'Dons' => [
-                    'Projets' => '/dashboard/projets',
-                    'Donations' => '/dashboard/donations'
+                    'Projets' => '/admin/projets',
+                    'Donations' => '/admin/donations'
                 ],
                 'Comptabilité' => [
-                    'Transactions' => '/dashboard/transactions',
-                    'Catégories' => '/dashboard/finance-categories'
+                    'Transactions' => '/admin/transactions',
+                    'Catégories' => '/admin/finance-categories'
                 ]
             ],
             'Contenu' => [
                 'Site Public' => [
-                    'Actualités' => '/dashboard/posts',
-                    'Événements' => '/dashboard/events'
+                    'Actualités' => '/admin/posts',
+                    'Événements' => '/admin/events'
                 ]
             ]
         ];
 
         foreach ($structure as $moduleName => $menus) {
             $module = Module::firstOrCreate(['name' => $moduleName]);
-            
+
             foreach ($menus as $menuName => $sousMenus) {
                 $menu = Menu::firstOrCreate([
                     'name' => $menuName,

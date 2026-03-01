@@ -15,7 +15,7 @@
         this.currentId = id;
         this.formData.name = name;
         this.formData.module_id = moduleId;
-        this.actionUrl = id ? `/dashboard/menus/${id}` : '{{ route('admin.menus.store') }}';
+        this.actionUrl = id ? `/admin/menus/${id}` : '{{ route('admin.menus.store') }}';
         this.menuModal = true;
     }
 }">
