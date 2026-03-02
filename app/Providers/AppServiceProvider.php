@@ -5,8 +5,12 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\Role;
 use App\Models\SousMenu;
+use App\Models\Post;
+use App\Models\Event;
 use App\Observers\RoleObserver;
 use App\Observers\SousmenuObserver;
+use App\Observers\PostObserver;
+use App\Observers\EventObserver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -62,5 +66,7 @@ class AppServiceProvider extends ServiceProvider
 
         SousMenu::observe(SousmenuObserver::class);
         Role::observe(RoleObserver::class);
+        Post::observe(PostObserver::class);
+        Event::observe(EventObserver::class);
     }
 }

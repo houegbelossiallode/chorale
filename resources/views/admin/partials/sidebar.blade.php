@@ -66,6 +66,13 @@
                     </button>
                     <div x-show="activeMenu === '{{ $menuId }}' || {{ $hasActiveSub ? 'true' : 'false' }}" x-collapse
                         class="pl-4 space-y-1 mt-1">
+                        <a href="{{ route('admin.newsletter.index') }}"
+                            class="flex items-center gap-3 px-4 py-2 rounded-lg text-[14px] {{ request()->routeIs('admin.newsletter.*') ? 'text-[#7367F0] font-semibold' : 'text-slate-500 hover:text-[#7367F0]' }}">
+                            <div
+                                class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.newsletter.*') ? 'bg-[#7367F0]' : 'bg-slate-300' }}">
+                            </div>
+                            Newsletter
+                        </a>
                         @foreach($menu->sousMenus as $sm)
                             @php
                                 $smUrl = Route::has($sm->url) ? route($sm->url) : url($sm->url);

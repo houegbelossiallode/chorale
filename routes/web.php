@@ -71,6 +71,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('events/types', \App\Http\Controllers\Admin\TypeController::class);
     Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
     Route::delete('events/images/{image}', [\App\Http\Controllers\Admin\EventController::class, 'deleteImage'])->name('events.delete-image');
+
+    // Newsletter
+    Route::get('newsletter', [\App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::post('newsletter/send', [\App\Http\Controllers\Admin\NewsletterController::class, 'send'])->name('newsletter.send');
+    Route::delete('newsletter/{subscription}', [\App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+    Route::post('newsletter/{subscription}/toggle', [\App\Http\Controllers\Admin\NewsletterController::class, 'toggleStatus'])->name('newsletter.toggle');
+
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     Route::post('fichier-chants', [\App\Http\Controllers\Admin\FichierChantController::class, 'store'])->name('fichier-chants.store');
     Route::post('chants/{chant}/record', [\App\Http\Controllers\Admin\FichierChantController::class, 'record'])->name('chants.record');
