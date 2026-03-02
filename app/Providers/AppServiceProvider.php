@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
             $menus = [];
             if ($user && $user->role) {
                 $accessibleSousMenus = $user->role->permissions()
-                    ->where('is_granted', true)
+                    ->whereRaw('is_granted = true')
                     ->pluck('sous_menu_id')
                     ->toArray();
 
