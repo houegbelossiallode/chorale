@@ -4,96 +4,128 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        /* Base styles for the viewer */
+        table {
+            border-collapse: collapse;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        th,
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            font-size: 10pt;
+        }
+
         .header {
-            background-color: #7367F0;
+            background-color: #4f46e5;
             color: #ffffff;
+            font-size: 14pt;
             font-weight: bold;
             text-align: center;
         }
 
         .subheader {
-            background-color: #F8F7FA;
+            background-color: #f8fafc;
+            color: #64748b;
             font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9pt;
+        }
+
+        .total-label {
+            background-color: #f1f5f9;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .total-value {
+            font-weight: bold;
+            text-align: right;
         }
 
         .recette {
-            color: #28C76F;
+            color: #10b981;
         }
 
         .depense {
-            color: #EA5455;
-        }
-
-        .total-row {
-            background-color: #f1f0ff;
-            font-weight: bold;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        th,
-        td {
-            border: 1px solid #E6E6E6;
-            padding: 8px;
-            font-family: Arial, sans-serif;
+            color: #ef4444;
         }
     </style>
 </head>
 
 <body>
     <table>
+        <!-- Explicit column widths for Excel -->
+        <colgroup>
+            <col style="width: 100px;"> <!-- Date -->
+            <col style="width: 300px;"> <!-- Description -->
+            <col style="width: 100px;"> <!-- Type -->
+            <col style="width: 150px;"> <!-- Catégorie -->
+            <col style="width: 120px;"> <!-- Montant -->
+            <col style="width: 150px;"> <!-- Référence -->
+        </colgroup>
+
         <thead>
             <tr>
-                <th colspan="6" class="header" height="30">RAPPORT FINANCIER - {{ strtoupper($monthName) }} {{ $year }}
+                <th colspan="6" class="header"
+                    style="height: 50px; background-color: #4f46e5; color: #ffffff; font-size: 16pt;">
+                    JOURNAL DE CAISSE — {{ strtoupper($monthName) }} {{ $year }}
                 </th>
             </tr>
             <tr>
-                <th colspan="6" style="text-align: center; font-size: 10px;">Généré par Chorale App le
-                    {{ date('d/m/Y H:i') }}</th>
-            </tr>
-            <tr>
-                <th colspan="6"></th>
+                <th colspan="6"
+                    style="text-align: center; color: #94a3b8; font-size: 9pt; height: 30px; border-bottom: 2px solid #4f46e5;">
+                    Document généré par la Chorale Saint Oscar Romero le {{ date('d/m/Y à H:i') }}
+                </th>
             </tr>
             <tr class="subheader">
-                <th width="15">Date</th>
-                <th width="40">Description</th>
-                <th width="15">Type</th>
-                <th width="20">Catégorie</th>
-                <th width="20">Montant (FCFA)</th>
-                <th width="20">Référence</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Date</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Description</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Flux</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Catégorie</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Montant (CFA)</th>
+                <th style="background-color: #f8fafc; color: #64748b;">Référence</th>
             </tr>
         </thead>
         <tbody>
             @foreach($transactions as $t)
                 <tr>
-                    <td>{{ $t->created_at->format('d/m/Y') }}</td>
+                    <td style="text-align: center;">{{ $t->created_at->format('d/m/Y') }}</td>
                     <td>{{ $t->description }}</td>
-                    <td class="{{ $t->type == 'recette' ? 'recette' : 'depense' }}">{{ ucfirst($t->type) }}</td>
+                    <td style="text-align: center; font-weight: bold;"
+                        class="{{ $t->type == 'recette' ? 'recette' : 'depense' }}">
+                        {{ strtoupper($t->type) }}
+                    </td>
                     <td>{{ $t->categorie->libelle }}</td>
-                    <td style="text-align: right;">{{ $t->montant }}</td>
-                    <td>{{ $t->reference }}</td>
+                    <td style="text-align: right; font-weight: 500;">{{ number_format($t->montant, 0, ',', ' ') }}</td>
+                    <td style="color: #64748b; font-size: 9pt;">{{ $t->reference }}</td>
                 </tr>
             @endforeach
+
+            <!-- Spacing row -->
             <tr>
-                <td colspan="6"></td>
+                <td colspan="6" style="border: none; height: 20px;"></td>
             </tr>
-            <tr class="total-row">
-                <td colspan="4" style="text-align: right;">TOTAL RECETTES</td>
-                <td style="text-align: right; color: #28C76F;">{{ $totalRecettes }}</td>
-                <td></td>
+
+            <!-- Totals Section -->
+            <tr>
+                <td colspan="4" class="total-label">CUMUL DES RECETTES (+)</td>
+                <td class="total-value recette">{{ number_format($totalRecettes, 0, ',', ' ') }}</td>
+                <td style="background-color: #f1f5f9;"></td>
             </tr>
-            <tr class="total-row">
-                <td colspan="4" style="text-align: right;">TOTAL DÉPENSES</td>
-                <td style="text-align: right; color: #EA5455;">{{ $totalDepenses }}</td>
-                <td></td>
+            <tr>
+                <td colspan="4" class="total-label">CUMUL DES DÉPENSES (-)</td>
+                <td class="total-value depense">{{ number_format($totalDepenses, 0, ',', ' ') }}</td>
+                <td style="background-color: #f1f5f9;"></td>
             </tr>
-            <tr class="total-row" style="background-color: #7367F0; color: #ffffff;">
-                <td colspan="4" style="text-align: right;">SOLDE NET</td>
-                <td style="text-align: right;">{{ $totalRecettes - $totalDepenses }}</td>
-                <td></td>
+            <tr>
+                <td colspan="4" class="total-label" style="background-color: #4f46e5; color: #ffffff; height: 35px;">
+                    SOLDE DE PÉRIODE</td>
+                <td class="total-value" style="background-color: #4f46e5; color: #ffffff; font-size: 12pt;">
+                    {{ number_format($totalRecettes - $totalDepenses, 0, ',', ' ') }}
+                </td>
+                <td style="background-color: #4f46e5;"></td>
             </tr>
         </tbody>
     </table>

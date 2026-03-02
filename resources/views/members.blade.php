@@ -54,10 +54,10 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         @foreach($pupitre->users as $member)
                             <div class="group relative reveal">
-                                <a href="{{ route('profile.show', $member->slug) }}" class="block relative z-10">
-                                    <div class="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-2 card-premium">
+                                <a href="{{ route('profile.show', $member->slug) }}" class="block h-full relative z-10">
+                                    <div class="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-amber-900/10 hover:-translate-y-2 card-premium flex flex-col h-full">
                                         <!-- Photo Container -->
-                                        <div class="aspect-[4/5] relative overflow-hidden bg-gray-50">
+                                        <div class="aspect-[4/5] relative overflow-hidden bg-gray-200 shrink-0">
                                             @if($member->photo_url)
                                                 <img src="{{ $member->photo_url }}" alt="{{ $member->first_name }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
                                             @else
@@ -86,17 +86,19 @@
                                         </div>
 
                                         <!-- content -->
-                                        <div class="p-8 text-center">
+                                        <div class="p-8 text-center flex-1 flex flex-col justify-center">
                                             <h3 class="text-xl font-serif font-bold text-gray-900 group-hover:text-amber-700 transition-colors uppercase tracking-tight">
                                                 {{ $member->first_name }} {{ $member->last_name }}
                                             </h3>
                                             <p class="text-xs font-bold text-amber-600/60 uppercase tracking-[0.2em] mt-2 mb-4">{{ $pupitre->name }}</p>
                                             
-                                            @if($member->citation)
-                                                <p class="text-sm text-gray-500 italic font-elegant line-clamp-2 leading-relaxed">&ldquo;{{ Str::limit($member->citation, 60) }}&rdquo;</p>
-                                            @else
-                                                <p class="text-sm text-gray-400 font-elegant italic">Chanteur dévoué à la liturgie...</p>
-                                            @endif
+                                            <div class="mt-auto">
+                                                @if($member->citation)
+                                                    <p class="text-sm text-gray-500 italic font-elegant line-clamp-2 leading-relaxed">&ldquo;{{ Str::limit($member->citation, 60) }}&rdquo;</p>
+                                                @else
+                                                    <p class="text-sm text-gray-400 font-elegant italic">Chanteur dévoué à la liturgie...</p>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </a>
