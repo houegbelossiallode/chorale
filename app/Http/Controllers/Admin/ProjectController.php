@@ -32,7 +32,7 @@ class ProjectController extends Controller
 
         Projet::create($validated);
 
-        return redirect()->route('admin.finance.projets.index')->with('success', 'Projet créé.');
+        return redirect()->route('admin.projets.index')->with('success', 'Projet créé.');
     }
 
     public function edit(Projet $projet)
@@ -50,7 +50,7 @@ class ProjectController extends Controller
 
         $projet->update($validated);
 
-        return redirect()->route('admin.finance.projets.index')->with('success', 'Projet mis à jour.');
+        return redirect()->route('admin.projets.index')->with('success', 'Projet mis à jour.');
     }
 
     public function destroy(Projet $projet)
