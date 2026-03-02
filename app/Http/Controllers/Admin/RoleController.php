@@ -8,6 +8,7 @@ use App\Models\Module;
 use App\Models\SousMenu;
 use App\Models\RolePermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
@@ -18,7 +19,7 @@ class RoleController extends Controller
     {
         $roles = Role::withCount([
             'permissions' => function ($query) {
-                $query->where('is_granted', true);
+                $query->where('is_granted',DB::raw('true'));
             }
         ])->get();
         return view('admin.roles.index', compact('roles'));
@@ -71,14 +72,14 @@ class RoleController extends Controller
         $role->update(['libelle' => $request->libelle]);
 
         // Reset permissions
-        RolePermission::where('role_id', $role->id)->update(['is_granted' => false]);
+        RolePermission::where('role_id', $role->id)->update(['is_granted' => DB::raw('false')]);
 
         // Set granted permissions
         if ($request->has('permissions')) {
             foreach ($request->permissions as $smId) {
                 RolePermission::updateOrCreate(
                     ['role_id' => $role->id, 'sous_menu_id' => $smId],
-                    ['is_granted' => true]
+                    ['is_granted' => DB::raw('true')]
                 );
             }
         }

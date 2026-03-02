@@ -37,9 +37,10 @@ class NewsletterMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.newsletter',
+            view: 'emails.newsletter',
             with: [
                 'content' => $this->messageBody,
+                'subjectText' => $this->subjectText,
             ],
         );
     }

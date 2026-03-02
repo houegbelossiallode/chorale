@@ -1,8 +1,23 @@
+@php
+    $initialActiveMenu = '';
+    foreach ($mainmenus as $menu) {
+        if (
+            $menu->sousMenus->contains(function ($sm) {
+                $smUrl = Route::has($sm->url) ? route($sm->url) : url($sm->url);
+                return request()->url() == $smUrl;
+            })
+        ) {
+            $initialActiveMenu = Str::slug($menu->name);
+            break;
+        }
+    }
+@endphp
+
 <aside id="admin-sidebar"
-    class="fixed inset-y-0 left-0 z-[70] w-[260px] bg-white text-[#444050] transform transition-all duration-300 ease-in-out shadow-material lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-[70] w-[260px] bg-white text-[#444050] transform transition-all duration-300 ease-in-out shadow-material lg:translate-x-0 flex flex-col h-screen"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
-    <div class="h-[76px] flex items-center px-6 mb-2">
+    <div class="h-[76px] flex-shrink-0 flex items-center px-6 mb-2 border-b border-slate-50">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group">
             <div class="w-8 h-8 bg-[#7367F0] rounded-lg flex items-center justify-center text-white shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,8 +36,7 @@
 
 
     <div class="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
-        <nav class="space-y-1"
-            x-data="{ activeMenu: '{{ request()->routeIs('admin.*') ? explode('.', request()->route()->getName())[2] ?? '' : '' }}' }">
+        <nav class="space-y-1 pb-10" x-data="{ activeMenu: '{{ $initialActiveMenu }}' }">
 
             <p class="text-[11px] font-medium text-slate-400 uppercase tracking-widest mb-4 px-4 mt-4">Main</p>
 
@@ -64,15 +78,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
-                    <div x-show="activeMenu === '{{ $menuId }}' || {{ $hasActiveSub ? 'true' : 'false' }}" x-collapse
-                        class="pl-4 space-y-1 mt-1">
-                        <a href="{{ route('admin.newsletter.index') }}"
-                            class="flex items-center gap-3 px-4 py-2 rounded-lg text-[14px] {{ request()->routeIs('admin.newsletter.*') ? 'text-[#7367F0] font-semibold' : 'text-slate-500 hover:text-[#7367F0]' }}">
-                            <div
-                                class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('admin.newsletter.*') ? 'bg-[#7367F0]' : 'bg-slate-300' }}">
-                            </div>
-                            Newsletter
-                        </a>
+                    <div x-show="activeMenu === '{{ $menuId }}'" x-collapse class="pl-4 space-y-1 mt-1">
                         @foreach($menu->sousMenus as $sm)
                             @php
                                 $smUrl = Route::has($sm->url) ? route($sm->url) : url($sm->url);

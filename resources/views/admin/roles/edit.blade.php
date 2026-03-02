@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="w-full" x-data="{
-        permissions: {{ json_encode($role->permissions()->where('is_granted', true)->pluck('sous_menu_id')->toArray()) }},
+        permissions: {{ json_encode($role->permissions()->whereRaw('is_granted = true')->pluck('sous_menu_id')->toArray()) }},
         toggleModule(moduleId, event) {
             const checkboxes = document.querySelectorAll(`.module-${moduleId}-checkbox`);
             const checked = event.target.checked;

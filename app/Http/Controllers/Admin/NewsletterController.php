@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\NewsletterSubscription;
 use App\Mail\NewsletterMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class NewsletterController extends Controller
@@ -23,7 +24,7 @@ class NewsletterController extends Controller
             'content' => 'required|string',
         ]);
 
-        $subscribers = NewsletterSubscription::where('is_active', true)->get();
+        $subscribers = NewsletterSubscription::where('is_active',DB::raw('true'))->get();
 
         if ($subscribers->isEmpty()) {
             return back()->with('error', 'Aucun abonné actif trouvé.');
