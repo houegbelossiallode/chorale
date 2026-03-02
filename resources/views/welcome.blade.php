@@ -170,6 +170,66 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════ -->
+    <!-- REJOIGNEZ-NOUS — Call to Action                -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="py-24 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative rounded-[3rem] overflow-hidden bg-gray-900 shadow-2xl shadow-amber-900/20 reveal">
+                <!-- Background Decoration -->
+                <div class="absolute inset-0 bg-pattern opacity-10"></div>
+                <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-3xl"></div>
+
+                <div class="relative z-10 grid lg:grid-cols-2 gap-12 items-center p-8 md:p-16 lg:p-20">
+                    <div class="reveal-left">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-[0.3em]">✦ Recrutement Ouvert</span>
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-serif text-white mb-8 leading-tight">
+                            Unissez votre <span class="text-gradient-gold italic">voix</span><br>à la nôtre
+                        </h2>
+                        <p class="text-white/60 text-lg leading-relaxed mb-10 font-elegant italic">
+                            « Chanter, c'est prier deux fois. » — Saint Augustin. <br><br>
+                            Que vous soyez ténor, basse, alto ou soprano, votre place est parmi nous. 
+                            <strong>Rendez-vous sur notre page contact pour nous laisser un message, et nous reviendrons vers vous très prochainement.</strong>
+                        </p>
+                        
+                        <div class="space-y-4 mb-10">
+                            <div class="flex items-center gap-4 text-white/80">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-amber-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold">Répétitions Hebdomadaires</p>
+                                    <p class="text-xs text-white/40">Samedis 16h00 - 18h00 | Dimanches 07h00 - 08h00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('contact') }}" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-amber-500/30 transition-all duration-300 hover:scale-105 group">
+                            Rejoindre la Chorale
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+
+                    <div class="reveal-right hidden lg:block">
+                        <div class="relative">
+                            <div class="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+                                <img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                                     class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition duration-700" alt="Choristes en répétition">
+                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                            </div>
+                            <!-- Floating decorative element -->
+                            <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl"></div>
+                            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════ -->
     <!-- EVENTS — Immersive Cards                       -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="py-32 bg-white relative overflow-hidden">
