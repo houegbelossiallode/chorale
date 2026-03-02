@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Post;
 use App\Models\NewsletterSubscription;
 use App\Mail\NewsletterMail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class PostObserver
@@ -32,7 +33,7 @@ class PostObserver
 
     protected function sendNewsletter(Post $post)
     {
-        $subscribers = NewsletterSubscription::where('is_active', true)->get();
+        $subscribers = NewsletterSubscription::where('is_active',DB::raw('true'))->get();
         if ($subscribers->isEmpty())
             return;
 

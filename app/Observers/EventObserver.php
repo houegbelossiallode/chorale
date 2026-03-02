@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Event;
 use App\Models\NewsletterSubscription;
 use App\Mail\NewsletterMail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class EventObserver
@@ -32,7 +33,7 @@ class EventObserver
 
     protected function sendNewsletter(Event $event)
     {
-        $subscribers = NewsletterSubscription::where('is_active', true)->get();
+        $subscribers = NewsletterSubscription::where('is_active',DB::raw('true'))->get();
         if ($subscribers->isEmpty())
             return;
 
