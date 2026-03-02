@@ -283,7 +283,8 @@
                         ['/', 'Accueil'],
                         ['/a-propos', 'Notre Histoire'],
                         ['/membres', 'Nos Voix'],
-                        ['/evenements', 'Événements']
+                        ['/evenements', 'Événements'],
+                        ['/contact', 'Contact']
                     ] as [$url, $label])
                     <a href="{{ $url }}" class="block px-6 py-4 rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-between group"
                        :class="scrolled 
