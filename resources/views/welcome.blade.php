@@ -138,7 +138,7 @@
                     </div>
 
                     <h2 class="text-4xl md:text-6xl font-serif text-gray-900 mb-8 md:mb-12 leading-[1.1]">
-                        Parole<br><span class="text-gradient-gold">aux Prêtres</span>
+                        Parole<br><span class="text-gradient-gold">du père curé</span>
                     </h2>
 
                     <blockquote class="relative">

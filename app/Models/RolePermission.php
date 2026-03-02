@@ -8,6 +8,10 @@ class RolePermission extends Model
 {
     protected $guarded = [''];
 
+    protected $casts = [
+        'is_granted' => 'boolean',
+    ];
+
     public function role()
     {
         return $this->belongsTo(Role::class);

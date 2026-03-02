@@ -64,7 +64,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
-                    <div x-show="activeMenu === '{{ $menuId }}' || '{{ $hasActiveSub }}'" x-collapse
+                    <div x-show="activeMenu === '{{ $menuId }}' || {{ $hasActiveSub ? 'true' : 'false' }}" x-collapse
                         class="pl-4 space-y-1 mt-1">
                         @foreach($menu->sousMenus as $sm)
                             @php
