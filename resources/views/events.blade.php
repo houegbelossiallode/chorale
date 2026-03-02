@@ -19,9 +19,9 @@
 
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center pt-24 md:pt-20">
             <!-- <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full glass mb-10">
-                        <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
-                        <span class="text-amber-300/90 text-xs font-bold tracking-[0.4em] uppercase">Calendrier Sacré</span>
-                    </div> -->
+                            <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
+                            <span class="text-amber-300/90 text-xs font-bold tracking-[0.4em] uppercase">Calendrier Sacré</span>
+                        </div> -->
             <h1
                 class="text-3xl sm:text-5xl md:text-6xl font-serif text-white leading-[0.95] mb-6 max-w-4xl mx-auto break-words">
                 Agenda<br><span class="text-amber-400/80 italic font-light">des Liturgies</span></h1>
@@ -34,9 +34,9 @@
     <!-- Events Grid -->
     <section class="py-32 bg-warm-white relative bg-pattern">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                 @forelse($events as $i => $event)
-                    <div class="group card-premium bg-white rounded-3xl overflow-hidden border border-gray-100 reveal"
+                    <div class="group card-premium bg-white rounded-3xl overflow-hidden border border-gray-100 reveal flex flex-col h-full"
                         style="transition-delay: {{ $i * 80 }}ms;">
                         <div class="h-2 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500"></div>
                         <div class="p-8">
@@ -63,10 +63,10 @@
                             </div>
 
                             <h3
-                                class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight">
-                                {{ Str::limit($event->title, 40) }}
+                                class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight break-words">
+                                {{ $event->title }}
                             </h3>
-                            <p class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-[40px]">
+                            <p class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-[40px] flex-1">
                                 {{ Str::limit($event->description, 70) }}
                             </p>
 

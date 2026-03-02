@@ -282,8 +282,8 @@
                             </div>
                         </div>
 
-                        <h3 class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight">{{ $event->title }}</h3>
-                        <p class="text-gray-400 text-sm mb-8 line-clamp-2 leading-relaxed">{{ $event->description }}</p>
+                        <h3 class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight break-words">{{ $event->title }}</h3>
+                        <p class="text-gray-400 text-sm mb-8 line-clamp-2 leading-relaxed flex-1">{{ $event->description }}</p>
 
                         <div class="flex items-center justify-between pt-6 border-t border-gray-50">
                             <div class="flex items-center gap-2 text-gray-400">
