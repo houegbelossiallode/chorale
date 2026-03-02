@@ -70,12 +70,12 @@
                         {{ $pupitre->description ?? 'Aucune description disponible.' }}</p>
 
                     <div class="flex flex-col gap-3 pt-4 border-t border-slate-50">
-                        <div class="flex items-center justify-between">
+                        <!-- <div class="flex items-center justify-between">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Effectif</span>
                             <span
                                 class="px-2 py-0.5 bg-slate-50 text-slate-600 rounded-md text-xs font-bold">{{ $pupitre->users_count }}
                                 membres</span>
-                        </div>
+                        </div> -->
                         <div class="flex items-center justify-between">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Responsable</span>
                             @if($pupitre->responsable)

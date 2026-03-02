@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-[#444050]">Dons & Contributions</h1>
             <p class="text-slate-500 text-sm">Consultez l'historique complet des dons reçus.</p>
         </div>
-        <button onclick="window.location.href='{{ route('admin.finance.donations.create') }}'" class="btn-primary flex items-center gap-2">
+        <button onclick="window.location.href='{{ route('admin.donations.create') }}'" class="btn-primary flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Enregistrer un don
         </button>
@@ -51,7 +51,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <form action="{{ route('admin.finance.donations.destroy', $donation->id) }}" method="POST" class="inline" onsubmit="return confirm('Annuler ce don ? Le montant sera déduit du projet.');">
+                            <form action="{{ route('admin.donations.destroy', $donation->id) }}" method="POST" class="inline" onsubmit="return confirm('Annuler ce don ? Le montant sera déduit du projet.');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-2 text-slate-400 hover:text-red-500 transition-colors">
