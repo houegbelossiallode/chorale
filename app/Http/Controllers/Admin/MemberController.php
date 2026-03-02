@@ -77,6 +77,9 @@ class MemberController extends Controller
             }
         }
 
+        // Retirer le fichier photo des données à insérer en base
+        unset($validated['photo']);
+
         // 4. Créer l'utilisateur localement
         $user = User::create($validated);
 
@@ -130,6 +133,9 @@ class MemberController extends Controller
                 $validated['photo_url'] = $photoUrl;
             }
         }
+
+        // Retirer le fichier photo des données à mettre à jour
+        unset($validated['photo']);
 
         $member->update($validated);
 

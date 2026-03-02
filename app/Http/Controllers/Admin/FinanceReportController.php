@@ -12,42 +12,34 @@ class FinanceReportController extends Controller
     /**
      * Export transactions to CSV.
      */
-    public function exportCSV(Request $request)
+    public function exportExcel(Request $request)
     {
-        $fileName = 'transactions_' . date('Y-m-d') . '.csv';
-        $transactions = TransactionFinanciere::with('categorie')->latest()->get();
+        $month = (int) $request->get('month', date('m'));
+        $year = (int) $request->get('year', date('Y'));
 
-        $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        ];
+        $transactions = TransactionFinanciere::with('categorie')
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->latest()
+            ->get();
 
-        $callback = function () use ($transactions) {
-            $file = fopen('php://output', 'w');
-            // Support for Excel (UTF-8 BOM)
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        $totalRecettes = $transactions->where('type', 'recette')->sum('montant');
+        $totalDepenses = $transactions->where('type', 'depense')->sum('montant');
 
-            fputcsv($file, ['ID', 'Date', 'Description', 'Type', 'Catégorie', 'Montant (FCFA)', 'Référence']);
+        $monthName = \Carbon\Carbon::create()->month($month)->translatedFormat('F');
+        $fileName = "Rapport_Financier_{$monthName}_{$year}.xls";
 
-            foreach ($transactions as $t) {
-                fputcsv($file, [
-                    $t->id,
-                    $t->created_at->format('d/m/Y H:i'),
-                    $t->description,
-                    ucfirst($t->type),
-                    $t->categorie->libelle,
-                    $t->montant,
-                    $t->reference
-                ]);
-            }
+        $html = view('admin.finance.reports.export_excel', [
+            'transactions' => $transactions,
+            'totalRecettes' => $totalRecettes,
+            'totalDepenses' => $totalDepenses,
+            'monthName' => $monthName,
+            'year' => $year
+        ])->render();
 
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', "attachment; filename=\"$fileName\"");
     }
 
     /**
@@ -80,7 +72,7 @@ class FinanceReportController extends Controller
             'totalDepenses' => $totalDepenses,
             'solde' => $totalRecettes - $totalDepenses,
             'statsParCategorie' => $statsParCategorie,
-            'monthName' => \Carbon\Carbon::create()->month($month)->translatedFormat('F'),
+            'monthName' => \Carbon\Carbon::create()->month((int) $month)->translatedFormat('F'),
             'year' => $year
         ]);
     }
