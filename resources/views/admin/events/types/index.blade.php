@@ -62,7 +62,7 @@
                             </svg>
                             Renommer
                         </button>
-                        <form action="{{ route('admin.events.types.destroy', $type) }}" method="POST"
+                        <form action="{{ route('admin.types.destroy', $type) }}" method="POST"
                             onsubmit="return confirm('Supprimer ce type ?');">
                             @csrf
                             @method('DELETE')
@@ -111,7 +111,7 @@
                     </button>
                 </div>
                 <form
-                    :action="editMode ? '{{ route('admin.events.types.index') }}/' + typeId : '{{ route('admin.events.types.store') }}'"
+                    :action="editMode ? '{{ route('admin.types.index') }}/' + typeId : '{{ route('admin.events.types.store') }}'"
                     method="POST" class="p-8 space-y-6">
                     @csrf
                     <template x-if="editMode">

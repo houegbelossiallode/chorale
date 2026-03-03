@@ -61,9 +61,13 @@
                     <button @click="activeMenu = (activeMenu === '{{ $menuId }}' ? '' : '{{ $menuId }}')"
                         class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg transition-all group {{ $hasActiveSub ? 'bg-[#F2F2F2]' : 'text-[#444050] hover:bg-[#F2F2F2]' }}">
                         <div class="flex items-center gap-3">
-                            @php $viewName = 'admin.partials.icons.' . Str::slug($menu->name); @endphp
-                            @if(view()->exists($viewName))
-                                @include($viewName, ['class' => 'w-5 h-5 text-slate-400 group-hover:text-[#7367F0]'])
+                            @if($menu->icone)
+                                @php $viewName = 'admin.partials.icons.' . $menu->icone; @endphp
+                                @if(view()->exists($viewName))
+                                    @include($viewName, ['class' => 'w-5 h-5 text-slate-400 group-hover:text-[#7367F0]'])
+                                @else
+                                    <i class="ti ti-{{ $menu->icone }} w-5 h-5 text-slate-400 group-hover:text-[#7367F0]"></i>
+                                @endif
                             @else
                                 <svg class="w-5 h-5 text-slate-400 group-hover:text-[#7367F0]" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">

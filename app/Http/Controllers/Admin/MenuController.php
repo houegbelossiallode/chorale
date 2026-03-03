@@ -31,6 +31,7 @@ class MenuController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'icone' => 'nullable|string|max:255',
             'module_id' => 'required|exists:modules,id'
         ]);
         Menu::create($validated);
@@ -47,6 +48,7 @@ class MenuController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'icone' => 'nullable|string|max:255',
             'module_id' => 'required|exists:modules,id'
         ]);
         $menu->update($validated);
