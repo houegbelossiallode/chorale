@@ -23,7 +23,7 @@ class TypeController extends Controller
 
         Type::create($validated);
 
-        return redirect()->route('admin.events.types.index')
+        return redirect()->route('admin.types.index')
             ->with('success', 'Type d\'événement créé avec succès.');
     }
 
@@ -35,7 +35,7 @@ class TypeController extends Controller
 
         $type->update($validated);
 
-        return redirect()->route('admin.events.types.index')
+        return redirect()->route('admin.types.index')
             ->with('success', 'Type d\'événement mis à jour avec succès.');
     }
 
@@ -47,7 +47,7 @@ class TypeController extends Controller
 
         $type->delete();
 
-        return redirect()->route('admin.events.types.index')
+        return redirect()->route('admin.types.index')
             ->with('success', 'Type d\'événement supprimé avec succès.');
     }
 }
