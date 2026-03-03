@@ -69,9 +69,9 @@ class EventProgramController extends Controller
 
     public function toggleVisibility(Event $event)
     {
-        $event->update([
-            'is_repertoire_public' => DB::raw($event->is_repertoire_public ? 'false' : 'true')
-        ]);
+        DB::table('events')
+            ->where('id', $event->id)
+            ->update(['is_repertoire_public' => DB::raw('NOT is_repertoire_public')]);
 
         return back()->with('success', 'Visibilité du répertoire mise à jour.');
     }
