@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Repertoire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
