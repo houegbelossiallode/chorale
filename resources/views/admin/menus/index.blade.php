@@ -4,22 +4,22 @@
 
 @section('content')
     <div class="space-y-6" x-data="{
-        menuModal: false,
-        editMode: false,
-        currentId: null,
-        formData: { name: '', icone: '', module_id: '' },
-        actionUrl: '',
+            menuModal: false,
+            editMode: false,
+            currentId: null,
+            formData: { name: '', icone: '', module_id: '' },
+            actionUrl: '',
 
-        openMenu(id = null, name = '', icone = '', moduleId = '') {
-            this.editMode = !!id;
-            this.currentId = id;
-            this.formData.name = name;
-            this.formData.icone = icone;
-            this.formData.module_id = moduleId;
-            this.actionUrl = id ? `/admin/menus/${id}` : '{{ route('admin.menus.store') }}';
-            this.menuModal = true;
-        }
-    }">
+            openMenu(id = null, name = '', icone = '', moduleId = '') {
+                this.editMode = !!id;
+                this.currentId = id;
+                this.formData.name = name;
+                this.formData.icone = icone;
+                this.formData.module_id = moduleId;
+                this.actionUrl = id ? `/admin/menus/${id}` : '{{ route('admin.menus.store') }}';
+                this.menuModal = true;
+            }
+        }">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-[#444050]">Liste des Menus</h1>
@@ -50,6 +50,7 @@
                             </th>
                             <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Module
                                 Parent</th>
+                            <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Icône</th>
                             <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">
                                 Actions</th>
                         </tr>
@@ -65,6 +66,16 @@
                                         class="px-3 py-1 bg-[#7367F0]/10 text-[#7367F0] rounded-full text-[10px] font-bold uppercase tracking-wider">
                                         {{ $menu->module->name ?? 'Indépendant' }}
                                     </span>
+                                </td>
+                                <td class="px-8 py-4">
+                                    <div class="flex items-center gap-2">
+                                        @if($menu->icone)
+                                            <i class="ti ti-{{ $menu->icone }} text-[#7367F0] text-lg"></i>
+                                            <span class="text-xs text-slate-500 font-medium">{{ $menu->icone }}</span>
+                                        @else
+                                            <span class="text-xs text-slate-300 italic">Aucune</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-8 py-4">
                                     <div class="flex items-center justify-end gap-1">
