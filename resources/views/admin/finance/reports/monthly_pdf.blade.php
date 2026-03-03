@@ -260,18 +260,18 @@
             <div class="summary-card">
                 <div class="card-label">Flux de Recettes</div>
                 <div class="card-value value-recette">{{ number_format($totalRecettes, 0, ',', ' ') }}
-                    <small>FCFA</small>
+                    <small>€</small>
                 </div>
             </div>
             <div class="summary-card">
                 <div class="card-label">Flux de Dépenses</div>
                 <div class="card-value value-depense">{{ number_format($totalDepenses, 0, ',', ' ') }}
-                    <small>FCFA</small>
+                    <small>€</small>
                 </div>
             </div>
             <div class="summary-card" style="background-color: #EEEBFF; border-color: #D1C8FF;">
                 <div class="card-label">Solde Net</div>
-                <div class="card-value value-solde">{{ number_format($solde, 0, ',', ' ') }} <small>FCFA</small></div>
+                <div class="card-value value-solde">{{ number_format($solde, 0, ',', ' ') }} <small>€</small></div>
             </div>
         </div>
 
@@ -296,7 +296,7 @@
                                 {{ strtoupper($stat['type']) }}
                             </span>
                         </td>
-                        <td class="text-right font-bold">{{ number_format($stat['total'], 0, ',', ' ') }} FCFA</td>
+                        <td class="text-right font-bold">{{ number_format($stat['total'], 0, ',', ' ') }} €</td>
                     </tr>
                 @endforeach
             </tbody>

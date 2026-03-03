@@ -56,7 +56,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Montant
-                                (FCFA)</label>
+                                (€)</label>
                             <input type="number" name="montant" value="{{ old('montant') }}"
                                 class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                                 placeholder="0" required>

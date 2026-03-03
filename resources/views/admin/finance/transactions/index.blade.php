@@ -13,17 +13,17 @@
 
             <div class="bg-white rounded-xl shadow-material p-3 md:p-4 border-l-4 border-green-500">
                 <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Total Recettes</p>
-                <p class="text-lg md:text-xl font-black text-green-600">{{ number_format($totalRecettes, 0, ',', ' ') }} FCFA</p>
+                <p class="text-lg md:text-xl font-black text-green-600">{{ number_format($totalRecettes, 0, ',', ' ') }} €</p>
             </div>
 
             <div class="bg-white rounded-xl shadow-material p-3 md:p-4 border-l-4 border-red-500">
                 <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Total Dépenses</p>
-                <p class="text-lg md:text-xl font-black text-red-600">{{ number_format($totalDepenses, 0, ',', ' ') }} FCFA</p>
+                <p class="text-lg md:text-xl font-black text-red-600">{{ number_format($totalDepenses, 0, ',', ' ') }} €</p>
             </div>
 
             <div class="bg-white rounded-xl shadow-material p-3 md:p-4 border-l-4 border-[#7367F0]">
                 <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Solde Actuel</p>
-                <p class="text-lg md:text-xl font-black text-[#7367F0]">{{ number_format($solde, 0, ',', ' ') }} FCFA</p>
+                <p class="text-lg md:text-xl font-black text-[#7367F0]">{{ number_format($solde, 0, ',', ' ') }} €</p>
             </div>
         </div>
 

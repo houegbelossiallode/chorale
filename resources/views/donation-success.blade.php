@@ -16,7 +16,7 @@
             <h1 class="text-4xl md:text-6xl font-serif text-gray-900 mb-6">Merci infiniment !</h1>
             <p class="text-xl text-gray-500 mb-10 leading-relaxed max-w-lg mx-auto">
                 Votre don de <span class="text-amber-600 font-extrabold text-3xl">{{ number_format($amount, 0, ',', ' ') }}
-                    FCFA</span> a été reçu avec succès.
+                    €</span> a été reçu avec succès.
             </p>
 
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-black/5 mb-12 inline-block">

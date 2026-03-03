@@ -115,7 +115,7 @@
                         <div class="flex items-center gap-2">
                             <span
                                 class="text-lg md:text-xl font-bold text-[#444050]">{{ number_format($stats['solde'], 0, ',', ' ') }}
-                                <small class="text-[10px] font-normal">FCFA</small></span>
+                                <small class="text-[10px] font-normal">€</small></span>
                             <span
                                 class="text-[10px] md:text-[11px] font-semibold text-[#00CFE8] bg-[#E5F8FF] px-1 py-0.5 rounded">Actif</span>
                         </div>
@@ -130,7 +130,7 @@
                 <div>
                     <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total Recettes</p>
                     <h3 class="text-xl font-black text-slate-700">{{ number_format($stats['total_recettes'], 0, ',', ' ') }}
-                        FCFA</h3>
+                        €</h3>
                 </div>
                 <div class="text-[#28C76F] bg-green-50 p-2 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +143,7 @@
                 <div>
                     <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Total Dépenses</p>
                     <h3 class="text-xl font-black text-slate-700">{{ number_format($stats['total_depenses'], 0, ',', ' ') }}
-                        FCFA</h3>
+                        €</h3>
                 </div>
                 <div class="text-[#EA5455] bg-red-50 p-2 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
-                                            return ' ' + context.label + ': ' + context.raw.toLocaleString() + ' FCFA';
+                                            return ' ' + context.label + ': ' + context.raw.toLocaleString() + ' €';
                                         }
                                     }
                                 }
