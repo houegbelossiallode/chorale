@@ -302,19 +302,7 @@
                            :class="scrolled ? 'bg-gray-50 text-gray-900' : 'bg-white/5 text-white'">Connexion</a>
                     <!-- @endguest -->
                     
-                    <!-- @auth
-                        @if(auth()->user()->role === 'admin')
-                            <a href="/admin" class="block px-6 py-4 rounded-2xl font-semibold text-center transition active:scale-95"
-                               :class="scrolled ? 'bg-amber-50 text-amber-700' : 'bg-white/10 text-amber-300'">Administration</a>
-                        @endif
-                        <form method="POST" action="{{ route('logout') }}" id="logout-form-mobile" class="hidden">
-                            @csrf
-                        </form>
-                        <button onclick="document.getElementById('logout-form-mobile').submit()" 
-                                class="w-full px-6 py-4 rounded-2xl font-semibold text-center transition active:scale-95"
-                                :class="scrolled ? 'bg-gray-50 text-gray-900' : 'bg-white/5 text-white'">Déconnexion</button>
-                    @endauth -->
-
+                   
                     <a href="/don" class="block px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl font-bold text-center shadow-lg shadow-amber-500/20 active:scale-95 transition-transform">
                         ✦ Faire un Don
                     </a>
