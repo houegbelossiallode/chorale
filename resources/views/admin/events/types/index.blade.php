@@ -111,7 +111,7 @@
                     </button>
                 </div>
                 <form
-                    :action="editMode ? '{{ route('admin.types.index') }}/' + typeId : '{{ route('admin.events.types.store') }}'"
+                    :action="editMode ? '{{ route('admin.types.index') }}/' + typeId : '{{ route('admin.types.store') }}'"
                     method="POST" class="p-8 space-y-6">
                     @csrf
                     <template x-if="editMode">
