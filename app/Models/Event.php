@@ -21,12 +21,18 @@ class Event extends Model
 
     public function principalImage()
     {
-        return $this->hasOne(EventImage::class)->where('is_principal',DB::raw('true'));
+        return $this->hasOne(EventImage::class)->where('is_principal', DB::raw('true'));
+    }
+
+    public function repertoire()
+    {
+        return $this->belongsToMany(Chant::class, 'repertoire')->withPivot('partie_event_id', 'ordre')->withTimestamps();
     }
 
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
         'is_public' => 'boolean',
+        'is_repertoire_public' => 'boolean',
     ];
 }

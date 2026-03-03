@@ -27,7 +27,8 @@
                 {{ $event->type->libelle ?? 'Événement' }}
             </div>
             <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif text-white leading-[1.1] mb-8 break-words max-w-5xl">
-                {{ $event->title }}</h1>
+                {{ $event->title }}
+            </h1>
             <div class="flex flex-wrap items-center gap-6 text-white/40 text-sm">
                 <span class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,29 +75,29 @@
                     <!-- Gallery -->
                     @if($event->images->count() > 0)
                         <div x-data="{ 
-                                                    showLightbox: false, 
-                                                    currentIndex: 0, 
-                                                    images: [
-                                                        @foreach($event->images as $img)
-                                                            '{{ $img->image_path }}',
-                                                        @endforeach
-                                                    ],
-                                                    openLightbox(index) {
-                                                        this.currentIndex = index;
-                                                        this.showLightbox = true;
-                                                        document.body.style.overflow = 'hidden';
-                                                    },
-                                                    closeLightbox() {
-                                                        this.showLightbox = false;
-                                                        document.body.style.overflow = 'auto';
-                                                    },
-                                                    next() {
-                                                        this.currentIndex = (this.currentIndex + 1) % this.images.length;
-                                                    },
-                                                    prev() {
-                                                        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-                                                    }
-                                                }" @keydown.escape.window="closeLightbox()"
+                                                            showLightbox: false, 
+                                                            currentIndex: 0, 
+                                                            images: [
+                                                                @foreach($event->images as $img)
+                                                                    '{{ $img->image_path }}',
+                                                                @endforeach
+                                                            ],
+                                                            openLightbox(index) {
+                                                                this.currentIndex = index;
+                                                                this.showLightbox = true;
+                                                                document.body.style.overflow = 'hidden';
+                                                            },
+                                                            closeLightbox() {
+                                                                this.showLightbox = false;
+                                                                document.body.style.overflow = 'auto';
+                                                            },
+                                                            next() {
+                                                                this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                                                            },
+                                                            prev() {
+                                                                this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                                                            }
+                                                        }" @keydown.escape.window="closeLightbox()"
                             @keydown.arrow-right.window="next()" @keydown.arrow-left.window="prev()" class="reveal">
                             <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8 flex items-center gap-3">
                                 <span class="w-8 h-px bg-amber-500/30"></span>
@@ -246,6 +247,34 @@
                                 @endif
                             </div>
                         </div>
+
+                        <!-- Public Repertoire Link -->
+                        @if($event->is_repertoire_public)
+                            <div class="reveal">
+                                <a href="{{ route('event.program', $event->id) }}"
+                                    class="w-full flex items-center justify-between p-6 bg-gradient-to-br from-[#7367F0] to-[#4834D4] rounded-3xl text-white shadow-xl shadow-[#7367F0]/20 hover:scale-[1.02] transition-all group">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-bold uppercase tracking-widest opacity-60">Répertoire</p>
+                                            <p class="font-serif font-bold text-lg">Programme Musical</p>
+                                        </div>
+                                    </div>
+                                    <svg class="w-6 h-6 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 7l5 5-5 5M18 12H6" />
+                                    </svg>
+                                </a>
+                            </div>
+                        @endif
 
                         <!-- Share Card -->
                         <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">

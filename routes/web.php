@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\PresenceController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\SousMenuController;
+use App\Http\Controllers\Admin\EventProgramController;
+use App\Http\Controllers\Admin\PartieEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicController::class, 'index'])->name('home');
@@ -23,6 +25,7 @@ Route::get('/profil/{slug}', [PublicController::class, 'memberProfile'])->name('
 Route::post('/membres/{slug}/like', [PublicController::class, 'toggleLike'])->name('members.like');
 Route::get('/evenements', [PublicController::class, 'events'])->name('events');
 Route::get('/evenements/{id}', [PublicController::class, 'eventShow'])->name('evenements.show');
+Route::get('/evenements/{event}/programme', [\App\Http\Controllers\PublicEventController::class, 'program'])->name('event.program');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::post('/contact', [PublicController::class, 'contactSubmit'])->name('contact.submit');
 Route::post('/newsletter', [PublicController::class, 'newsletterSubscribe'])->name('newsletter.subscribe');
@@ -46,7 +49,6 @@ Route::post('/logout', [\App\Http\Controllers\Auth\AuthSyncController::class, 'l
 // Member Dashboard Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-
     // Admin only routes
     Route::resource('members', \App\Http\Controllers\Admin\MemberController::class);
     Route::post('members/{member}/toggle', [\App\Http\Controllers\Admin\MemberController::class, 'toggleStatus'])->name('members.toggle');
@@ -70,6 +72,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('sousmenus', \App\Http\Controllers\Admin\SousMenuController::class);
     Route::resource('events/types', \App\Http\Controllers\Admin\TypeController::class);
     Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
+
+    // Configuration des Parties (Global)
+    Route::resource('partie-events', \App\Http\Controllers\Admin\PartieEventController::class);
+
+    // Programme des événements
+    Route::get('events/{event}/program', [EventProgramController::class, 'index'])->name('events.program.index');
+    Route::post('events/{event}/repertoire', [EventProgramController::class, 'storeRepertoire'])->name('events.repertoire.store');
+    Route::post('events/{event}/program/toggle-visibility', [EventProgramController::class, 'toggleVisibility'])->name('events.program.toggle-visibility');
+    Route::delete('repertoire/{id}', [EventProgramController::class, 'destroyRepertoire'])->name('events.repertoire.destroy');
+
     Route::delete('events/images/{image}', [\App\Http\Controllers\Admin\EventController::class, 'deleteImage'])->name('events.delete-image');
 
     // Newsletter
@@ -91,6 +103,10 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
     // Bibliothèque Musicale
     Route::get('/chants', [\App\Http\Controllers\Choriste\ChantController::class, 'index'])->name('chants.index');
     Route::get('/chants/{chant}', [\App\Http\Controllers\Choriste\ChantController::class, 'show'])->name('chants.show');
+
+    // Agenda des Événements
+    Route::get('/agenda', [\App\Http\Controllers\Choriste\EventController::class, 'index'])->name('events.index');
+    Route::get('/agenda/{event}', [\App\Http\Controllers\Choriste\EventController::class, 'show'])->name('events.show');
 
     // Enregistrements
     Route::post('/enregistrements', [\App\Http\Controllers\Choriste\EnregistrementController::class, 'store'])->name('enregistrements.store');

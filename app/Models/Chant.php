@@ -12,4 +12,9 @@ class Chant extends Model
     {
         return $this->hasMany(FichierChant::class);
     }
+
+    public function repertoireEvents()
+    {
+        return $this->belongsToMany(Event::class, 'repertoire')->withPivot('partie_event_id', 'ordre')->withTimestamps();
+    }
 }

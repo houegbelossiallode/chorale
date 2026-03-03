@@ -62,7 +62,8 @@
                         class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg transition-all group {{ $hasActiveSub ? 'bg-[#F2F2F2]' : 'text-[#444050] hover:bg-[#F2F2F2]' }}">
                         <div class="flex items-center gap-3">
                             @if($menu->icone)
-                                <i class="ti ti-{{ $menu->icone }} text-slate-400 group-hover:text-[#7367F0] w-5 h-5 flex items-center justify-center"></i>
+                                <i
+                                    class="ti ti-{{ $menu->icone }} text-slate-400 group-hover:text-[#7367F0] w-5 h-5 flex items-center justify-center"></i>
                             @else
                                 <svg class="w-5 h-5 text-slate-400 group-hover:text-[#7367F0]" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">

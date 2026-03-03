@@ -34,14 +34,17 @@ class EnregistrementController extends Controller
 
         $request->validate([
             'chant_id' => 'required|exists:chants,id',
-            'audio' => 'required|file', // Simplified for debugging
+            'repertoire_id' => 'nullable|exists:repertoire,id',
+            'audio' => 'required|file',
         ]);
 
         $user = Auth::user();
         $file = $request->file('audio');
 
         // Path: recordings/user_{id}/chant_{id}/recording_{uniqid}.webm
-        $filename = 'recording-' . uniqid() . '.' . $file->getClientOriginalExtension();
+        // If repertoire_id exists, we can add it to path to keep things organized
+        $prefix = $request->repertoire_id ? "rep_{$request->repertoire_id}_" : "";
+        $filename = $prefix . 'recording-' . uniqid() . '.' . $file->getClientOriginalExtension();
         $path = "recordings/user_{$user->id}/chant_{$request->chant_id}/{$filename}";
 
         $filePath = $this->supabase->uploadFile('imgs', $path, $file);
@@ -50,6 +53,7 @@ class EnregistrementController extends Controller
             Enregistrement::create([
                 'user_id' => $user->id,
                 'chant_id' => $request->chant_id,
+                'repertoire_id' => $request->repertoire_id,
                 'file_path' => $filePath,
             ]);
 
