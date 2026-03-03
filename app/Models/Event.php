@@ -26,7 +26,12 @@ class Event extends Model
 
     public function repertoire()
     {
-        return $this->belongsToMany(Chant::class, 'repertoire')->withPivot('partie_event_id', 'ordre')->withTimestamps();
+        return $this->belongsToMany(Chant::class, 'repertoire')->withPivot('id', 'partie_event_id', 'ordre')->withTimestamps();
+    }
+
+    public function repertoireEntries()
+    {
+        return $this->hasMany(Repertoire::class, 'event_id');
     }
 
     protected $casts = [

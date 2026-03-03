@@ -45,9 +45,10 @@
 
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Paroles / Texte</label>
-                        <textarea name="parole" rows="10"
-                            class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all resize-none"
-                            placeholder="Saisissez ou collez les paroles ici...">{{ old('parole', $chant->parole) }}</textarea>
+                        <div class="space-y-2">
+                            <div id="editor-container" class="h-64 bg-white rounded-lg border border-slate-200"></div>
+                            <textarea name="parole" id="parole-textarea" class="hidden">{{ old('parole', $chant->parole) }}</textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -184,6 +185,33 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Quill Editor Initialization
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: 'Saisissez ou collez les paroles ici...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['clean']
+                ]
+            }
+        });
+
+        var textarea = document.getElementById('parole-textarea');
+        
+        // Load initial content from textarea
+        if (textarea.value) {
+            quill.root.innerHTML = textarea.value;
+        }
+
+        // Sync Quill content to textarea on every change
+        quill.on('text-change', function() {
+            textarea.value = quill.root.innerHTML;
+        });
+
         const resType = document.getElementById('res_type');
         const fileContainer = document.getElementById('file_input_container');
         const urlContainer = document.getElementById('url_input_container');

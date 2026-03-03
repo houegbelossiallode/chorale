@@ -145,7 +145,7 @@
                         <div class="absolute -top-3 -left-1 text-8xl font-serif text-amber-200/50 leading-none select-none">"</div>
                         <p class="text-xl md:text-2xl text-gray-600 leading-relaxed font-elegant italic relative z-10 pl-8 border-l-4 border-gradient-gold" style="border-image: linear-gradient(to bottom, #c9a84c, #e8d48b) 1;">
                             @if($priest_word)
-                                {{ $priest_word->content }}
+                                {!! $priest_word->content !!}
                             @else
                                 La musique sacrée est le pont entre le visible et l'invisible. Elle élève nos prières jusqu'au trône de Dieu et fait descendre Sa grâce dans nos cœurs. Notre chorale est cet instrument divin.
                             @endif

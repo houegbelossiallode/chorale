@@ -23,6 +23,8 @@ class PublicEventController extends Controller
                 'chants.id as chant_id',
                 'chants.title as chant_title',
                 'chants.composer',
+                'chants.parole',
+                'chants.file_path as score_path',
                 'partie_events.titre as partie_titre',
                 'repertoire.ordre'
             )
@@ -30,12 +32,17 @@ class PublicEventController extends Controller
             ->get();
 
         // On peut aussi charger les fichiers pour chaque chant
+        // On charge les fichiers pour chaque chant avec le nom du pupitre si applicable
         foreach ($repertoire as $item) {
             $item->fichiers = DB::table('fichier_chants')
-                ->where('chant_id', $item->chant_id)
+                ->leftJoin('pupitres', 'fichier_chants.pupitre_id', '=', 'pupitres.id')
+                ->where('fichier_chants.chant_id', $item->chant_id)
+                ->select('fichier_chants.*', 'pupitres.name as pupitre_name')
                 ->get();
         }
 
-        return view('public.events.program', compact('event', 'repertoire'));
+        $pupitres = \App\Models\Pupitre::with('users')->get();
+
+        return view('public.events.program', compact('event', 'repertoire', 'pupitres'));
     }
 }

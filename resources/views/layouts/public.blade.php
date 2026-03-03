@@ -454,6 +454,99 @@
             }
         } catch(e) { console.warn('Supabase init skipped:', e); }
     </script>
+    <!-- Universal Media Player Modal -->
+    <div x-data="universalMediaPlayer()" 
+         @open-media.window="open($event.detail)"
+         x-show="isOpen" 
+         class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/95 backdrop-blur-xl"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         x-cloak>
+        
+        <div class="relative w-full max-w-5xl aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl border border-white/10"
+             @click.away="close()">
+            
+            <!-- Close Button -->
+            <button @click="close()" class="absolute top-6 right-6 z-50 w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-amber-500 transition-all border border-white/20">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Player Content -->
+            <div class="w-full h-full flex items-center justify-center">
+                <!-- YouTube -->
+                <template x-if="type === 'youtube'">
+                    <iframe :src="'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1'" 
+                            class="w-full h-full" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen></iframe>
+                </template>
+
+                <!-- Audio -->
+                <template x-if="type === 'audio'">
+                    <div class="flex flex-col items-center gap-8 w-full p-12">
+                        <div class="w-32 h-32 rounded-3xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-2xl shadow-amber-500/20 animate-pulse-glow">
+                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-serif text-white text-center" x-text="title"></h3>
+                        <audio controls autoplay class="w-full max-w-xl" :src="url" ref="audioPlayer"></audio>
+                    </div>
+                </template>
+
+                <!-- Video (Local) -->
+                <template x-if="type === 'video'">
+                    <video controls autoplay class="w-full h-full" :src="url"></video>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function universalMediaPlayer() {
+            return {
+                isOpen: false,
+                type: '',
+                url: '',
+                title: '',
+                youtubeId: '',
+
+                open(detail) {
+                    this.type = detail.type;
+                    this.url = detail.url;
+                    this.title = detail.title || 'Média';
+                    
+                    if (this.type === 'youtube') {
+                        this.youtubeId = this.extractYoutubeId(this.url);
+                        if (!this.youtubeId) {
+                            alert('Lien YouTube invalide');
+                            return;
+                        }
+                    }
+
+                    this.isOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+
+                close() {
+                    this.isOpen = false;
+                    this.type = '';
+                    this.url = '';
+                    this.youtubeId = '';
+                    document.body.style.overflow = 'auto';
+                },
+
+                extractYoutubeId(url) {
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                    const match = url.match(regExp);
+                    return (match && match[2].length === 11) ? match[2] : null;
+                }
+            }
+        }
+    </script>
     @stack('scripts')
 </body>
 </html>

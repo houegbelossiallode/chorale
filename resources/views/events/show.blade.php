@@ -67,7 +67,7 @@
                         <div class="mb-14">
                             <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8">À propos</h2>
                             <div class="prose prose-lg max-w-none text-gray-500 font-elegant">
-                                {!! nl2br(e($event->description)) !!}
+                                {!! $event->description !!}
                             </div>
                         </div>
                     @endif
@@ -75,29 +75,29 @@
                     <!-- Gallery -->
                     @if($event->images->count() > 0)
                         <div x-data="{ 
-                                                            showLightbox: false, 
-                                                            currentIndex: 0, 
-                                                            images: [
-                                                                @foreach($event->images as $img)
-                                                                    '{{ $img->image_path }}',
-                                                                @endforeach
-                                                            ],
-                                                            openLightbox(index) {
-                                                                this.currentIndex = index;
-                                                                this.showLightbox = true;
-                                                                document.body.style.overflow = 'hidden';
-                                                            },
-                                                            closeLightbox() {
-                                                                this.showLightbox = false;
-                                                                document.body.style.overflow = 'auto';
-                                                            },
-                                                            next() {
-                                                                this.currentIndex = (this.currentIndex + 1) % this.images.length;
-                                                            },
-                                                            prev() {
-                                                                this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-                                                            }
-                                                        }" @keydown.escape.window="closeLightbox()"
+                                                                    showLightbox: false, 
+                                                                    currentIndex: 0, 
+                                                                    images: [
+                                                                        @foreach($event->images as $img)
+                                                                            '{{ $img->image_path }}',
+                                                                        @endforeach
+                                                                    ],
+                                                                    openLightbox(index) {
+                                                                        this.currentIndex = index;
+                                                                        this.showLightbox = true;
+                                                                        document.body.style.overflow = 'hidden';
+                                                                    },
+                                                                    closeLightbox() {
+                                                                        this.showLightbox = false;
+                                                                        document.body.style.overflow = 'auto';
+                                                                    },
+                                                                    next() {
+                                                                        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                                                                    },
+                                                                    prev() {
+                                                                        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                                                                    }
+                                                                }" @keydown.escape.window="closeLightbox()"
                             @keydown.arrow-right.window="next()" @keydown.arrow-left.window="prev()" class="reveal">
                             <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8 flex items-center gap-3">
                                 <span class="w-8 h-px bg-amber-500/30"></span>

@@ -59,9 +59,10 @@
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Contenu
                                     du message</label>
-                                <textarea name="content" rows="8" required
-                                    class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition"
-                                    placeholder="Écrivez votre message ici..."></textarea>
+                                <div class="space-y-2">
+                                    <div id="editor-container" class="h-64 bg-white rounded-xl border border-gray-200"></div>
+                                    <textarea name="content" id="content-textarea" class="hidden">{{ old('content') }}</textarea>
+                                </div>
                             </div>
                             <button type="submit"
                                 class="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2">
@@ -152,4 +153,58 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Écrivez votre message ici...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'color': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('content-textarea');
+
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            quill.on('text-change', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Écrivez votre message ici...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'color': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('content-textarea');
+            
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            quill.on('text-change', function() {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+    </script>
 @endsection

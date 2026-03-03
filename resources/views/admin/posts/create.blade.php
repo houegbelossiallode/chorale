@@ -43,18 +43,20 @@
                         </div>
 
                         <!-- <div class="space-y-1.5">
-                            <label class="text-[12px] font-semibold text-slate-500 ml-1">Extrait (Court résumé)</label>
-                            <textarea name="excerpt" rows="2"
-                                class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
-                                placeholder="Une brève introduction qui incitera à lire la suite...">{{ old('excerpt') }}</textarea>
-                            @error('excerpt') <p class="text-xs text-[#EA5455] mt-1">{{ $message }}</p> @enderror
-                        </div> -->
+                                <label class="text-[12px] font-semibold text-slate-500 ml-1">Extrait (Court résumé)</label>
+                                <textarea name="excerpt" rows="2"
+                                    class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
+                                    placeholder="Une brève introduction qui incitera à lire la suite...">{{ old('excerpt') }}</textarea>
+                                @error('excerpt') <p class="text-xs text-[#EA5455] mt-1">{{ $message }}</p> @enderror
+                            </div> -->
 
                         <div class="space-y-1.5">
                             <label class="text-[12px] font-semibold text-slate-500 ml-1">Corps de l'article</label>
-                            <textarea name="content" rows="12" required
-                                class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px] leading-relaxed"
-                                placeholder="Racontez votre histoire ici...">{{ old('content') }}</textarea>
+                            <div class="space-y-2">
+                                <div id="editor-container" class="h-96 bg-white rounded-lg border border-slate-200"></div>
+                                <textarea name="content" id="content-textarea"
+                                    class="hidden">{{ old('content') }}</textarea>
+                            </div>
                             @error('content') <p class="text-xs text-[#EA5455] mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -85,11 +87,11 @@
                             </div>
 
                             <!-- <div class="space-y-1.5">
-                                    <label class="text-[12px] font-semibold text-slate-500 ml-1">Auteur</label>
-                                    <input type="text" name="author"  required 
-                                           class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
-                                           placeholder="Nom de l'auteur">
-                                </div> -->
+                                        <label class="text-[12px] font-semibold text-slate-500 ml-1">Auteur</label>
+                                        <input type="text" name="author"  required 
+                                               class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
+                                               placeholder="Nom de l'auteur">
+                                    </div> -->
 
                             <div class="pt-2">
                                 <label class="flex items-center gap-3 cursor-pointer group">
@@ -177,4 +179,34 @@
             </div>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Racontez votre histoire ici...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'image', 'video'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('content-textarea');
+
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            quill.on('text-change', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+    </script>
 @endsection

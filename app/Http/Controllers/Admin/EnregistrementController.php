@@ -13,11 +13,20 @@ class EnregistrementController extends Controller
      */
     public function index()
     {
-        $enregistrements = Enregistrement::with(['user.pupitre', 'chant'])
+        // On récupère les événements qui ont au moins un enregistrement via leur répertoire
+        $events = \App\Models\Event::whereHas('repertoireEntries.enregistrements')
+            ->with(['repertoireEntries.enregistrements.user.pupitre', 'repertoireEntries.chant', 'repertoireEntries.partieEvent'])
+            ->orderBy('start_at', 'desc')
+            ->get();
+
+        // On peut aussi récupérer les enregistrements orphelins (sans répertoire) si nécessaire
+        // Mais selon la nouvelle logique, ils devraient tous avoir un repertoire_id
+        $orphanEnregistrements = Enregistrement::whereNull('repertoire_id')
+            ->with(['user.pupitre', 'chant'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.enregistrements.index', compact('enregistrements'));
+        return view('admin.enregistrements.index', compact('events', 'orphanEnregistrements'));
     }
 
     /**

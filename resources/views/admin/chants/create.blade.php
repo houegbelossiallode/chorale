@@ -43,9 +43,10 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Paroles /
                                 Texte</label>
-                            <textarea name="parole" rows="10"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all resize-none"
-                                placeholder="Saisissez ou collez les paroles ici...">{{ old('parole') }}</textarea>
+                            <div class="space-y-2">
+                                <div id="editor-container" class="h-64 bg-white rounded-lg border border-slate-200"></div>
+                                <textarea name="parole" id="parole-textarea" class="hidden">{{ old('parole') }}</textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -105,6 +106,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Saisissez ou collez les paroles ici...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('parole-textarea');
+
+            // Load initial content from textarea (old value)
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            // Sync Quill content to textarea on every change
+            quill.on('text-change', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+
             const fileInput = document.getElementById('partition');
             const previewContainer = document.getElementById('pdf-preview-container');
             const previewFrame = document.getElementById('pdf-preview');

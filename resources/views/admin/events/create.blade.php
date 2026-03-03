@@ -22,42 +22,42 @@
 
         <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6"
             x-data="{ 
-                            previews: [],
-                            principalIndex: 0,
-                            dataTransfer: new DataTransfer(),
-                            handleFiles(event) {
-                                const input = event.target;
-                                const files = Array.from(input.files);
-                                files.forEach(file => {
-                                    this.dataTransfer.items.add(file);
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        this.previews.push({
-                                            id: Math.random().toString(36).substr(2, 9),
-                                            url: e.target.result,
-                                            name: file.name
-                                        });
-                                    };
-                                    reader.readAsDataURL(file);
-                                });
-                                input.files = this.dataTransfer.files;
-                            },
-                            removePreview(id) {
-                                const idx = this.previews.findIndex(p => p.id === id);
-                                if (idx > -1) {
-                                    this.previews.splice(idx, 1);
-                                    const newDt = new DataTransfer();
-                                    for (let i = 0; i < this.dataTransfer.files.length; i++) {
-                                        if (i !== idx) newDt.items.add(this.dataTransfer.files[i]);
-                                    }
-                                    this.dataTransfer = newDt;
-                                    this.$refs.fileInput.files = this.dataTransfer.files;
-                                    if (this.principalIndex >= this.previews.length) {
-                                        this.principalIndex = Math.max(0, this.previews.length - 1);
+                                previews: [],
+                                principalIndex: 0,
+                                dataTransfer: new DataTransfer(),
+                                handleFiles(event) {
+                                    const input = event.target;
+                                    const files = Array.from(input.files);
+                                    files.forEach(file => {
+                                        this.dataTransfer.items.add(file);
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            this.previews.push({
+                                                id: Math.random().toString(36).substr(2, 9),
+                                                url: e.target.result,
+                                                name: file.name
+                                            });
+                                        };
+                                        reader.readAsDataURL(file);
+                                    });
+                                    input.files = this.dataTransfer.files;
+                                },
+                                removePreview(id) {
+                                    const idx = this.previews.findIndex(p => p.id === id);
+                                    if (idx > -1) {
+                                        this.previews.splice(idx, 1);
+                                        const newDt = new DataTransfer();
+                                        for (let i = 0; i < this.dataTransfer.files.length; i++) {
+                                            if (i !== idx) newDt.items.add(this.dataTransfer.files[i]);
+                                        }
+                                        this.dataTransfer = newDt;
+                                        this.$refs.fileInput.files = this.dataTransfer.files;
+                                        if (this.principalIndex >= this.previews.length) {
+                                            this.principalIndex = Math.max(0, this.previews.length - 1);
+                                        }
                                     }
                                 }
-                            }
-                          }">
+                              }">
             @csrf
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -105,9 +105,11 @@
 
                         <div class="space-y-1.5">
                             <label class="text-[12px] font-semibold text-slate-500 ml-1">Description / Notes</label>
-                            <textarea name="description" rows="5"
-                                class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
-                                placeholder="Précisez le programme, les tenues, etc...">{{ old('description') }}</textarea>
+                            <div class="space-y-2">
+                                <div id="editor-container" class="h-64 bg-white rounded-lg border border-slate-200"></div>
+                                <textarea name="description" id="description-textarea"
+                                    class="hidden">{{ old('description') }}</textarea>
+                            </div>
                             @error('description') <p class="text-xs text-[#EA5455] mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -232,4 +234,32 @@
             </div>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Précisez le programme, les tenues, etc...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('description-textarea');
+
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            quill.on('text-change', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+    </script>
 @endsection

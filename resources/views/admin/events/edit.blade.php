@@ -22,51 +22,51 @@
 
         <form action="{{ route('admin.events.update', $event) }}" method="POST" enctype="multipart/form-data"
             class="space-y-6" x-data="{ 
-                        previews: [],
-                        principalId: {{ $event->principalImage->id ?? 'null' }},
-                        principalIndex: null,
-                        dataTransfer: new DataTransfer(),
-                        handleFiles(event) {
-                            const files = Array.from(event.target.files);
-                            files.forEach(file => {
-                                this.dataTransfer.items.add(file);
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    this.previews.push({
-                                        id: Math.random().toString(36).substr(2, 9),
-                                        url: e.target.result,
-                                        name: file.name
-                                    });
-                                };
-                                reader.readAsDataURL(file);
-                            });
-                            this.$refs.fileInput.files = this.dataTransfer.files;
-                        },
-                        removePreview(id) {
-                            const index = this.previews.findIndex(p => p.id === id);
-                            if (index !== -1) {
-                                this.previews.splice(index, 1);
-                                const newDt = new DataTransfer();
-                                const files = Array.from(this.dataTransfer.files);
-                                files.splice(index, 1);
-                                files.forEach(file => newDt.items.add(file));
-                                this.dataTransfer = newDt;
+                            previews: [],
+                            principalId: {{ $event->principalImage->id ?? 'null' }},
+                            principalIndex: null,
+                            dataTransfer: new DataTransfer(),
+                            handleFiles(event) {
+                                const files = Array.from(event.target.files);
+                                files.forEach(file => {
+                                    this.dataTransfer.items.add(file);
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        this.previews.push({
+                                            id: Math.random().toString(36).substr(2, 9),
+                                            url: e.target.result,
+                                            name: file.name
+                                        });
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
                                 this.$refs.fileInput.files = this.dataTransfer.files;
+                            },
+                            removePreview(id) {
+                                const index = this.previews.findIndex(p => p.id === id);
+                                if (index !== -1) {
+                                    this.previews.splice(index, 1);
+                                    const newDt = new DataTransfer();
+                                    const files = Array.from(this.dataTransfer.files);
+                                    files.splice(index, 1);
+                                    files.forEach(file => newDt.items.add(file));
+                                    this.dataTransfer = newDt;
+                                    this.$refs.fileInput.files = this.dataTransfer.files;
 
-                                // Reset principal index if deleted
-                                if (this.principalIndex === index) this.principalIndex = null;
-                                else if (this.principalIndex > index) this.principalIndex--;
+                                    // Reset principal index if deleted
+                                    if (this.principalIndex === index) this.principalIndex = null;
+                                    else if (this.principalIndex > index) this.principalIndex--;
+                                }
+                            },
+                            setPrincipalExisting(id) {
+                                this.principalId = id;
+                                this.principalIndex = null;
+                            },
+                            setPrincipalNew(index) {
+                                this.principalIndex = index;
+                                this.principalId = null;
                             }
-                        },
-                        setPrincipalExisting(id) {
-                            this.principalId = id;
-                            this.principalIndex = null;
-                        },
-                        setPrincipalNew(index) {
-                            this.principalIndex = index;
-                            this.principalId = null;
-                        }
-                      }">
+                          }">
             @csrf
             @method('PUT')
 
@@ -118,9 +118,11 @@
 
                         <div class="space-y-1.5">
                             <label class="text-[12px] font-semibold text-slate-500 ml-1">Description / Notes</label>
-                            <textarea name="description" rows="5"
-                                class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all text-[#444050] text-[14px]"
-                                placeholder="Contenu...">{{ old('description', $event->description) }}</textarea>
+                            <div class="space-y-2">
+                                <div id="editor-container" class="h-64 bg-white rounded-lg border border-slate-200"></div>
+                                <textarea name="description" id="description-textarea"
+                                    class="hidden">{{ old('description', $event->description) }}</textarea>
+                            </div>
                             @error('description') <p class="text-xs text-[#EA5455] mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -300,4 +302,32 @@
             @method('DELETE')
         </form>
     @endforeach
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Quill Editor Initialization
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Modifiez la description...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var textarea = document.getElementById('description-textarea');
+
+            if (textarea.value) {
+                quill.root.innerHTML = textarea.value;
+            }
+
+            quill.on('text-change', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+    </script>
 @endsection

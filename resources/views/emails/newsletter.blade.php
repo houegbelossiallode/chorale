@@ -113,7 +113,7 @@
         <div class="content">
             <h2>{{ $subjectText }}</h2>
 
-            <div style="white-space: pre-wrap;">{{ $content }}</div>
+            <div style="white-space: pre-wrap;">{!! $content !!}</div>
 
             <div class="divider"></div>
 
