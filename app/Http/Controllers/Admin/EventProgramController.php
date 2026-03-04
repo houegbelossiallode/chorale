@@ -19,7 +19,7 @@ class EventProgramController extends Controller
             ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
             ->where('repertoire.event_id', $event->id)
             ->select('repertoire.id', 'chants.title as chant_title', 'partie_events.titre as partie_titre', 'repertoire.ordre')
-            ->orderBy('repertoire.ordre')
+            ->orderBy('partie_events.ordre')
             ->get();
 
         $allChants = Chant::all();
@@ -51,15 +51,10 @@ class EventProgramController extends Controller
             ],
         ]);
 
-        $lastOrder = DB::table('repertoire')
-            ->where('event_id', $event->id)
-            ->max('ordre') ?? 0;
-
         DB::table('repertoire')->insert([
             'event_id' => $event->id,
             'chant_id' => $validated['chant_id'],
             'partie_event_id' => $validated['partie_event_id'],
-            'ordre' => $lastOrder + 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

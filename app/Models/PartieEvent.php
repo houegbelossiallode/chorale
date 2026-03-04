@@ -10,6 +10,6 @@ class PartieEvent extends Model
 
     public function chants()
     {
-        return $this->belongsToMany(Chant::class, 'repertoire')->withPivot('ordre')->withTimestamps();
+        return $this->belongsToMany(Chant::class, 'repertoire')->withTimestamps();
     }
 }

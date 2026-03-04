@@ -38,26 +38,26 @@ class SousMenuController extends Controller
         return back()->with('success', 'Sous-menu créé.');
     }
 
-    public function edit(SousMenu $sousMenu)
+    public function edit(SousMenu $sousmenu)
     {
         $menus = \App\Models\Menu::all();
-        return view('admin.sousmenus.edit', compact('sousMenu', 'menus'));
+        return view('admin.sousmenus.edit', ['sousMenu' => $sousmenu, 'menus' => $menus]);
     }
 
-    public function update(Request $request, SousMenu $sousMenu)
+    public function update(Request $request, SousMenu $sousmenu)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'menu_id' => 'required|exists:menus,id',
             'url' => 'required|string|max:255'
         ]);
-        $sousMenu->update($validated);
+        $sousmenu->update($validated);
         return back()->with('success', 'Sous-menu mis à jour.');
     }
 
-    public function destroy(SousMenu $sousMenu)
+    public function destroy(SousMenu $sousmenu)
     {
-        $sousMenu->delete();
+        $sousmenu->delete();
         return back()->with('success', 'Sous-menu supprimé.');
     }
 }

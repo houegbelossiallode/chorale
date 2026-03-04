@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Repertoire extends Model
 {
     protected $table = 'repertoire';
-    protected $fillable = ['event_id', 'chant_id', 'partie_event_id', 'ordre'];
+    protected $fillable = ['event_id', 'chant_id', 'partie_event_id'];
 
     public function event()
     {

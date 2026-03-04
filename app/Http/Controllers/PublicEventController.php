@@ -28,7 +28,7 @@ class PublicEventController extends Controller
                 'partie_events.titre as partie_titre',
                 'repertoire.ordre'
             )
-            ->orderBy('repertoire.ordre')
+            ->orderBy('partie_events.ordre')
             ->get();
 
         // On peut aussi charger les fichiers pour chaque chant

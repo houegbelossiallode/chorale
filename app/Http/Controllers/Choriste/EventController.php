@@ -31,8 +31,10 @@ class EventController extends Controller
                 $q->where('user_id', Auth::id());
             }
         ])
-            ->where('event_id', $event->id)
-            ->orderBy('ordre')
+            ->where('repertoire.event_id', $event->id)
+            ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
+            ->select('repertoire.*')
+            ->orderBy('partie_events.ordre')
             ->get();
 
         $pupitres = \App\Models\Pupitre::with('users')->get();
