@@ -16,7 +16,7 @@ class RepetitionController extends Controller
         $repetitions = Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
             ->withCount('presences')
             ->orderBy('start_time', 'desc')
-            ->get();
+            ->paginate(6);
 
         return view('choriste.repetitions.index', compact('repetitions'));
     }

@@ -151,6 +151,13 @@
             @endforelse
         </div>
 
+        <!-- Pagination -->
+        <div class="mt-12 flex justify-center">
+            <div class="bg-white px-6 py-4 rounded-[2rem] shadow-material-sm border border-slate-100">
+                {{ $repetitions->links() }}
+            </div>
+        </div>
+
         <!-- Modal du Programme Musical (Commun Admin/Choriste) -->
         <div x-show="showProgramModal"
             class="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" x-cloak

@@ -23,7 +23,7 @@ class RepetitionController extends Controller
         $repetitions = Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
             ->withCount('presences')
             ->latest()
-            ->get();
+            ->paginate(10);
         return view('admin.suivi.repetitions.index', compact('repetitions'));
     }
 

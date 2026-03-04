@@ -4,38 +4,38 @@
 
 @section('content')
     <div class="space-y-6" x-data="{
-                repModal: false,
-                autoModal: false,
-                editMode: false,
-                currentId: null,
-                formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
-                actionUrl: '{{ route('admin.repetitions.store') }}',
-                selectedRep: null,
-                showProgramModal: false,
+                        repModal: false,
+                        autoModal: false,
+                        editMode: false,
+                        currentId: null,
+                        formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
+                        actionUrl: '{{ route('admin.repetitions.store') }}',
+                        selectedRep: null,
+                        showProgramModal: false,
 
-                openProgram(rep) {
-                    this.selectedRep = rep;
-                    this.showProgramModal = true;
-                },
+                        openProgram(rep) {
+                            this.selectedRep = rep;
+                            this.showProgramModal = true;
+                        },
 
-                openModal(rep = null) {
-                    if (rep) {
-                        this.editMode = true;
-                        this.currentId = rep.id;
-                        this.formData.titre = rep.titre;
-                        this.formData.start_time = rep.start_time.substring(0, 16);
-                        this.formData.end_time = rep.end_time.substring(0, 16);
-                        this.formData.lieu = rep.lieu;
-                        this.formData.description = rep.description;
-                        this.actionUrl = `/admin/repetitions/${rep.id}`;
-                    } else {
-                        this.editMode = false;
-                        this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
-                        this.actionUrl = '{{ route('admin.repetitions.store') }}';
-                    }
-                    this.repModal = true;
-                }
-            }">
+                        openModal(rep = null) {
+                            if (rep) {
+                                this.editMode = true;
+                                this.currentId = rep.id;
+                                this.formData.titre = rep.titre;
+                                this.formData.start_time = rep.start_time.substring(0, 16);
+                                this.formData.end_time = rep.end_time.substring(0, 16);
+                                this.formData.lieu = rep.lieu;
+                                this.formData.description = rep.description;
+                                this.actionUrl = `/admin/repetitions/${rep.id}`;
+                            } else {
+                                this.editMode = false;
+                                this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
+                                this.actionUrl = '{{ route('admin.repetitions.store') }}';
+                            }
+                            this.repModal = true;
+                        }
+                    }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-[#444050]">Gestion des Répétitions</h1>
@@ -175,8 +175,7 @@
                                 })->map(function ($c) {
                                     return ['title' => $c->title, 'composer' => $c->composer, 'file_path' => $c->file_path];
                                 })->values()->all()
-                            ]) }})"
-                                                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all uppercase tracking-widest">
+                            ]) }})" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all uppercase tracking-widest">
                                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                                             viewBox="0 0 24 24">
                                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -356,6 +355,11 @@
                 @empty
                     <div class="p-10 text-center text-slate-400 italic">Aucune répétition.</div>
                 @endforelse
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-8 py-4 bg-slate-50 border-t border-gray-100 flex justify-center">
+                {{ $repetitions->links() }}
             </div>
         </div>
 
