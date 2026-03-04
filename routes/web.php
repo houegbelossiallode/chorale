@@ -110,6 +110,7 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
     // Agenda des Événements
     Route::get('/agenda', [\App\Http\Controllers\Choriste\EventController::class, 'index'])->name('events.index');
     Route::get('/agenda/{event}', [\App\Http\Controllers\Choriste\EventController::class, 'show'])->name('events.show');
+    Route::get('/agenda/{event}/repertoire/pdf', [\App\Http\Controllers\Admin\EventProgramController::class, 'downloadPdf'])->name('events.repertoire.pdf');
 
     // Répétitions
     Route::get('/repetitions', [\App\Http\Controllers\Choriste\RepetitionController::class, 'index'])->name('repetitions.index');

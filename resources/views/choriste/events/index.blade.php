@@ -52,10 +52,20 @@
                             </p>
                         </div>
 
-                        <a href="{{ route('choriste.events.show', $event->id) }}"
-                            class="w-full py-2.5 bg-[#7367F0]/10 hover:bg-[#7367F0] text-[#7367F0] hover:text-white rounded-xl text-xs font-bold transition-all text-center">
-                            Voir le Répertoire
-                        </a>
+                        <div class="flex items-center gap-2 mt-2">
+                            <a href="{{ route('choriste.events.show', $event->id) }}"
+                                class="flex-1 py-2.5 bg-[#7367F0]/10 hover:bg-[#7367F0] text-[#7367F0] hover:text-white rounded-xl text-xs font-bold transition-all text-center">
+                                Voir le Répertoire
+                            </a>
+                            <a href="{{ route('choriste.events.repertoire.pdf', $event->id) }}" target="_blank"
+                                title="Télécharger le programme (PDF)"
+                                class="px-4 py-2.5 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-100/50 hover:border-red-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
             @endforeach
