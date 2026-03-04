@@ -10,6 +10,9 @@ use App\Models\Chant;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RepetitionReminderMail;
+
 class RepetitionController extends Controller
 {
     /**
@@ -17,7 +20,10 @@ class RepetitionController extends Controller
      */
     public function index()
     {
-        $repetitions = Repetition::withCount('presences')->latest()->get();
+        $repetitions = Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
+            ->withCount('presences')
+            ->latest()
+            ->get();
         return view('admin.suivi.repetitions.index', compact('repetitions'));
     }
 
@@ -51,12 +57,39 @@ class RepetitionController extends Controller
         $allChants = Chant::orderBy('title')->get();
         $repetition->load('chants');
 
-        return view('admin.suivi.repetitions.show', compact('repetition', 'members', 'allChants'));
+        $events = \App\Models\Event::with(['repertoireEntries.chant', 'repertoireEntries.partieEvent'])
+            ->orderBy('start_at', 'desc')
+            ->take(20)
+            ->get()
+            ->map(function ($e) {
+                return [
+                    'id' => $e->id,
+                    'title' => $e->title . ' (' . $e->start_at->format('d/m/Y') . ')',
+                    'repertoire' => $e->repertoireEntries->groupBy(function ($r) {
+                        return $r->partieEvent->titre ?? 'Sans partie';
+                    })->map(function ($items) {
+                        return $items->map(function ($r) {
+                            return [
+                                'id' => $r->chant_id,
+                                'title' => $r->chant->title,
+                                'composer' => $r->chant->composer
+                            ];
+                        });
+                    })
+                ];
+            });
+
+        return view('admin.suivi.repetitions.show', compact('repetition', 'members', 'allChants', 'events'));
     }
 
     public function syncChants(Request $request, Repetition $repetition)
     {
         $repetition->chants()->sync($request->input('chants', []));
+
+        if ($request->has('event_id')) {
+            $repetition->update(['event_id' => $request->input('event_id')]);
+        }
+
         return back()->with('success', 'Programme musical mis à jour.');
     }
 
@@ -118,5 +151,32 @@ class RepetitionController extends Controller
         }
 
         return back()->with('success', "$count répétitions ont été programmées pour le mois.");
+    }
+
+    public function sendReminder(Repetition $repetition)
+    {
+        // Récupérer tous les choristes actifs (ceux qui ont un rôle choriste)
+        $choristes = User::whereHas('role', function ($query) {
+            $query->where('libelle', 'like', '%choriste%');
+        })->get();
+
+        if ($choristes->isEmpty()) {
+            return back()->with('error', 'Aucun choriste actif trouvé pour recevoir la relance.');
+        }
+
+        // Charger les relations nécessaires pour l'email
+        $repetition->load(['chants', 'event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent']);
+
+        try {
+            // Envoi des mails
+            foreach ($choristes as $choriste) {
+                if ($choriste->email) {
+                    Mail::to($choriste->email)->send(new RepetitionReminderMail($repetition));
+                }
+            }
+            return back()->with('success', 'Relance envoyée avec succès à ' . $choristes->count() . ' chorist(e)s.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'envoi de la relance : ' . $e->getMessage());
+        }
     }
 }

@@ -212,6 +212,10 @@
             align-items: center;
             justify-content: center;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 

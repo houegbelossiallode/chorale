@@ -22,7 +22,7 @@ class PublicController extends Controller
             ->take(3)
             ->get();
         $upcoming_events = Event::where('is_public', DB::raw('true'))
-            ->where('start_at', '>=', now())
+           // ->where('start_at', '>=', now())
             ->orderBy('start_at', 'asc')
             ->take(3)
             ->get();

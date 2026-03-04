@@ -19,11 +19,9 @@
 
     <div class="h-[76px] flex-shrink-0 flex items-center px-6 mb-2 border-b border-slate-50">
         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group">
-            <div class="w-8 h-8 bg-[#7367F0] rounded-lg flex items-center justify-center text-white shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
+            <div class="w-10 h-10 flex items-center justify-center overflow-hidden rounded-lg">
+                <img src="{{ asset('images/logo chorale st oscar romero noir fond blanc.png') }}" alt="Logo"
+                    class="w-full h-full object-contain">
             </div>
             <span class="text-xl font-bold tracking-tight text-[#444050]">Chorale</span>
         </a>

@@ -178,6 +178,8 @@
 
         /* Number counter animation */
         .counter { font-variant-numeric: tabular-nums; }
+
+        [x-cloak] { display: none !important; }
     </style>
     @stack('styles')
 </head>
@@ -194,10 +196,11 @@
                 <a href="/" class="flex items-center gap-2 sm:gap-3 group">
                     <div class="relative">
                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-500 overflow-hidden"
-                             :class="scrolled ? 'bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-700 shadow-lg shadow-amber-500/25' : 'glass'">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                            </svg>
+                             :class="scrolled ? 'bg-white shadow-lg shadow-amber-500/10' : 'glass'">
+                            <img src="{{ asset('images/logo chorale st oscar romero blanc.png') }}" 
+                                 alt="Logo" 
+                                 class="w-full h-full object-contain p-1"
+                                 :class="scrolled ? 'filter invert' : ''">
                         </div>
                         <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-2xl blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-500" :class="scrolled ? '' : 'hidden'"></div>
                     </div>

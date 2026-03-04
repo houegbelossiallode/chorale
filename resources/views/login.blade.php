@@ -33,14 +33,10 @@
                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full blur-3xl">
                             </div>
 
-                            <!-- Logo -->
                             <div class="relative z-10">
-                                <div
-                                    class="w-16 h-16 bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl shadow-amber-500/30 mb-8 animate-pulse-glow">
-                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                                    </svg>
+                                <div class="w-24 h-24 mb-6">
+                                    <img src="{{ asset('images/logo chorale st oscar romero blanc.png') }}" alt="Logo"
+                                        class="w-full h-full object-contain drop-shadow-2xl">
                                 </div>
                                 <span class="text-white/40 text-xs font-bold uppercase tracking-[0.3em]">Chorale
                                     Catholique</span>
@@ -69,14 +65,10 @@
                 <div class="reveal-right">
                     <div class="max-w-md mx-auto">
                         <div class="text-center mb-10">
-                            <!-- Mobile logo -->
                             <div class="lg:hidden mb-8">
-                                <div
-                                    class="w-16 h-16 mx-auto bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl shadow-amber-500/20 mb-4">
-                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                                    </svg>
+                                <div class="w-20 h-20 mx-auto">
+                                    <img src="{{ asset('images/logo chorale st oscar romero blanc.png') }}" alt="Logo"
+                                        class="w-full h-full object-contain filter invert brightness-0">
                                 </div>
                             </div>
                             <h1 class="text-4xl font-serif font-bold text-gray-900 mb-3">Bon retour ✦</h1>

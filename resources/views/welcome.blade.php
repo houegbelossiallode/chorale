@@ -27,11 +27,6 @@
 
         <!-- Content -->
         <div class="relative z-20 text-center px-4 max-w-5xl mx-auto pt-24 md:pt-20">
-            <!-- <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full glass mb-12">
-                <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
-                <span class="text-amber-300/90 text-xs font-bold tracking-[0.4em] uppercase">Chorale Catholique • Depuis 2004</span>
-                <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
-            </div> -->
 
             <h1 class="text-5xl sm:text-7xl md:text-[8rem] lg:text-[10rem] font-serif text-white mb-4 leading-[0.85] tracking-tight">
                 <span class="text-white/50 italic font-light text-4xl sm:text-6xl md:text-8xl">Chorale</span> </br> Saint Oscar<br>
@@ -290,7 +285,7 @@
                                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 <span class="text-xs font-medium">{{ $event->location }}</span>
                             </div>
-                            <a href="{{ route('events.show', $event->slug) }}" class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 group-hover:bg-gradient-to-br group-hover:from-amber-500 group-hover:to-amber-600 group-hover:text-white transition-all duration-300 group-hover:shadow-lg group-hover:shadow-amber-500/20">
+                            <a href="{{ route('evenements.show', $event->id) }}" class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 group-hover:bg-gradient-to-br group-hover:from-amber-500 group-hover:to-amber-600 group-hover:text-white transition-all duration-300 group-hover:shadow-lg group-hover:shadow-amber-500/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                             </a>
                         </div>

@@ -64,7 +64,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('projets', \App\Http\Controllers\Admin\ProjectController::class);
     Route::resource('donations', \App\Http\Controllers\Admin\DonationController::class);
     Route::resource('repetitions', \App\Http\Controllers\Admin\RepetitionController::class);
-    Route::post('repetitions/automate', [\App\Http\Controllers\Admin\RepetitionController::class, 'automate'])->name('repetitions.automate');
+    Route::get('/repetitions/automate', [RepetitionController::class, 'automate'])->name('repetitions.automate'); // Pas utilisé mais au cas où
+    Route::post('/repetitions/automate', [RepetitionController::class, 'automate'])->name('repetitions.automate');
+    Route::post('/repetitions/{repetition}/reminder', [RepetitionController::class, 'sendReminder'])->name('repetitions.reminder');
     Route::post('repetitions/{repetition}/sync-chants', [\App\Http\Controllers\Admin\RepetitionController::class, 'syncChants'])->name('suivi.repetitions.sync_chants');
     Route::resource('presences', \App\Http\Controllers\Admin\PresenceController::class);
     Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
@@ -107,6 +109,9 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
     // Agenda des Événements
     Route::get('/agenda', [\App\Http\Controllers\Choriste\EventController::class, 'index'])->name('events.index');
     Route::get('/agenda/{event}', [\App\Http\Controllers\Choriste\EventController::class, 'show'])->name('events.show');
+
+    // Répétitions
+    Route::get('/repetitions', [\App\Http\Controllers\Choriste\RepetitionController::class, 'index'])->name('repetitions.index');
 
     // Enregistrements
     Route::post('/enregistrements', [\App\Http\Controllers\Choriste\EnregistrementController::class, 'store'])->name('enregistrements.store');

@@ -3,86 +3,91 @@
 @section('title', 'Faire l\'appel')
 
 @section('content')
-    <div class="space-y-6" x-data="{ 
-        showProgramModal: false,
-        showMotifModal: false,
-        currentUserId: null,
-        currentStatus: null,
-        currentMotif: '',
-        selectedChants: {{ json_encode($repetition->chants->pluck('id')) }},
-        searchQuery: '',
-        get filteredChants() {
-            if (!this.searchQuery) return this.allChants;
-            const query = this.searchQuery.toLowerCase();
-            return this.allChants.filter(c => 
-                c.title.toLowerCase().includes(query) || 
-                (c.composer && c.composer.toLowerCase().includes(query))
-            );
-        },
-        allChants: {{ json_encode($allChants) }},
-        presences: {{ json_encode($members->mapWithKeys(function ($m) {
-        $presence = $m->presences->first();
-        return [
-            $m->id => [
-                'status' => $presence?->status,
-                'motif' => $presence?->motif
-            ]
-        ];
-    })) }},
-        stats: {
-            present: {{ $repetition->presences()->where('status', 'present')->count() }},
-            all: {{ $members->count() }}
-        },
-        async updatePresence(userId, status) {
-            if (status === 'absent' || status === 'justifie') {
-                this.currentUserId = userId;
-                this.currentStatus = status;
-                this.currentMotif = this.presences[userId].motif || '';
-                this.showMotifModal = true;
-                return;
-            }
-            await this.confirmPresence(userId, status, null);
-        },
-        async confirmPresence(userId, status, motif) {
-            const oldStatus = this.presences[userId].status;
-            const oldMotif = this.presences[userId].motif;
+    <div class="space-y-6" x-data='{
+                                    showProgramModal: false,
+                                    showMotifModal: false,
+                                    currentUserId: null,
+                                    currentStatus: null,
+                                    currentMotif: "",
+                                    selectedChants: {{ json_encode($repetition->chants->pluck("id")) }},
+                                    selectedEventId: {{ $repetition->event_id ?? 'null' }},
+                                    events: @json($events),
+                                    get currentEventRepertoire() {
+                                        if (!this.selectedEventId) return null;
+                                        const event = this.events.find(e => e.id == this.selectedEventId);
+                                        return event ? event.repertoire : null;
+                                    },
+                                    searchQuery: "",
+                                    get filteredChants() {
+                                        if (!this.searchQuery) return this.allChants;
+                                        const query = this.searchQuery.toLowerCase();
+                                        return this.allChants.filter(c => 
+                                            c.title.toLowerCase().includes(query) || 
+                                            (c.composer && c.composer.toLowerCase().includes(query))
+                                        );
+                                    },
+                                    allChants: @json($allChants),
+                                    presences: @json($members->mapWithKeys(function ($m) use ($repetition) {
+                                        $presence = $m->presences->where("repetition_id", $repetition->id)->first();
+                                        return [
+                                            $m->id => [
+                                                "status" => $presence?->status,
+                                                "motif" => $presence?->motif
+                                            ]
+                                        ];
+                                    })),
+                                    stats: {
+                                        present: {{ $repetition->presences()->where("status", "present")->count() }},
+                                        all: {{ $members->count() }}
+                                    },
+                                    async updatePresence(userId, status) {
+                                        if (status === "absent" || status === "justifie") {
+                                            this.currentUserId = userId;
+                                            this.currentStatus = status;
+                                            this.currentMotif = this.presences[userId].motif || "";
+                                            this.showMotifModal = true;
+                                            return;
+                                        }
+                                        await this.confirmPresence(userId, status, null);
+                                    },
+                                    async confirmPresence(userId, status, motif) {
+                                        const oldStatus = this.presences[userId].status;
+                                        const oldMotif = this.presences[userId].motif;
 
-            if (oldStatus === status && oldMotif === motif) return;
+                                        if (oldStatus === status && oldMotif === motif) return;
 
-            this.presences[userId].status = status;
-            this.presences[userId].motif = motif;
+                                        this.presences[userId].status = status;
+                                        this.presences[userId].motif = motif;
 
-            // Update local stats
-            if (oldStatus === 'present') this.stats.present--;
-            if (status === 'present') this.stats.present++;
+                                        if (oldStatus === "present") this.stats.present--;
+                                        if (status === "present") this.stats.present++;
 
-            try {
-                const response = await fetch('{{ route('admin.presences.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        user_id: userId,
-                        repetition_id: {{ $repetition->id }},
-                        status: status,
-                        motif: motif
-                    })
-                });
+                                        try {
+                                            const response = await fetch("{{ route('admin.presences.store') }}", {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                    "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
+                                                    "X-Requested-With": "XMLHttpRequest"
+                                                },
+                                                body: JSON.stringify({
+                                                    user_id: userId,
+                                                    repetition_id: {{ $repetition->id }},
+                                                    status: status,
+                                                    motif: motif
+                                                })
+                                            });
 
-                if (!response.ok) throw new Error();
-            } catch (e) {
-                // Rollback on error
-                this.presences[userId].status = oldStatus;
-                this.presences[userId].motif = oldMotif;
-                if (oldStatus === 'present') this.stats.present++;
-                if (status === 'present') this.stats.present--;
-                alert('Erreur lors de l’enregistrement de la présence.');
-            }
-        }
-    }">
+                                            if (!response.ok) throw new Error();
+                                        } catch (e) {
+                                            this.presences[userId].status = oldStatus;
+                                            this.presences[userId].motif = oldMotif;
+                                            if (oldStatus === "present") this.stats.present++;
+                                            if (status === "present") this.stats.present--;
+                                            alert("Erreur lors de l’enregistrement de la présence.");
+                                        }
+                                    }
+                                }'>
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
@@ -95,7 +100,8 @@
                     Retour au planning
                 </a>
                 <h1 class="text-2xl font-black text-[#444050] uppercase tracking-tight">Feuille d'appel :
-                    {{ $repetition->titre }}</h1>
+                    {{ $repetition->titre }}
+                </h1>
                 <div class="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2">
                     <p class="text-[#7367F0] font-bold text-sm flex items-center gap-1.5 uppercase tracking-widest">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,9 +131,9 @@
                     </p>
                 </div>
                 @if($repetition->description)
-                <p class="text-slate-500 text-xs md:text-sm mt-3 flex items-center gap-1.5 italic">
-                    {{ $repetition->description }}
-                </p>
+                    <p class="text-slate-500 text-xs md:text-sm mt-3 flex items-center gap-1.5 italic">
+                        {{ $repetition->description }}
+                    </p>
                 @endif
             </div>
             <div class="flex gap-3">
@@ -186,9 +192,11 @@
                                                 <div>
                                                     <p
                                                         class="font-bold text-[#444050] group-hover:text-[#7367F0] transition-colors uppercase tracking-tight">
-                                                        {{ $member->first_name }} {{ $member->last_name }}</p>
+                                                        {{ $member->first_name }} {{ $member->last_name }}
+                                                    </p>
                                                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
-                                                        {{ $member->email }}</p>
+                                                        {{ $member->email }}
+                                                    </p>
                                                     <template x-if="presences[{{ $member->id }}].motif">
                                                         <div
                                                             class="mt-1 flex items-center gap-1.5 text-[10px] text-[#FF9F43] font-bold uppercase italic bg-[#FF9F43]/5 px-2 py-0.5 rounded-md w-fit border border-[#FF9F43]/10">
@@ -255,7 +263,8 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="font-bold text-[#444050] text-[15px] uppercase tracking-tight truncate">
-                                            {{ $member->first_name }} {{ $member->last_name }}</p>
+                                            {{ $member->first_name }} {{ $member->last_name }}
+                                        </p>
                                         <span
                                             class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-bold uppercase tracking-widest border border-slate-100">
                                             {{ $member->pupitre->name ?? 'NON DÉFINI' }}
@@ -331,7 +340,8 @@
                                 <div class="flex-1 min-w-0">
                                     <p class="font-bold text-[#444050] text-sm truncate">{{ $chant->title }}</p>
                                     <p class="text-[11px] text-slate-400 truncate">
-                                        {{ $chant->composer ?? 'Compositeur inconnu' }}</p>
+                                        {{ $chant->composer ?? 'Compositeur inconnu' }}
+                                    </p>
                                 </div>
                             </div>
                         @empty
@@ -375,73 +385,171 @@
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" x-cloak
             x-transition.opacity>
 
-            <div class="bg-white rounded-3xl w-full max-w-2xl shadow-material-lg overflow-hidden flex flex-col max-h-[90vh] mx-2" @click.away="showProgramModal = false">
-            <div class="p-5 sm:p-6 md:p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-black text-base sm:text-lg md:text-xl text-[#444050] uppercase tracking-tight truncate">Programme</h3>
-                    <p class="text-[10px] md:text-xs text-slate-500 font-medium truncate">Sélectionnez les chants pour cette séance.</p>
+            <div class="bg-white rounded-3xl w-full max-w-2xl shadow-material-lg overflow-hidden flex flex-col max-h-[90vh] mx-2"
+                @click.away="showProgramModal = false">
+                <div class="p-5 sm:p-6 md:p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                    <div class="flex-1 min-w-0">
+                        <h3
+                            class="font-black text-base sm:text-lg md:text-xl text-[#444050] uppercase tracking-tight truncate">
+                            Programme</h3>
+                        <p class="text-[10px] md:text-xs text-slate-500 font-medium truncate">Sélectionnez les chants pour
+                            cette séance.</p>
+                    </div>
+                    <button @click="showProgramModal = false"
+                        class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-                <button @click="showProgramModal = false" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
 
-            <div class="px-5 sm:px-6 md:px-8 py-3 bg-white border-b border-slate-50">
-                <div class="relative">
-                    <input type="text" x-model="searchQuery" 
-                           placeholder="Rechercher un chant..." 
-                           class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-xs sm:text-sm">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                <div class="px-5 sm:px-6 md:px-8 py-4 bg-white border-b border-slate-50 space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Importer depuis
+                            l'Agenda</label>
+                        <select x-model="selectedEventId"
+                            class="w-full px-4 py-2 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-sm font-bold text-[#444050]">
+                            <option value="">-- Choisir un événement --</option>
+                            <template x-for="event in events" :key="event.id">
+                                <option :value="event.id" x-text="event.title"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Rechercher un chant
+                            spécifique</label>
+                        <div class="relative mt-1">
+                            <input type="text" x-model="searchQuery" placeholder="Titre, compositeur..."
+                                class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-xs sm:text-sm">
+                            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <form action="{{ route('admin.suivi.repetitions.sync_chants', $repetition) }}" method="POST" class="flex flex-col flex-1 overflow-hidden">
-                @csrf
-                <div class="p-4 sm:p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar-slim">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <template x-for="chant in filteredChants" :key="chant.id">
-                            <label class="relative flex items-center gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer group"
-                                   :class="selectedChants.includes(chant.id) ? 'border-[#7367F0] bg-[#7367F0]/5' : 'border-slate-50 bg-white hover:border-slate-200'">
-                                
-                                <input type="checkbox" name="chants[]" :value="chant.id" 
-                                       x-model="selectedChants" class="hidden">
-                                
-                                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center transition-all group-hover:scale-110"
-                                     :class="selectedChants.includes(chant.id) ? 'bg-[#7367F0] text-white shadow-material' : 'bg-slate-100 text-slate-400'">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-                                </div>
-    
-                                <div class="flex-1 min-w-0 text-left">
-                                    <p class="font-bold text-xs sm:text-sm text-[#444050] truncate" :class="selectedChants.includes(chant.id) ? 'text-[#7367F0]' : ''" x-text="chant.title"></p>
-                                    <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter truncate" x-text="chant.composer || 'Chef de Choeur'"></p>
-                                </div>
-    
-                                <div x-show="selectedChants.includes(chant.id)" class="text-[#7367F0]">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                </div>
-                            </label>
-                        </template>
-                        <template x-if="filteredChants.length === 0">
-                            <div class="col-span-full py-10 text-center text-slate-400 italic text-sm">
-                                Aucun chant trouvé.
+                <form action="{{ route('admin.suivi.repetitions.sync_chants', $repetition) }}" method="POST"
+                    class="flex flex-col flex-1 overflow-hidden">
+                    @csrf
+                    <input type="hidden" name="event_id" :value="selectedEventId">
+                    <div class="p-4 sm:p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar-slim">
+                        <!-- Event Repertoire Display -->
+                        <template x-if="currentEventRepertoire">
+                            <div class="space-y-6 mb-8">
+                                <template x-for="(chantsInPartie, partie) in currentEventRepertoire" :key="partie">
+                                    <div class="space-y-3">
+                                        <h4 class="text-[10px] font-black text-[#7367F0] uppercase tracking-[0.3em] bg-[#7367F0]/5 px-3 py-1 rounded-md w-fit"
+                                            x-text="partie"></h4>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <template x-for="chant in chantsInPartie" :key="chant.id">
+                                                <label
+                                                    class="relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer group"
+                                                    :class="selectedChants.includes(chant.id) ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-50 bg-white hover:border-slate-200'">
+                                                    <input type="checkbox" name="chants[]" :value="chant.id"
+                                                        x-model="selectedChants" class="hidden">
+                                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                                                        :class="selectedChants.includes(chant.id) ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-bold text-[11px] text-[#444050] truncate"
+                                                            :class="selectedChants.includes(chant.id) ? 'text-blue-700' : ''"
+                                                            x-text="chant.title"></p>
+                                                        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-tighter truncate"
+                                                            x-text="chant.composer || 'Chef de Choeur'"></p>
+                                                    </div>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </template>
-                    </div>
-                </div>
 
-                <div class="p-5 sm:p-6 md:p-8 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p class="text-[9px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <span x-text="selectedChants.length"></span> chant(s) sélectionné(s)
-                    </p>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button type="button" @click="showProgramModal = false" class="btn-secondary px-4 py-2 flex-1 sm:flex-none text-xs sm:text-sm">Annuler</button>
-                        <button type="submit" class="btn-primary px-6 py-2 flex-1 sm:flex-none text-xs sm:text-sm">Enregistrer</button>
+                        <div x-show="searchQuery">
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 pl-1">
+                                Résultats de recherche
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <template x-for="chant in filteredChants" :key="chant.id">
+                                    <label
+                                        class="relative flex items-center gap-3 p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer group"
+                                        :class="selectedChants.includes(chant.id) ? 'border-blue-500 bg-blue-50' : 'border-slate-50 bg-white hover:border-slate-200'">
+
+                                        <input type="checkbox" name="chants[]" :value="chant.id" x-model="selectedChants"
+                                            class="hidden">
+
+                                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center transition-all group-hover:scale-110"
+                                            :class="selectedChants.includes(chant.id) ? 'bg-blue-600 text-white shadow-material' : 'bg-slate-100 text-slate-400'">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                            </svg>
+                                        </div>
+
+                                        <div class="flex-1 min-w-0 text-left">
+                                            <p class="font-bold text-xs sm:text-sm text-[#444050] truncate"
+                                                :class="selectedChants.includes(chant.id) ? 'text-blue-700' : ''"
+                                                x-text="chant.title"></p>
+                                            <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-tighter truncate"
+                                                x-text="chant.composer || 'Chef de Choeur'"></p>
+                                        </div>
+
+                                        <div x-show="selectedChants.includes(chant.id)" class="text-blue-600">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    </label>
+                                </template>
+                                <template x-if="filteredChants.length === 0">
+                                    <div class="col-span-full py-10 text-center text-slate-400 italic text-sm">
+                                        Aucun chant trouvé.
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Empty State if nothing is selected or searched -->
+                        <div x-show="!selectedEventId && !searchQuery" class="py-20 text-center">
+                            <div
+                                class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-slate-200">
+                                <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <p class="text-slate-400 text-sm font-medium italic">Choisissez un agenda ou recherchez un chant
+                                par son nom.</p>
+                        </div>
                     </div>
-                </div>
-            </form>
-        </div>
+
+                    <div
+                        class="p-5 sm:p-6 md:p-8 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-[9px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <span x-text="selectedChants.length"></span> chant(s) sélectionné(s)
+                        </p>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button type="button" @click="showProgramModal = false"
+                                class="btn-secondary px-4 py-2 flex-1 sm:flex-none text-xs sm:text-sm">Annuler</button>
+                            <button type="submit"
+                                class="btn-primary px-6 py-2 flex-1 sm:flex-none text-xs sm:text-sm">Enregistrer</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Motif Modal -->
