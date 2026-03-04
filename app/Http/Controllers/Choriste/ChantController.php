@@ -48,12 +48,6 @@ class ChantController extends Controller
             }
         ]);
 
-        // Charger les enregistrements personnels de l'utilisateur pour ce chant
-        $enregistrements = Enregistrement::where('user_id', $user->id)
-            ->where('chant_id', $chant->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('choriste.chants.show', compact('chant', 'enregistrements'));
+        return view('choriste.chants.show', compact('chant'));
     }
 }

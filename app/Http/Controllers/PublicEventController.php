@@ -26,7 +26,6 @@ class PublicEventController extends Controller
                 'chants.parole',
                 'chants.file_path as score_path',
                 'partie_events.titre as partie_titre',
-                'repertoire.ordre'
             )
             ->orderBy('partie_events.ordre')
             ->get();

@@ -150,122 +150,7 @@
                 {{-- RIGHT COLUMN: Interactive Widgets (4 cols) --}}
                 <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-24 self-start">
 
-                    {{-- RECORDER WIDGET (Glassmorphism) --}}
-                    <div class="backdrop-blur-md bg-white/60 border border-white/50 rounded-3xl p-6 shadow-material-lg">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-sm font-extrabold text-[#7367F0] uppercase tracking-widest flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                </svg>
-                                S'enregistrer
-                            </h3>
-                        </div>
 
-                        <div class="space-y-6" id="recorder-container">
-                            <div
-                                class="flex items-center justify-center py-4 bg-slate-50/50 rounded-2xl relative overflow-hidden group">
-                                <div id="visualizer-bg"
-                                    class="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center gap-0.5 px-2">
-                                    @for ($i = 0; $i < 40; $i++)
-                                        <div class="v-bar w-1 bg-[#7367F0] rounded-full h-4 transition-all duration-75"></div>
-                                    @endfor
-                                </div>
-
-                                <button id="startBtn"
-                                    class="relative z-10 w-20 h-20 bg-red-500 text-white rounded-full flex items-center justify-center shadow-xl hover:bg-red-600 transition-all hover:scale-110 group active:scale-95">
-                                    <div class="w-6 h-6 bg-white rounded-full"></div>
-                                </button>
-                                <button id="stopBtn"
-                                    class="relative z-10 w-20 h-20 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-xl hover:bg-black transition-all hover:scale-110 active:scale-95 hidden">
-                                    <div class="w-6 h-6 bg-white rounded-sm"></div>
-                                </button>
-                            </div>
-
-                            <div id="recorderStatus" class="text-center">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                <p id="statusLabel" class="text-xs font-bold text-slate-600 mb-2 uppercase">Prêt à enregistrer
-                                </p>
-                                <p id="timer" class="text-4xl font-mono text-slate-800 font-extrabold hidden">00:00</p>
-                            </div>
-
-                            <div id="previewContainer" class="hidden animate-fade-in space-y-4 pt-6 border-t border-gray-100">
-                                <div class="p-4 bg-[#7367F0]/5 rounded-2xl border border-[#7367F0]/10">
-                                    <p class="text-[10px] font-bold text-[#7367F0] uppercase tracking-widest mb-3 text-center">
-                                        Écouter ma prise</p>
-                                    <audio id="audioPreview" controls class="w-full h-8 custom-audio"></audio>
-                                </div>
-                                <div class="grid grid-cols-2 gap-3 md:gap-4">
-                                    <button id="discardBtn"
-                                        class="py-3 md:py-4 bg-slate-100 text-slate-600 text-xs md:text-sm font-bold rounded-2xl hover:bg-slate-200 transition-all">
-                                        Recommencer
-                                    </button>
-                                    <button id="uploadBtn"
-                                        class="w-full py-3 md:py-4 bg-[#7367F0] text-white text-xs md:text-sm font-bold rounded-2xl flex items-center justify-center gap-2 md:gap-3 hover:bg-[#685dd8] transition-all shadow-lg hover:shadow-[#7367F0]/30 group">
-                                        <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-y-1 transition-transform"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                        </svg>
-                                        Envoyer
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- MY RECORDINGS --}}
-                    @if($enregistrements->isNotEmpty())
-                        <div class="bg-white rounded-3xl shadow-material-lg p-5 md:p-6 border border-gray-100">
-                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Historique Prises
-                            </h3>
-
-                            <div class="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar-slim pr-1">
-                                @foreach($enregistrements as $rec)
-                                    <div class="p-4 rounded-2xl border border-slate-50 bg-slate-50/30 hover:bg-slate-50 transition-colors">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span
-                                                    class="text-[10px] font-black text-slate-400 font-mono">{{ $rec->created_at->format('d/m/Y H:i') }}</span>
-                                                @if($rec->chef_comment)
-                                                    <span
-                                                        class="px-2 py-0.5 bg-green-50 text-green-600 text-[8px] font-black uppercase rounded">Avis
-                                                        Reçu</span>
-                                                @else
-                                                    <span
-                                                        class="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-[8px] font-black uppercase rounded">En
-                                                        attente</span>
-                                                @endif
-                                            </div>
-                                            <button onclick="deleteRecording({{ $rec->id }})"
-                                                class="p-1.5 text-slate-300 hover:text-red-500 transition-colors" title="Supprimer">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <audio id="rec-{{ $rec->id }}" src="{{ $rec->file_path }}" controls class="w-full h-6 mb-3 custom-audio-mini"></audio>
-
-                                        @if($rec->chef_comment)
-                                            <div class="p-3 bg-white border border-[#7367F0]/20 rounded-xl relative mt-2 shadow-sm">
-                                                <div
-                                                    class="absolute -top-2 left-3 px-1.5 bg-[#7367F0] text-white text-[8px] font-black rounded uppercase">
-                                                    Feedback Chef</div>
-                                                <p class="text-[11px] text-slate-600 font-medium italic leading-relaxed">
-                                                    {{ $rec->chef_comment }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
 
                     {{-- AUDIO RESOURCES --}}
                     @php $audioFiles = $chant->fichiers->where('type', 'audio'); @endphp
@@ -285,7 +170,7 @@
                                         <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">
                                             {{ $audio->pupitre ? $audio->pupitre->name : 'Tutti' }}
                                         </span>
-                                        <a href="{{ $audio->file_path }}" download
+                                        <a href="{{ Str::startsWith($audio->file_path, ['http://', 'https://']) ? $audio->file_path : asset('storage/' . $audio->file_path) }}" download
                                             class="w-6 h-6 flex items-center justify-center bg-white rounded-lg border border-gray-100 text-[#7367F0] hover:scale-110 transition-transform shadow-sm">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -293,7 +178,10 @@
                                             </svg>
                                         </a>
                                     </div>
-                                    <audio src="{{ $audio->file_path }}" controls class="w-full h-8 custom-audio"></audio>
+                                    <button @click="$dispatch('open-media', { type: 'audio', url: '{{ Str::startsWith($audio->file_path, ['http://', 'https://']) ? $audio->file_path : asset('storage/' . $audio->file_path) }}', title: '{{ addslashes($chant->title) }}' })" class="w-full py-2 bg-white rounded-xl border border-gray-200 text-[#7367F0] text-xs font-bold hover:bg-[#7367F0]/5 flex items-center justify-center gap-2 transition-all shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Écouter l'audio
+                                    </button>
                                 </div>
                             @endforeach
                         </div>
@@ -313,8 +201,8 @@
 
                             <div class="space-y-3">
                                 @foreach($visualFiles as $visual)
-                                    <a href="{{ $visual->file_path }}" target="_blank"
-                                        class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 hover:bg-purple-50/30 border border-transparent hover:border-purple-200 transition-all group">
+                                    <button @click="$dispatch('open-media', { type: '{{ $visual->type }}', url: '{{ Str::startsWith($visual->file_path, ['http://', 'https://']) ? $visual->file_path : asset('storage/' . $visual->file_path) }}', title: '{{ addslashes($chant->title) }}' })"
+                                        class="w-full text-left flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 hover:bg-purple-50/30 border border-transparent hover:border-purple-200 transition-all group">
                                         @if($visual->type === 'youtube')
                                             <div
                                                 class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
@@ -340,7 +228,7 @@
                                             <p class="text-[10px] text-slate-400 font-black uppercase">
                                                 {{ $visual->type === 'youtube' ? 'YouTube link' : 'Vidéo locale' }}</p>
                                         </div>
-                                    </a>
+                                    </button>
                                 @endforeach
                             </div>
                         </div>
@@ -383,127 +271,3 @@
             }
         </style>
 @endsection
-
-@push('scripts')
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let timerInterval;
-        let startTime;
-        let audioBlob;
-
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const timerElem = document.getElementById('timer');
-        const statusLabel = document.getElementById('statusLabel');
-        const visualizerBg = document.getElementById('visualizer-bg');
-        const previewContainer = document.getElementById('previewContainer');
-        const audioPreview = document.getElementById('audioPreview');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const discardBtn = document.getElementById('discardBtn');
-
-        startBtn.onclick = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                startBtn.classList.add('hidden');
-                stopBtn.classList.remove('hidden');
-                timerElem.classList.remove('hidden');
-                previewContainer.classList.add('hidden');
-                statusLabel.textContent = "ENREGISTREMENT...";
-                statusLabel.classList.add('text-red-500', 'animate-pulse');
-
-                startTime = Date.now();
-                timerInterval = setInterval(() => {
-                    const diff = Math.floor((Date.now() - startTime) / 1000);
-                    timerElem.textContent = `${Math.floor(diff / 60).toString().padStart(2, '0')}:${(diff % 60).toString().padStart(2, '0')}`;
-                }, 1000);
-
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
-                mediaRecorder.onstop = () => {
-                    audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    audioPreview.src = URL.createObjectURL(audioBlob);
-                    previewContainer.classList.remove('hidden');
-                    statusLabel.textContent = "ENREGISTREMENT TERMINÉ";
-                    statusLabel.classList.remove('text-red-500', 'animate-pulse');
-                    stream.getTracks().forEach(t => t.stop());
-                };
-
-                audioChunks = [];
-                mediaRecorder.start();
-                animateBars(stream);
-
-            } catch (err) { alert("Micro inaccessible !"); }
-        };
-
-        stopBtn.onclick = () => {
-            mediaRecorder.stop();
-            clearInterval(timerInterval);
-            startBtn.classList.remove('hidden');
-            stopBtn.classList.add('hidden');
-        };
-
-        discardBtn.onclick = () => {
-            audioChunks = [];
-            audioBlob = null;
-            audioPreview.src = '';
-            previewContainer.classList.add('hidden');
-            statusLabel.textContent = "PRÊT À ENREGISTRER";
-            statusLabel.classList.remove('text-red-500', 'animate-pulse');
-            timerElem.classList.add('hidden');
-            timerElem.textContent = "00:00";
-        };
-
-        function animateBars(stream) {
-            const ctx = new AudioContext();
-            const src = ctx.createMediaStreamSource(stream);
-            const anlyz = ctx.createAnalyser();
-            src.connect(anlyz);
-            const data = new Uint8Array(anlyz.frequencyBinCount);
-            const bars = document.querySelectorAll('.v-bar');
-            function draw() {
-                if (mediaRecorder.state !== 'recording') return;
-                requestAnimationFrame(draw);
-                anlyz.getByteFrequencyData(data);
-                bars.forEach((b, i) => b.style.height = `${data[i % 50] / 2 + 10}px`);
-            }
-            draw();
-        }
-
-        uploadBtn.onclick = async () => {
-            const originalText = uploadBtn.innerHTML;
-            uploadBtn.disabled = true;
-            uploadBtn.innerHTML = '<span class="animate-spin mr-2">◌</span> Envoi...';
-            const formData = new FormData();
-            formData.append('audio', audioBlob, 'record.webm');
-            formData.append('chant_id', '{{ $chant->id }}');
-            try {
-                const res = await fetch('{{ route("choriste.enregistrements.store") }}', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: formData
-                });
-                const result = await res.json();
-                if (result.success) window.location.reload();
-                else alert("Erreur: " + result.message);
-            } catch (err) { alert("Erreur lors de l'envoi."); }
-            finally { uploadBtn.disabled = false; uploadBtn.innerHTML = originalText; }
-        };
-
-        async function deleteRecording(id) {
-            if (!confirm('Supprimer cet enregistrement définitivement ?')) return;
-            try {
-                const res = await fetch(`/choriste/enregistrements/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                });
-                const result = await res.json();
-                if (result.success) window.location.reload();
-                else alert("Erreur: " + result.message);
-            } catch (err) { alert("Erreur lors de la suppression."); }
-        }
-    </script>
-@endpush
