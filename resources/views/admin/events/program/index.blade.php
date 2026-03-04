@@ -4,17 +4,17 @@
 
 @section('content')
     <div class="space-y-6" x-data="{
-                        songModal: false,
-                        searchQuery: '',
-                        songData: { chant_id: '', partie_event_id: '' },
+                                songModal: false,
+                                searchQuery: '',
+                                songData: { chant_id: '', partie_event_id: '' },
 
-                        openSongModal() {
-                            this.songData.chant_id = '';
-                            this.songData.partie_event_id = '';
-                            this.searchQuery = '';
-                            this.songModal = true;
-                        }
-                    }">
+                                openSongModal() {
+                                    this.songData.chant_id = '';
+                                    this.songData.partie_event_id = '';
+                                    this.searchQuery = '';
+                                    this.songModal = true;
+                                }
+                            }">
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -46,6 +46,15 @@
                     </button>
                 </form>
 
+                <a href="{{ route('admin.events.repertoire.pdf', $event->id) }}"
+                    class="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-600 hover:text-red-600 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm transition-all">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Télécharger (PDF)
+                </a>
+
                 <button @click="openSongModal()" class="btn-primary flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -67,9 +76,6 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-100">
-                            <th
-                                class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest w-16 text-center">
-                                Ordre</th>
                             <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Partie</th>
                             <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Chant</th>
                             <th class="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">
@@ -79,9 +85,6 @@
                     <tbody class="divide-y divide-slate-50">
                         @forelse($repertoire as $item)
                             <tr class="hover:bg-slate-50/50 transition duration-300">
-                                <td class="px-8 py-4 text-center">
-                                    <span class="text-xs font-bold text-slate-400">#{{ $item->ordre }}</span>
-                                </td>
                                 <td class="px-8 py-4">
                                     <span
                                         class="px-3 py-1 bg-[#7367F0]/10 text-[#7367F0] rounded-full text-[10px] font-bold uppercase tracking-wider">
@@ -108,7 +111,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-8 py-16 text-center text-slate-400 italic text-sm">
+                                <td colspan="3" class="px-8 py-16 text-center text-slate-400 italic text-sm">
                                     Le répertoire est vide. Cliquez sur "Ajouter au Répertoire" pour commencer.
                                 </td>
                             </tr>

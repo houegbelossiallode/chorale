@@ -19,9 +19,9 @@
 
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center pt-24 md:pt-20">
             <!-- <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full glass mb-10">
-                            <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
-                            <span class="text-amber-300/90 text-xs font-bold tracking-[0.4em] uppercase">Calendrier Sacré</span>
-                        </div> -->
+                                    <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-lg shadow-amber-400/50"></div>
+                                    <span class="text-amber-300/90 text-xs font-bold tracking-[0.4em] uppercase">Calendrier Sacré</span>
+                                </div> -->
             <h1
                 class="text-3xl sm:text-5xl md:text-6xl font-serif text-white leading-[0.95] mb-6 max-w-4xl mx-auto break-words">
                 Agenda<br><span class="text-amber-400/80 italic font-light">des Liturgies</span></h1>
@@ -66,9 +66,10 @@
                                 class="text-xl font-serif font-bold text-gray-900 mb-3 group-hover:text-amber-700 transition leading-tight break-words">
                                 {{ $event->title }}
                             </h3>
-                            <p class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-[40px] flex-1">
-                                {{ Str::limit($event->description, 70) }}
-                            </p>
+                            <div
+                                class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-[40px] flex-1 prose prose-sm max-w-none">
+                                {!! $event->description !!}
+                            </div>
 
                             @if($event->location)
                                 <div class="flex items-center gap-2 text-gray-400 mb-6">

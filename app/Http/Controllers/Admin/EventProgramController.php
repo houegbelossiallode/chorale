@@ -8,6 +8,7 @@ use App\Models\PartieEvent;
 use App\Models\Chant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EventProgramController extends Controller
 {
@@ -18,7 +19,7 @@ class EventProgramController extends Controller
             ->leftJoin('chants', 'repertoire.chant_id', '=', 'chants.id')
             ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
             ->where('repertoire.event_id', $event->id)
-            ->select('repertoire.id', 'chants.title as chant_title', 'partie_events.titre as partie_titre', 'repertoire.ordre')
+            ->select('repertoire.id', 'chants.title as chant_title', 'partie_events.titre as partie_titre')
             ->orderBy('partie_events.ordre')
             ->get();
 
@@ -26,6 +27,93 @@ class EventProgramController extends Controller
         $allParties = PartieEvent::orderBy('ordre')->get();
 
         return view('admin.events.program.index', compact('event', 'repertoire', 'allChants', 'allParties'));
+    }
+
+    public function downloadPdf(Event $event)
+    {
+        // Nettoyage radical des tampons de sortie
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $repertoire = DB::table('repertoire')
+            ->leftJoin('chants', 'repertoire.chant_id', '=', 'chants.id')
+            ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
+            ->where('repertoire.event_id', $event->id)
+            ->select('chants.title as chant_title', 'chants.parole', 'partie_events.titre as partie_titre', 'partie_events.ordre as partie_ordre')
+            ->orderBy('partie_events.ordre')
+            ->get();
+
+        // On construit le HTML de manière ultra-linéaire (sans retours à la ligne inutiles)
+        $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
+        $html .= '<style>body{font-family:sans-serif;font-size:11pt;margin:0;padding:20px;}';
+        $html .= '.header{text-align:center;margin-bottom:20px;}';
+        $html .= '.logo{max-width:60px;margin-bottom:5px;}';
+        $html .= '.chorale-name{font-weight:bold;font-size:12pt;display:block;}';
+        $html .= '.title{font-weight:bold;font-size:14pt;margin-top:5px;}';
+        $html .= '.main-table{width:100%;border-collapse:collapse;}';
+        $html .= '.column{width:50%;vertical-align:top;padding:0 10px;}';
+        $html .= '.item{margin-bottom:15px;}';
+        $html .= '.partie{text-decoration:underline;font-weight:bold;text-transform:uppercase;}';
+        $html .= '.lyrics{font-family:serif;font-size:10pt;margin-top:2px;display:block;line-height:1.1;}</style></head><body>';
+
+        // Encodage du logo en base64 pour PDF
+        $logoPath = public_path('images/logo chorale st oscar romero noir fond blanc.png');
+        $logoHtml = '';
+        if (file_exists($logoPath)) {
+            $base64 = base64_encode(file_get_contents($logoPath));
+            $logoHtml = '<img src="data:image/png;base64,' . $base64 . '" class="logo"><br>';
+        }
+
+        $html .= '<div class="header">';
+        $html .= $logoHtml;
+        $html .= '<span class="chorale-name">Paroisse Ste Mère Térésa - Chapelle St Oscar Romero - Groupe Louange</span>';
+        $html .= '<div class="title">' . e($event->title) . '</div>';
+        $html .= '<div>' . \Carbon\Carbon::parse($event->start_at)->translatedFormat('j F Y') . '</div></div>';
+
+        $html .= '<table class="main-table">';
+
+        $count = $repertoire->count();
+        $mid = (int) ceil($count / 2);
+
+        // Conversion en tableaux indexés
+        $col1 = $repertoire->slice(0, $mid)->values();
+        $col2 = $repertoire->slice($mid)->values();
+
+        for ($i = 0; $i < $mid; $i++) {
+            $html .= '<tr>';
+
+            // Colonne gauche
+            $html .= '<td class="column">';
+            if (isset($col1[$i])) {
+                $item = $col1[$i];
+                $html .= '<div class="item"><span class="partie">' . e($item->partie_titre) . '</span> : <strong>' . e($item->chant_title) . '</strong>';
+                if ($item->parole) {
+                    $paroles = preg_replace('/(\r?\n){3,}/', "\n\n", trim($item->parole)); // Évite plus de 2 sauts de ligne à la suite
+                    $html .= '<div class="lyrics">' . nl2br(e($paroles)) . '</div>';
+                }
+                $html .= '</div>';
+            }
+            $html .= '</td>';
+
+            // Colonne droite
+            $html .= '<td class="column">';
+            if (isset($col2[$i])) {
+                $item = $col2[$i];
+                $html .= '<div class="item"><span class="partie">' . e($item->partie_titre) . '</span> : <strong>' . e($item->chant_title) . '</strong>';
+                if ($item->parole) {
+                    $paroles = preg_replace('/(\r?\n){3,}/', "\n\n", trim($item->parole)); // Évite plus de 2 sauts de ligne à la suite
+                    $html .= '<div class="lyrics">' . nl2br(e($paroles)) . '</div>';
+                }
+                $html .= '</div>';
+            }
+            $html .= '</td>';
+
+            $html .= '</tr>';
+        }
+        $html .= '</table></body></html>';
+
+        return Pdf::loadHTML($html)->setPaper('a4', 'portrait')->download('repertoire.pdf');
     }
 
     public function storeRepertoire(Request $request, Event $event)

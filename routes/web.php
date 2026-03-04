@@ -80,6 +80,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Programme des événements
     Route::get('events/{event}/program', [EventProgramController::class, 'index'])->name('events.program.index');
+    Route::get('events/{event}/repertoire/pdf', [EventProgramController::class, 'downloadPdf'])->name('events.repertoire.pdf');
     Route::post('events/{event}/repertoire', [EventProgramController::class, 'storeRepertoire'])->name('events.repertoire.store');
     Route::post('events/{event}/program/toggle-visibility', [EventProgramController::class, 'toggleVisibility'])->name('events.program.toggle-visibility');
     Route::delete('repertoire/{id}', [EventProgramController::class, 'destroyRepertoire'])->name('events.repertoire.destroy');

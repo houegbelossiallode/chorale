@@ -72,7 +72,7 @@
                     </div>
 
                     <p class="text-[13px] text-slate-500 line-clamp-2 mb-6 min-h-[40px]">
-                        {{ $event->description ?: 'Aucune description fournie.' }}
+                        {!! $event->description ?: 'Aucune description fournie.' !!}
                     </p>
 
                     <!-- Actions -->
