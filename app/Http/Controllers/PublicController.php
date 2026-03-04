@@ -22,7 +22,7 @@ class PublicController extends Controller
             ->take(3)
             ->get();
         $upcoming_events = Event::where('is_public', DB::raw('true'))
-           // ->where('start_at', '>=', now())
+            // ->where('start_at', '>=', now())
             ->orderBy('start_at', 'asc')
             ->take(3)
             ->get();
@@ -123,6 +123,7 @@ class PublicController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:255',
             'subject' => 'nullable|string|max:255',
             'message' => 'required|string',
         ]);

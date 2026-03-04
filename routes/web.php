@@ -112,6 +112,7 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
 
     // Répétitions
     Route::get('/repetitions', [\App\Http\Controllers\Choriste\RepetitionController::class, 'index'])->name('repetitions.index');
+    Route::get('/repetitions/{repetition}/repertoire', [\App\Http\Controllers\Choriste\RepetitionController::class, 'repertoire'])->name('repetitions.repertoire');
 
     // Enregistrements
     Route::post('/enregistrements', [\App\Http\Controllers\Choriste\EnregistrementController::class, 'store'])->name('enregistrements.store');
