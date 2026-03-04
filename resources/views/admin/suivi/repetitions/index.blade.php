@@ -4,38 +4,38 @@
 
 @section('content')
     <div class="space-y-6" x-data="{
-                        repModal: false,
-                        autoModal: false,
-                        editMode: false,
-                        currentId: null,
-                        formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
-                        actionUrl: '{{ route('admin.repetitions.store') }}',
-                        selectedRep: null,
-                        showProgramModal: false,
+                            repModal: false,
+                            autoModal: false,
+                            editMode: false,
+                            currentId: null,
+                            formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
+                            actionUrl: '{{ route('admin.repetitions.store') }}',
+                            selectedRep: null,
+                            showProgramModal: false,
 
-                        openProgram(rep) {
-                            this.selectedRep = rep;
-                            this.showProgramModal = true;
-                        },
+                            openProgram(rep) {
+                                this.selectedRep = rep;
+                                this.showProgramModal = true;
+                            },
 
-                        openModal(rep = null) {
-                            if (rep) {
-                                this.editMode = true;
-                                this.currentId = rep.id;
-                                this.formData.titre = rep.titre;
-                                this.formData.start_time = rep.start_time.substring(0, 16);
-                                this.formData.end_time = rep.end_time.substring(0, 16);
-                                this.formData.lieu = rep.lieu;
-                                this.formData.description = rep.description;
-                                this.actionUrl = `/admin/repetitions/${rep.id}`;
-                            } else {
-                                this.editMode = false;
-                                this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
-                                this.actionUrl = '{{ route('admin.repetitions.store') }}';
+                            openModal(rep = null) {
+                                if (rep) {
+                                    this.editMode = true;
+                                    this.currentId = rep.id;
+                                    this.formData.titre = rep.titre;
+                                    this.formData.start_time = rep.start_time.substring(0, 16);
+                                    this.formData.end_time = rep.end_time.substring(0, 16);
+                                    this.formData.lieu = rep.lieu;
+                                    this.formData.description = rep.description;
+                                    this.actionUrl = `/admin/repetitions/${rep.id}`;
+                                } else {
+                                    this.editMode = false;
+                                    this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
+                                    this.actionUrl = '{{ route('admin.repetitions.store') }}';
+                                }
+                                this.repModal = true;
                             }
-                            this.repModal = true;
-                        }
-                    }">
+                        }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-[#444050]">Gestion des Répétitions</h1>
@@ -132,7 +132,7 @@
                                                         {{ $rep->presences_count }} POINTÉS
                                                     </span>
                                                 </td>
-                                                <td class="px-8 py-5">
+                                                <td class="px-8 py-5 text-right">
                                                     <div class="flex justify-end items-center" x-data="{ open: false }">
                                                         <div class="relative">
                                                             <button @click="open = !open" @click.away="open = false"
