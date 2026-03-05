@@ -1,98 +1,19 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('title', 'Faire l\'appel')
 
 @section('content')
-    <div class="space-y-6" x-data='{
-                                                                            showProgramModal: false,
-                                                                            showMotifModal: false,
-                                                                            currentUserId: null,
-                                                                            currentStatus: null,
-                                                                            currentMotif: "",
-                                                                            selectedRepertoireIds: {{ json_encode($repetition->repertoires->pluck('id')->map(fn($id) => (string) $id)) }},
-                                                                            selectedEventId: null,
-                                                                            workspaceEventIds: [],
-                                                                             init() {
-                                                                                 this.selectedRepertoireIds.forEach(id => {
-                                                                                     const event = this.events.find(e => {
-                                                                                         for (let partie in e.repertoire) {
-                                                                                             if (e.repertoire[partie].some(chant => chant.id == id)) return true;
-                                                                                         }
-                                                                                         return false;
-                                                                                     });
-                                                                                     if (event && !this.workspaceEventIds.includes(event.id)) {
-                                                                                         this.workspaceEventIds.push(event.id);
-                                                                                     }
-                                                                                 });
-                                                                             },
-                                                                             addEventToWorkspace(id) {
-                                                                                 if (id && !this.workspaceEventIds.includes(Number(id))) {
-                                                                                     this.workspaceEventIds.push(Number(id));
-                                                                                 }
-                                                                             },
-                                                                             removeEventFromWorkspace(id) {
-                                                                                 this.workspaceEventIds = this.workspaceEventIds.filter(eid => eid != id);
-                                                                             },
-                                                                            events: @json($events),
-                                                                            get currentEventRepertoire() {
-                                                                                if (!this.selectedEventId) return null;
-                                                                                const event = this.events.find(e => e.id == this.selectedEventId);
-                                                                                return event ? event.repertoire : null;
-                                                                            },
-                                                                            allChants: [],
-                                                                            presences: @json($presences),
-                                                                            stats: {
-                                                                                present: {{ $repetition->presences()->where('status', 'present')->count() }},
-                                                                                all: {{ $members->count() }}
-                                                                            },
-                                                                            async updatePresence(userId, status) {
-                                                                                if (status === "absent" || status === "justifie") {
-                                                                                    this.currentUserId = userId;
-                                                                                    this.currentStatus = status;
-                                                                                    this.currentMotif = this.presences[userId].motif || "";
-                                                                                    this.showMotifModal = true;
-                                                                                    return;
-                                                                                }
-                                                                                await this.confirmPresence(userId, status, null);
-                                                                            },
-                                                                            async confirmPresence(userId, status, motif) {
-                                                                                const oldStatus = this.presences[userId].status;
-                                                                                const oldMotif = this.presences[userId].motif;
-
-                                                                                if (oldStatus === status && oldMotif === motif) return;
-
-                                                                                this.presences[userId].status = status;
-                                                                                this.presences[userId].motif = motif;
-
-                                                                                if (oldStatus === "present") this.stats.present--;
-                                                                                if (status === "present") this.stats.present++;
-
-                                                                                try {
-                                                                                    const response = await fetch("{{ route('admin.presences.store') }}", {
-                                                                                        method: "POST",
-                                                                                        headers: {
-                                                                                            "Content-Type": "application/json",
-                                                                                            "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
-                                                                                            "X-Requested-With": "XMLHttpRequest"
-                                                                                        },
-                                                                                        body: JSON.stringify({
-                                                                                            user_id: userId,
-                                                                                            repetition_id: {{ $repetition->id }},
-                                                                                            status: status,
-                                                                                            motif: motif
-                                                                                        })
-                                                                                    });
-
-                                                                                    if (!response.ok) throw new Error();
-                                                                                } catch (e) {
-                                                                                    this.presences[userId].status = oldStatus;
-                                                                                    this.presences[userId].motif = oldMotif;
-                                                                                    if (oldStatus === "present") this.stats.present++;
-                                                                                    if (status === "present") this.stats.present--;
-                                                                                    alert("Erreur lors de l’enregistrement de la présence.");
-                                                                                }
-                                                                            }
-                                                                        }'>
+    <div class="space-y-6" x-data="presenceManagement(@js([
+        'selectedRepertoireIds' => $repetition->repertoires->pluck('id')->map(fn($id) => (string) $id),
+        'events' => $events,
+        'presences' => $presences,
+        'repetitionId' => $repetition->id,
+        'stats' => [
+            'present' => $repetition->presences()->where('status', 'present')->count(),
+            'all' => $members->count(),
+        ],
+        'presenceStoreRoute' => route('admin.presences.store')
+    ]))">
         <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
@@ -121,7 +42,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {{ \Carbon\Carbon::parse($repetition->start_time)->format('H:i') }} —
+                        {{ \Carbon\Carbon::parse($repetition->start_time)->format('H:i') }} à
                         {{ \Carbon\Carbon::parse($repetition->end_time)->format('H:i') }}
                     </p>
                     <div class="hidden sm:block w-1 h-1 rounded-full bg-slate-300"></div>
@@ -181,7 +102,7 @@
                                     class="bg-slate-50/50 text-[#444050] text-[11px] uppercase tracking-widest font-bold border-b border-gray-100">
                                     <th class="px-8 py-3">Membre</th>
                                     <th class="px-8 py-3">Pupitre</th>
-                                    <th class="px-8 py-3 text-center">Présence</th>
+                                    <th class="px-8 py-3 text-center">PrÃ©sence</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 text-[14px]">
@@ -220,16 +141,16 @@
                                         <td class="px-8 py-4">
                                             <span
                                                 class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-slate-100">
-                                                {{ $member->pupitre->name ?? 'NON DÉFINI' }}
+                                                {{ $member->pupitre->name ?? 'NON DÃ‰FINI' }}
                                             </span>
                                         </td>
                                         <td class="px-8 py-4">
                                             <div class="flex justify-center gap-1">
-                                                <button @click="updatePresence({{ $member->id }}, 'present')" title="Présent"
+                                                <button @click="updatePresence({{ $member->id }}, 'present')" title="PrÃ©sent"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'present' ?
-                                                                                                    'bg-[#28C76F] text-white border-[#28C76F] shadow-sm' :
-                                                                                                    'bg-white text-slate-300 border-slate-100 hover:border-[#28C76F]/30 hover:text-[#28C76F]'">
+                                                                                                                                                                            'bg-[#28C76F] text-white border-[#28C76F] shadow-sm' :
+                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#28C76F]/30 hover:text-[#28C76F]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M5 13l4 4L19 7" />
@@ -238,18 +159,18 @@
                                                 <button @click="updatePresence({{ $member->id }}, 'absent')" title="Absent"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'absent' ?
-                                                                                                    'bg-[#EA5455] text-white border-[#EA5455] shadow-sm' :
-                                                                                                    'bg-white text-slate-300 border-slate-100 hover:border-[#EA5455]/30 hover:text-[#EA5455]'">
+                                                                                                                                                                            'bg-[#EA5455] text-white border-[#EA5455] shadow-sm' :
+                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#EA5455]/30 hover:text-[#EA5455]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                 </button>
-                                                <button @click="updatePresence({{ $member->id }}, 'justifie')" title="Justifié"
+                                                <button @click="updatePresence({{ $member->id }}, 'justifie')" title="JustifiÃ©"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'justifie' ?
-                                                                                                    'bg-[#FF9F43] text-white border-[#FF9F43] shadow-sm' :
-                                                                                                    'bg-white text-slate-300 border-slate-100 hover:border-[#FF9F43]/30 hover:text-[#FF9F43]'">
+                                                                                                                                                                            'bg-[#FF9F43] text-white border-[#FF9F43] shadow-sm' :
+                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#FF9F43]/30 hover:text-[#FF9F43]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -278,7 +199,7 @@
                                         </p>
                                         <span
                                             class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-bold uppercase tracking-widest border border-slate-100">
-                                            {{ $member->pupitre->name ?? 'NON DÉFINI' }}
+                                            {{ $member->pupitre->name ?? 'NON DÃ‰FINI' }}
                                         </span>
                                     </div>
                                 </div>
@@ -298,8 +219,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'present')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'present' ?
-                                                                                        'bg-[#28C76F] text-white border-[#28C76F] shadow-md' :
-                                                                                        'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                'bg-[#28C76F] text-white border-[#28C76F] shadow-md' :
+                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M5 13l4 4L19 7" />
@@ -308,8 +229,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'absent')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'absent' ?
-                                                                                        'bg-[#EA5455] text-white border-[#EA5455] shadow-md' :
-                                                                                        'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                'bg-[#EA5455] text-white border-[#EA5455] shadow-md' :
+                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M6 18L18 6M6 6l12 12" />
@@ -318,8 +239,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'justifie')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'justifie' ?
-                                                                                        'bg-[#FF9F43] text-white border-[#FF9F43] shadow-md' :
-                                                                                        'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                'bg-[#FF9F43] text-white border-[#FF9F43] shadow-md' :
+                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -344,26 +265,28 @@
                             Gérer le programme
                         </h3>
                     </div>
-                    <div class="p-6">
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         @forelse($repetition->repertoires as $item)
-                            <div class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 group">
-                                <div
-                                    class="w-10 h-10 bg-[#7367F0]/10 rounded-xl flex items-center justify-center text-[#7367F0] group-hover:bg-[#7367F0] group-hover:text-white transition-all">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-bold text-[#444050] text-sm truncate">{{ $item->chant->title }}</p>
-                                    <p class="text-[11px] text-slate-400 truncate">
+                            <div
+                                class="p-3 bg-slate-50/50 rounded-xl border border-slate-100 group hover:shadow-sm transition-all text-center sm:text-left flex flex-col justify-center min-h-[5rem]">
+                                <div class="flex flex-col gap-1 min-w-0">
+                                    @if($item->partieEvent)
+                                        <span class="text-[8px] font-black text-[#7367F0] uppercase tracking-tighter">
+                                            {{ $item->partieEvent->titre }}
+                                        </span>
+                                    @endif
+                                    <p class="font-bold text-[#444050] text-xs leading-tight line-clamp-2">
+                                        {{ $item->chant->title }}
+                                    </p>
+                                    <p class="text-[10px] text-slate-400 truncate">
                                         {{ $item->chant->composer ?? 'Chef de Choeur' }}
                                     </p>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-10 px-4">
-                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div
+                                class="col-span-1 sm:col-span-2 text-center flex flex-col items-center justify-center py-12 px-4 h-full">
+                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                                     <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -373,7 +296,8 @@
                                     pour
                                     cette séance.</p>
                                 <button @click="showProgramModal = true"
-                                    class="mt-4 text-[#7367F0] text-xs font-bold uppercase hover:underline">Gérer le
+                                    class="mt-4 px-4 py-2 bg-[#7367F0]/10 text-[#7367F0] rounded-xl text-xs font-bold uppercase hover:bg-[#7367F0] hover:text-white transition-colors">Gérer
+                                    le
                                     programme</button>
                             </div>
                         @endforelse
@@ -382,7 +306,8 @@
 
                 <!-- Stats Recap -->
                 <div class="bg-gradient-to-br from-[#7367F0] to-[#9E95F5] rounded-2xl p-6 shadow-material text-white">
-                    <h4 class="font-bold text-sm uppercase tracking-wider mb-4 border-b border-white/20 pb-2">Résumé Rapide
+                    <h4 class="font-bold text-sm uppercase tracking-wider mb-4 border-b border-white/20 pb-2">Résumé
+                        Rapide
                     </h4>
                     <div class="space-y-4">
                         <div class="flex justify-between items-center text-sm">
@@ -390,7 +315,7 @@
                             <span class="font-black text-2xl" x-text="stats.present"></span>
                         </div>
                         <div class="flex justify-between items-center text-sm">
-                            <span class="opacity-80">Chants à travailler</span>
+                            <span class="opacity-80">Chants à  travailler</span>
                             <span class="font-black text-lg">{{ $repetition->repertoires->count() }}</span>
                         </div>
                     </div>
@@ -403,14 +328,14 @@
             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" x-cloak
             x-transition.opacity>
 
-            <div class="bg-white rounded-3xl w-full max-w-2xl shadow-material-lg overflow-hidden flex flex-col max-h-[90vh] mx-2"
+            <div class="bg-white rounded-3xl w-full max-w-4xl shadow-material-lg overflow-hidden flex flex-col max-h-[90vh] mx-2"
                 @click.away="showProgramModal = false">
                 <div class="p-5 sm:p-6 md:p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <div class="flex-1 min-w-0">
                         <h3
-                            class="font-black text-base sm:text-lg md:text-xl text-[#444050] uppercase tracking-tight truncate">
-                            Programme</h3>
-                        <p class="text-[10px] md:text-xs text-slate-500 font-medium truncate">Sélectionnez les chants pour
+                            class="font-black text-lg sm:text-xl md:text-2xl text-[#444050] uppercase tracking-tight truncate">
+                            Programme Musical</h3>
+                        <p class="text-xs md:text-sm text-slate-500 font-medium truncate">Sélectionnez les chants pour
                             cette séance.</p>
                     </div>
                     <button @click="showProgramModal = false"
@@ -422,18 +347,41 @@
                     </button>
                 </div>
 
-                <div class="px-5 sm:px-6 md:px-8 py-4 bg-white border-b border-slate-50 space-y-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Importer depuis
-                            l'Agenda</label>
-                        <select @change="addEventToWorkspace($event.target.value); $event.target.value = ''"
-                            class="w-full px-4 py-2 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-sm font-bold text-[#444050]">
-                            <option value="">-- Ajouter un événement au programme --</option>
-                            <template x-for="event in events" :key="event.id">
-                                <option :value="event.id" x-text="event.title"
-                                    :disabled="workspaceEventIds.includes(event.id)"></option>
-                            </template>
-                        </select>
+                <div class="px-5 sm:px-6 md:px-8 py-6 bg-white border-b border-slate-50 space-y-6">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <div class="flex-1 space-y-2">
+                            <label class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Importer de
+                                l'Agenda</label>
+                            <select @change="addEventToWorkspace($event.target.value); $event.target.value = ''"
+                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-sm font-bold text-[#444050]">
+                                <option value="">-- Ajouter un évènenement --</option>
+                                <template x-for="event in events" :key="event.id">
+                                    <option :value="event.id" x-text="event.title"
+                                        :disabled="workspaceEventIds.includes(event.id)"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <label class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Recherche
+                                rapide</label>
+                            <div class="relative">
+                                <input type="text" x-model="searchQuery" placeholder="Titre ou compositeur..."
+                                    class="w-full px-4 py-2.5 pl-10 rounded-xl bg-slate-50 border-2 border-slate-50 focus:border-[#7367F0] focus:bg-white outline-none transition-all text-sm font-bold text-[#444050]">
+                                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <button type="button" x-show="searchQuery" @click="searchQuery = ''"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -447,68 +395,75 @@
                     </template>
 
                     <div class="p-4 sm:p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar-slim">
-                        <!-- Affichage des répertoires sélectionnés (Résumé) -->
-                        <div class="space-y-10">
+                        <!-- Affichage des rÃ©pertoires sÃ©lectionnÃ©s (RÃ©sumÃ©) -->
+                        <div class="space-y-6">
                             <template x-for="eventId in workspaceEventIds" :key="eventId">
-                                @php $eventInLoop = "events.find(e => e.id == eventId)"; @endphp
-                                <div class="bg-slate-50/50 rounded-2xl p-5 border border-slate-100 relative group/event">
+                                <div class="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 relative group/event mb-2"
+                                    x-show="!searchQuery || Object.values(events.find(e => e.id == eventId).repertoire).some(partie => partie.some(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.composer && c.composer.toLowerCase().includes(searchQuery.toLowerCase()))))">
 
-                                    <div class="flex items-center justify-between mb-6">
-                                        <div class="flex items-center gap-3">
+                                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                                        <div class="flex items-center gap-2.5">
                                             <div
                                                 class="w-8 h-8 rounded-lg bg-[#7367F0]/10 text-[#7367F0] flex items-center justify-center">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
-                                            <h4 class="font-bold text-slate-700 text-sm"
+                                            <h4 class="font-bold text-slate-700 text-sm md:text-base"
                                                 x-text="events.find(e => e.id == eventId).title"></h4>
                                         </div>
                                         <button type="button" @click="removeEventFromWorkspace(eventId)"
-                                            class="text-xs font-bold text-red-400 hover:text-red-500 uppercase tracking-tighter transition-colors flex items-center gap-1 opacity-0 group-hover/event:opacity-100">
+                                            class="text-[10px] font-black text-red-400 hover:text-red-500 uppercase tracking-tighter transition-colors flex items-center gap-1 opacity-0 group-hover/event:opacity-100">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                     d="M6 18L18 6M6 6l12 12" />
                                             </svg>
-                                            Retirer du workspace
+                                            Retirer
                                         </button>
                                     </div>
 
-                                    <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
                                         <template
                                             x-for="(chantsInPartie, partie) in events.find(e => e.id == eventId).repertoire"
                                             :key="partie">
-                                            <div class="space-y-3">
-                                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] pl-1"
-                                                    x-text="partie"></h4>
-                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div class="bg-white rounded-2xl border border-slate-100 p-4 space-y-4 hover:shadow-sm transition-all h-full flex flex-col"
+                                                x-show="!searchQuery || chantsInPartie.some(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.composer && c.composer.toLowerCase().includes(searchQuery.toLowerCase())))">
+                                                <div
+                                                    class="flex items-center justify-between border-b border-slate-100/50 pb-2 flex-shrink-0">
+                                                    <h4 class="text-[10px] font-black text-[#7367F0] uppercase tracking-[0.2em]"
+                                                        x-text="partie"></h4>
+                                                    <span class="text-[9px] font-bold text-slate-300"
+                                                        x-text="chantsInPartie.length + ' chant' + (chantsInPartie.length > 1 ? 's' : '')"></span>
+                                                </div>
+                                                <div class="space-y-2 flex-1">
                                                     <template x-for="chant in chantsInPartie" :key="chant.id">
                                                         <label
-                                                            class="relative flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer group"
-                                                            :class="selectedRepertoireIds.includes(String(chant.id)) ? 'border-[#7367F0] bg-white shadow-sm scale-[1.01]' : 'border-white bg-white/50 hover:border-slate-100 hover:bg-white'">
+                                                            x-show="!searchQuery || chant.title.toLowerCase().includes(searchQuery.toLowerCase()) || (chant.composer && chant.composer.toLowerCase().includes(searchQuery.toLowerCase()))"
+                                                            class="relative flex items-center gap-3 p-2 rounded-xl border-2 transition-all cursor-pointer group"
+                                                            :class="selectedRepertoireIds.includes(String(chant.id)) ? 'border-[#7367F0] bg-white shadow-sm scale-[1.02]' : 'border-slate-50 bg-white hover:border-slate-200'">
                                                             <input type="checkbox" :value="String(chant.id)"
                                                                 x-model="selectedRepertoireIds" class="hidden">
-                                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                                                                :class="selectedRepertoireIds.includes(String(chant.id)) ? 'bg-[#7367F0] text-white shadow-lg' : 'bg-slate-100 text-slate-400'">
+                                                            <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0"
+                                                                :class="selectedRepertoireIds.includes(String(chant.id)) ? 'bg-[#7367F0] text-white shadow-lg' : 'bg-slate-50 text-slate-300'">
                                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
+                                                                        stroke-width="2.5"
                                                                         d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                                                 </svg>
                                                             </div>
                                                             <div class="flex-1 min-w-0">
-                                                                <p class="font-bold text-[10px] text-slate-600 truncate transition-colors"
+                                                                <p class="font-bold text-[11px] text-slate-600 truncate transition-colors leading-tight"
                                                                     :class="selectedRepertoireIds.includes(String(chant.id)) ? 'text-[#7367F0]' : ''"
                                                                     x-text="chant.title"></p>
-                                                                <p class="text-[8px] uppercase font-bold text-slate-400 tracking-tighter truncate"
+                                                                <p class="text-[9px] uppercase font-bold text-slate-400 tracking-tighter truncate"
                                                                     x-text="chant.composer || 'Chef de Choeur'"></p>
                                                             </div>
                                                             <div x-show="selectedRepertoireIds.includes(String(chant.id))"
                                                                 class="text-[#7367F0] flex-shrink-0"
                                                                 x-transition.scale.opacity>
-                                                                <svg class="w-4 h-4" fill="currentColor"
+                                                                <svg class="w-3.5 h-3.5" fill="currentColor"
                                                                     viewBox="0 0 20 20">
                                                                     <path fill-rule="evenodd"
                                                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -525,6 +480,20 @@
                             </template>
                         </div>
 
+                        <!-- No Search Results -->
+                        <div x-show="searchQuery && workspaceEventIds.length > 0 && !workspaceEventIds.some(eventId => Object.values(events.find(e => e.id == eventId).repertoire).some(partie => partie.some(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.composer && c.composer.toLowerCase().includes(searchQuery.toLowerCase())))))"
+                            class="py-12 text-center" x-cloak>
+                            <div
+                                class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100">
+                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Aucun résultat pour
+                                "<span class="text-slate-600" x-text="searchQuery"></span>"</p>
+                        </div>
+
 
                         <div x-show="workspaceEventIds.length === 0" class="py-20 text-center">
                             <div
@@ -534,9 +503,9 @@
                                         d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
                             </div>
-                            <p class="text-slate-400 text-sm font-medium italic px-8">Ajoutez un événement depuis l'agenda
+                            <p class="text-slate-400 text-sm font-medium italic px-8">Ajoutez un évènenement depuis l'agenda
                                 pour
-                                commencer à composer votre programme.</p>
+                                commencer à  composer votre programme.</p>
                         </div>
                     </div>
 
@@ -544,7 +513,7 @@
                         class="p-5 sm:p-6 md:p-8 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p class="text-[9px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">
                             <span class="text-slate-400" x-text="selectedRepertoireIds.length"></span>
-                            élément(s)
+                            Evènements
                             sélectionné(s)
                         </p>
                         <div class="flex gap-2 w-full sm:w-auto">
@@ -591,4 +560,105 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <script>
+        function presenceManagement(config) {
+            return {
+                showProgramModal: false,
+                showMotifModal: false,
+                currentUserId: null,
+                currentStatus: null,
+                currentMotif: "",
+                selectedRepertoireIds: config.selectedRepertoireIds || [],
+                workspaceEventIds: [],
+                searchQuery: "",
+                events: config.events || [],
+                presences: config.presences || {},
+                stats: config.stats || {
+                    present: 0,
+                    all: 0
+                },
+
+                init() {
+                    this.selectedRepertoireIds.forEach(id => {
+                        const event = this.events.find(e => {
+                            for (let partie in e.repertoire) {
+                                if (e.repertoire[partie].some(chant => chant.id == id)) return true;
+                            }
+                            return false;
+                        });
+                        if (event && !this.workspaceEventIds.includes(event.id)) {
+                            this.workspaceEventIds.push(event.id);
+                        }
+                    });
+                },
+
+                addEventToWorkspace(id) {
+                    if (id && !this.workspaceEventIds.includes(Number(id))) {
+                        this.workspaceEventIds.push(Number(id));
+                    }
+                },
+
+                removeEventFromWorkspace(id) {
+                    this.workspaceEventIds = this.workspaceEventIds.filter(eid => eid != id);
+                },
+
+                get currentEventRepertoire() {
+                    if (!this.selectedEventId) return null;
+                    const event = this.events.find(e => e.id == this.selectedEventId);
+                    return event ? event.repertoire : null;
+                },
+
+                async updatePresence(userId, status) {
+                    if (status === "absent" || status === "justifie") {
+                        this.currentUserId = userId;
+                        this.currentStatus = status;
+                        this.currentMotif = this.presences[userId].motif || "";
+                        this.showMotifModal = true;
+                        return;
+                    }
+                    await this.confirmPresence(userId, status, null);
+                },
+
+                async confirmPresence(userId, status, motif) {
+                    const oldStatus = this.presences[userId].status;
+                    const oldMotif = this.presences[userId].motif;
+
+                    if (oldStatus === status && oldMotif === motif) return;
+
+                    this.presences[userId].status = status;
+                    this.presences[userId].motif = motif;
+
+                    if (oldStatus === "present") this.stats.present--;
+                    if (status === "present") this.stats.present++;
+
+                    try {
+                        const response = await fetch(config.presenceStoreRoute, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
+                                "X-Requested-With": "XMLHttpRequest"
+                            },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                repetition_id: config.repetitionId,
+                                status: status,
+                                motif: motif
+                            })
+                        });
+
+                        if (!response.ok) throw new Error();
+                    } catch (e) {
+                        this.presences[userId].status = oldStatus;
+                        this.presences[userId].motif = oldMotif;
+                        if (oldStatus === "present") this.stats.present++;
+                        if (status === "present") this.stats.present--;
+                        alert("Erreur lors de l’enregistrement de la présence.");
+                    }
+                }
+            }
+        }
+    </script>
 @endsection

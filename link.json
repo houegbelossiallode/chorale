@@ -1,0 +1,47 @@
+{
+    "id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+    "aud": "authenticated",
+    "role": "authenticated",
+    "email": "elyseehouegbelossi@gmail.com",
+    "email_confirmed_at": "2026-03-02T10:50:06.487839Z",
+    "phone": "",
+    "confirmed_at": "2026-03-02T10:50:06.487839Z",
+    "recovery_sent_at": "2026-03-05T23:31:54.414927693Z",
+    "app_metadata": {
+        "provider": "email",
+        "providers": [
+            "email"
+        ]
+    },
+    "user_metadata": {
+        "email_verified": true,
+        "first_name": "HOUEGBELOSSI",
+        "last_name": "Elysee"
+    },
+    "identities": [
+        {
+            "identity_id": "cd739f46-9397-4c69-b3c9-661f6b6a14d1",
+            "id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+            "user_id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+            "identity_data": {
+                "email": "elyseehouegbelossi@gmail.com",
+                "email_verified": false,
+                "phone_verified": false,
+                "sub": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4"
+            },
+            "provider": "email",
+            "last_sign_in_at": "2026-03-02T10:50:06.481622Z",
+            "created_at": "2026-03-02T10:50:06.481672Z",
+            "updated_at": "2026-03-02T10:50:06.481672Z",
+            "email": "elyseehouegbelossi@gmail.com"
+        }
+    ],
+    "created_at": "2026-03-02T10:50:06.480091Z",
+    "updated_at": "2026-03-05T23:31:54.421328Z",
+    "is_anonymous": false,
+    "action_link": "https:\/\/lqwesljrejtzrcfjpesv.supabase.co\/auth\/v1\/verify?token=98f00b528d6eb0e532bfd6726beb7e035b6c84788759b7c1e874f858&type=recovery&redirect_to=http:\/\/localhost\/password\/reset\/placeholder",
+    "email_otp": "62286843",
+    "hashed_token": "98f00b528d6eb0e532bfd6726beb7e035b6c84788759b7c1e874f858",
+    "verification_type": "recovery",
+    "redirect_to": "http:\/\/localhost\/password\/reset\/placeholder"
+}

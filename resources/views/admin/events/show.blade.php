@@ -115,7 +115,7 @@
                     <h4 class="text-[14px] sm:text-[15px] font-semibold text-[#444050] uppercase tracking-wider">Description</h4>
                 </div>
                 @if($event->description)
-                    <div class="text-[13px] sm:text-[14px] text-slate-600 leading-relaxed whitespace-pre-line">{{ $event->description }}</div>
+                    <div class="text-[13px] sm:text-[14px] text-slate-600 leading-relaxed whitespace-pre-line">{!! $event->description !!}</div>
                 @else
                     <p class="text-[13px] text-slate-400 italic">Aucune description renseignée pour cet événement.</p>
                 @endif

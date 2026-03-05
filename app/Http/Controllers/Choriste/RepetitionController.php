@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Choriste;
 use App\Http\Controllers\Controller;
 use App\Models\Repetition;
 use App\Models\Repertoire;
+use App\Models\Pupitre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,6 +57,9 @@ class RepetitionController extends Controller
             }
         }
 
-        return view('choriste.repetitions.repertoire', compact('repetition', 'repertoire', 'isFullyRecorded'));
+        // Fetch pupitres for the chorale composition section
+        $pupitres = Pupitre::with('users')->get();
+
+        return view('choriste.repetitions.repertoire', compact('repetition', 'repertoire', 'isFullyRecorded', 'pupitres'));
     }
 }

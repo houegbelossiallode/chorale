@@ -66,8 +66,9 @@ class PasswordResetController extends Controller
         $token = $request->input('token');
         $email = $request->input('email');
         $newPassword = $request->input('password');
-        // Use Supabase admin endpoint to update password
-        $result = $this->supabase->resetUserPassword($token, $newPassword);
+
+        // Verify token and update password
+        $result = $this->supabase->resetUserPassword($token, $email, $newPassword);
         if ($result) {
             return redirect()->route('login')->with('status', 'Password has been reset.');
         }

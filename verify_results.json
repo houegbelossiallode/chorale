@@ -1,0 +1,65 @@
+{
+    "token": "c488d4950f3d0b9721b2be4fcf49c141e29c695f52d91ee5650c7bb9",
+    "hashed_token": "c488d4950f3d0b9721b2be4fcf49c141e29c695f52d91ee5650c7bb9",
+    "otp": "84483658",
+    "test1_token": {
+        "code": 403,
+        "error_code": "otp_expired",
+        "msg": "Token has expired or is invalid"
+    },
+    "test2_token_hash": {
+        "access_token": "eyJhbGciOiJFUzI1NiIsImtpZCI6Ijc2MTEyZDJlLTdlOTMtNDI4Zi1iOTk4LWRkNzZhZGZlYWM4MyIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2xxd2VzbGpyZWp0enJjZmpwZXN2LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIwNmE5ZDc1NS0yYzExLTRmY2EtYWMzZS00ZWM4ZmNmYTkyYjQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzcyNzU3Mjc1LCJpYXQiOjE3NzI3NTM2NzUsImVtYWlsIjoiZWx5c2VlaG91ZWdiZWxvc3NpQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcnN0X25hbWUiOiJIT1VFR0JFTE9TU0kiLCJsYXN0X25hbWUiOiJFbHlzZWUifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJvdHAiLCJ0aW1lc3RhbXAiOjE3NzI3NTM2NzV9XSwic2Vzc2lvbl9pZCI6IjM2YzZiNzBlLWI4ZDktNGM1Mi1hMDI5LWQ2MTFiNDg3YTEyZCIsImlzX2Fub255bW91cyI6ZmFsc2V9.1oggG0iQhW7nbj06b25PNYhU9ES9y2hJS8kDoZJLjAyXmnJ4BCjTElMMcWB5BCHPHMHIwN9Jpe64lLJmlYS-uQ",
+        "token_type": "bearer",
+        "expires_in": 3600,
+        "expires_at": 1772757275,
+        "refresh_token": "dzteyu6hg274",
+        "user": {
+            "id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+            "aud": "authenticated",
+            "role": "authenticated",
+            "email": "elyseehouegbelossi@gmail.com",
+            "email_confirmed_at": "2026-03-02T10:50:06.487839Z",
+            "phone": "",
+            "confirmed_at": "2026-03-02T10:50:06.487839Z",
+            "recovery_sent_at": "2026-03-05T23:34:32.544497Z",
+            "last_sign_in_at": "2026-03-05T23:34:35.182155988Z",
+            "app_metadata": {
+                "provider": "email",
+                "providers": [
+                    "email"
+                ]
+            },
+            "user_metadata": {
+                "email_verified": true,
+                "first_name": "HOUEGBELOSSI",
+                "last_name": "Elysee"
+            },
+            "identities": [
+                {
+                    "identity_id": "cd739f46-9397-4c69-b3c9-661f6b6a14d1",
+                    "id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+                    "user_id": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4",
+                    "identity_data": {
+                        "email": "elyseehouegbelossi@gmail.com",
+                        "email_verified": false,
+                        "phone_verified": false,
+                        "sub": "06a9d755-2c11-4fca-ac3e-4ec8fcfa92b4"
+                    },
+                    "provider": "email",
+                    "last_sign_in_at": "2026-03-02T10:50:06.481622Z",
+                    "created_at": "2026-03-02T10:50:06.481672Z",
+                    "updated_at": "2026-03-02T10:50:06.481672Z",
+                    "email": "elyseehouegbelossi@gmail.com"
+                }
+            ],
+            "created_at": "2026-03-02T10:50:06.480091Z",
+            "updated_at": "2026-03-05T23:34:35.185234Z",
+            "is_anonymous": false
+        }
+    },
+    "test3_otp": {
+        "code": 403,
+        "error_code": "otp_expired",
+        "msg": "Token has expired or is invalid"
+    }
+}

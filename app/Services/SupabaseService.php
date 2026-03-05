@@ -129,12 +129,48 @@ class SupabaseService
     }
 
     /**
-     * Réinitialise le mot de passe d'un utilisateur à l'aide d'un token JWT.
+     * Réinitialise le mot de passe d'un utilisateur à l'aide d'un token JWT ou OTP.
      * Retourne true si la mise à jour a réussi.
      */
-    public function resetUserPassword(string $token, string $newPassword)
+    public function resetUserPassword(string $token, string $email, string $newPassword)
     {
-        // ... (code existant)
+        // 1. Vérifier le token et obtenir une session
+        $verifyResponse = Http::withHeaders([
+            'apikey' => $this->serviceKey,
+            'Content-Type' => 'application/json'
+        ])->post($this->url . '/auth/v1/verify', [
+                    'type' => 'recovery',
+                    'token_hash' => $token,
+                ]);
+
+        if ($verifyResponse->failed()) {
+            Log::error('Supabase Verify Token Error: ' . $verifyResponse->body());
+            return false;
+        }
+
+        $session = $verifyResponse->json();
+        $accessToken = $session['access_token'] ?? null;
+
+        if (!$accessToken) {
+            Log::error('Supabase Verify Token Error: No access token returned');
+            return false;
+        }
+
+        // 2. Mettre à jour le mot de passe avec le access_token
+        $updateResponse = Http::withHeaders([
+            'apikey' => $this->serviceKey,
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type' => 'application/json'
+        ])->put($this->url . '/auth/v1/user', [
+                    'password' => $newPassword
+                ]);
+
+        if ($updateResponse->failed()) {
+            Log::error('Supabase Update Password Error: ' . $updateResponse->body());
+            return false;
+        }
+
+        return true;
     }
 
     /**

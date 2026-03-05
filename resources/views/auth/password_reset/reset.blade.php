@@ -93,7 +93,7 @@
                             @csrf
                             <input type="hidden" name="token" value="{{ $token }}">
 
-                            <div>
+                            <!-- <div>
                                 <label
                                     class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-[0.15em]">Adresse
                                     Email</label>
@@ -111,7 +111,7 @@
                                 @error('email')
                                     <span class="text-red-500 text-xs font-bold mt-2 block">{{ $message }}</span>
                                 @enderror
-                            </div>
+                            </div> -->
 
                             <div>
                                 <label

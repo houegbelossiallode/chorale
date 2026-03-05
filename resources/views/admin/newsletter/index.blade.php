@@ -9,8 +9,15 @@
                 <h1 class="text-2xl font-bold text-gray-900">Newsletter</h1>
                 <p class="text-sm text-gray-500 mt-1">Gérez vos abonnés et envoyez des communications par email.</p>
             </div>
+            <a href="{{ route('admin.newsletter.create') }}"
+                class="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2 shrink-0">
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Composer une Newsletter
+            </a>
         </div>
-
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg flex items-center gap-3">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -33,52 +40,10 @@
             </div>
         @endif
 
-        <div class="grid lg:grid-cols-3 gap-8">
-            <!-- Compose Form -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
-                    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Envoyer un message
-                        </h2>
-                    </div>
-                    <div class="p-6">
-                        <form action="{{ route('admin.newsletter.send') }}" method="POST" class="space-y-4">
-                            @csrf
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Sujet</label>
-                                <input type="text" name="subject" required
-                                    class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition"
-                                    placeholder="Ex: Concert de Pâques 2026">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Contenu
-                                    du message</label>
-                                <div class="space-y-2">
-                                    <div id="editor-container" class="h-64 bg-white rounded-xl border border-gray-200"></div>
-                                    <textarea name="content" id="content-textarea" class="hidden">{{ old('content') }}</textarea>
-                                </div>
-                            </div>
-                            <button type="submit"
-                                class="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                                Diffuser à {{ $subscribers->where('is_active', true)->count() }} abonnés
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
+        <div>
             <!-- Subscriber List -->
-            <div class="lg:col-span-2">
+            <div>
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                         <h2 class="font-bold text-gray-900 flex items-center gap-2">
@@ -153,58 +118,5 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Quill Editor Initialization
-            var quill = new Quill('#editor-container', {
-                theme: 'snow',
-                placeholder: 'Écrivez votre message ici...',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'color': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                }
-            });
 
-            var textarea = document.getElementById('content-textarea');
-
-            if (textarea.value) {
-                quill.root.innerHTML = textarea.value;
-            }
-
-            quill.on('text-change', function () {
-                textarea.value = quill.root.innerHTML;
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Quill Editor Initialization
-            var quill = new Quill('#editor-container', {
-                theme: 'snow',
-                placeholder: 'Écrivez votre message ici...',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{ 'color': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            var textarea = document.getElementById('content-textarea');
-            
-            if (textarea.value) {
-                quill.root.innerHTML = textarea.value;
-            }
-
-            quill.on('text-change', function() {
-                textarea.value = quill.root.innerHTML;
-            });
-        });
-    </script>
 @endsection

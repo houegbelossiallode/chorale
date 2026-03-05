@@ -17,6 +17,12 @@ class NewsletterController extends Controller
         return view('admin.newsletter.index', compact('subscribers'));
     }
 
+    public function create()
+    {
+        $activeSubscribersCount = NewsletterSubscription::where('is_active', DB::raw('true'))->count();
+        return view('admin.newsletter.create', compact('activeSubscribersCount'));
+    }
+
     public function send(Request $request)
     {
         $request->validate([
@@ -24,7 +30,7 @@ class NewsletterController extends Controller
             'content' => 'required|string',
         ]);
 
-        $subscribers = NewsletterSubscription::where('is_active',DB::raw('true'))->get();
+        $subscribers = NewsletterSubscription::where('is_active', DB::raw('true'))->get();
 
         if ($subscribers->isEmpty()) {
             return back()->with('error', 'Aucun abonné actif trouvé.');
