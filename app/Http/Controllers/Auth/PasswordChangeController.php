@@ -48,14 +48,18 @@ class PasswordChangeController extends Controller
 
         \Log::info('Supabase password update successful', ['email' => $user->email]);
 
-        // 2. Mise à jour locale
-        $user->password = Hash::make($request->password);
-        $user->must_change_password = false;
-        $user->save();
 
-        \Log::info('Local password update successful', [
-            'email' => $user->email,
-            'must_change_password' => $user->must_change_password
+        // 2. Mise à jour locale (Utilisation du Query Builder pour éviter les erreurs de type PGSQL)
+        \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                'must_change_password' => \Illuminate\Support\Facades\DB::raw('false'),
+                'updated_at' => now(),
+            ]);
+
+        \Log::info('Local password update successful via Query Builder', [
+            'email' => $user->email
         ]);
 
         // 3. Déconnexion forcée pour ré-authentification

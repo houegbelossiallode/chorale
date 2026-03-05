@@ -181,13 +181,13 @@
                 });
 
                 let result;
-                const responseText = await response.text();
                 try {
-                    result = JSON.parse(responseText);
+                    result = await response.json();
                 } catch (jsonErr) {
-                    console.error('Erreur de parsing JSON. Réponse reçue :', responseText);
-                    if (responseText.includes('<section') || responseText.includes('<!DOCTYPE')) {
-                        throw new Error('Le serveur a renvoyé une page HTML au lieu de JSON. Une redirection inattendue ou une erreur PHP a probablement eu lieu.');
+                    const text = await response.text();
+                    console.error('Erreur de parsing JSON. Réponse reçue :', text);
+                    if (text.includes('<section')) {
+                        throw new Error('Le serveur a renvoyé une page HTML au lieu de JSON. Une redirection inattendue a probablement eu lieu.');
                     }
                     throw new Error('Erreur de format de réponse serveur.');
                 }
