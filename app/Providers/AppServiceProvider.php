@@ -11,6 +11,7 @@ use App\Observers\RoleObserver;
 use App\Observers\SousmenuObserver;
 use App\Observers\PostObserver;
 use App\Observers\EventObserver;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useTailwind();
 
         if ($this->app->environment('production')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');

@@ -190,7 +190,7 @@
         </div>
 
         <!-- Composition de la Chorale -->
-        <div class="space-y-6 pb-12">
+        <!-- <div class="space-y-6 pb-12">
             <div class="flex items-center gap-4">
                 <h2 class="text-xl font-bold text-[#444050]">Composition de la Chorale</h2>
                 <div class="h-px flex-1 bg-slate-100"></div>
@@ -220,7 +220,7 @@
                     @endif
                 @endforeach
             </div>
-        </div>
+        </div> -->
 
         <!-- Recording Modal (Reusable from Chant show but simplified) -->
         <div x-show="modalOpen"
@@ -323,7 +323,7 @@
                     </div>
                     
                     <div class="bg-slate-50 rounded-2xl p-6 max-h-[50vh] overflow-y-auto">
-                        <pre class="text-sm text-slate-600 font-medium leading-relaxed whitespace-pre-wrap font-sans" x-text="currentLyrics"></pre>
+                        <div class="text-sm text-slate-600 font-medium leading-relaxed font-sans" x-html="currentLyrics"></div>
                     </div>
                 </div>
             </div>

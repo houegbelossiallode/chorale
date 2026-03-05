@@ -8,6 +8,7 @@ use App\Models\Chant;
 use Illuminate\Http\Request;
 use App\Services\SupabaseService;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class FichierChantController extends Controller
 {
@@ -110,6 +111,33 @@ class FichierChantController extends Controller
             'success' => false,
             'message' => 'Échec de l\'upload de l\'enregistrement.'
         ], 500);
+    }
+
+    public function download(FichierChant $fichierChant)
+    {
+        // Ne s'applique qu'aux fichiers physiques (pas YouTube)
+        if ($fichierChant->type === 'youtube') {
+            return back()->with('error', 'Impossible de télécharger un lien YouTube.');
+        }
+
+        try {
+            $response = Http::get($fichierChant->file_path);
+
+            if (!$response->successful()) {
+                throw new \Exception('Impossible de récupérer le fichier sur le stockage distant.');
+            }
+
+            $filename = basename($fichierChant->file_path);
+            $contentType = $response->header('Content-Type') ?: 'application/pdf';
+
+            return response($response->body(), 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors du téléchargement du fichier: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors du téléchargement du fichier.');
+        }
     }
 
     public function destroy(FichierChant $fichierChant)

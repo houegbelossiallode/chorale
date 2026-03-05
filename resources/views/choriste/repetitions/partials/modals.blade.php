@@ -101,8 +101,7 @@
             </div>
 
             <div class="bg-slate-50 rounded-2xl p-6 max-h-[50vh] overflow-y-auto custom-scrollbar-slim">
-                <pre class="text-sm text-slate-600 font-medium leading-relaxed whitespace-pre-wrap font-sans"
-                    x-text="currentLyrics"></pre>
+                <div class="text-sm text-slate-600 font-medium leading-relaxed font-sans" x-html="currentLyrics"></div>
             </div>
         </div>
     </div>

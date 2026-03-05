@@ -22,7 +22,7 @@ class EventController extends Controller
     }
     public function index()
     {
-        $events = Event::latest()->paginate(10);
+        $events = Event::with(['type', 'images'])->latest()->paginate(10);
         return view('admin.events.index', compact('events'));
     }
 
@@ -34,7 +34,7 @@ class EventController extends Controller
 
     public function create()
     {
-        $types = Type::all();
+        $types = Type::where('actif','OUI')->orderBy('libelle')->get();
         return view('admin.events.create', compact('types'));
     }
 
@@ -68,7 +68,7 @@ class EventController extends Controller
                     EventImage::create([
                         'event_id' => $event->id,
                         'image_path' => $imageUrl,
-                        'is_principal' => $request->principal_image_index == $index || (!$request->has('principal_image_index') && $index === 0),
+                        'is_principal' => ($request->principal_image_index == $index || (!$request->has('principal_image_index') && $index === 0)) ? \Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
                     ]);
                     Log::info("Image #{$index} enregistrée avec succès: {$imageUrl}");
                 } else {
@@ -85,7 +85,7 @@ class EventController extends Controller
 
     public function edit(Event $event)
     {
-        $types = Type::all();
+        $types = Type::where('actif','OUI')->orderBy('libelle')->get();
         return view('admin.events.edit', compact('event', 'types'));
     }
 
@@ -107,8 +107,8 @@ class EventController extends Controller
 
         // Gestion du changement d'image principale parmi les existantes
         if ($request->filled('principal_image_id')) {
-            EventImage::where('event_id', $event->id)->update(['is_principal' => false]);
-            EventImage::where('id', $request->principal_image_id)->update(['is_principal' => true]);
+            EventImage::where('event_id', $event->id)->update(['is_principal' => \Illuminate\Support\Facades\DB::raw('false')]);
+            EventImage::where('id', $request->principal_image_id)->update(['is_principal' => \Illuminate\Support\Facades\DB::raw('true')]);
         }
 
         // Ajout de nouvelles images à la galerie
@@ -117,7 +117,7 @@ class EventController extends Controller
 
             // Si on désigne une nouvelle image comme principale, on désactive les autres
             if ($request->has('principal_image_index')) {
-                EventImage::where('event_id', $event->id)->update(['is_principal' => false]);
+                EventImage::where('event_id', $event->id)->update(['is_principal' => \Illuminate\Support\Facades\DB::raw('false')]);
             }
 
             foreach ($request->file('images') as $index => $image) {
@@ -130,7 +130,7 @@ class EventController extends Controller
                     EventImage::create([
                         'event_id' => $event->id,
                         'image_path' => $imageUrl,
-                        'is_principal' => $request->principal_image_index == $index,
+                        'is_principal' => ($request->principal_image_index == $index) ? \Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
                     ]);
                     Log::info("Image #{$index} enregistrée: {$imageUrl}");
                 } else {

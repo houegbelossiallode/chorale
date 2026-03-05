@@ -15,16 +15,10 @@ class ChantController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-        $pupitreId = $user->pupitre_id;
-
-        // On récupère tous les chants avec les fichiers filtrés par pupitre
+        // On récupère tous les chants avec tous les fichiers
         $chants = Chant::with([
-            'fichiers' => function ($query) use ($pupitreId) {
-                $query->where(function ($q) use ($pupitreId) {
-                    $q->whereNull('pupitre_id') // Ressources pour tous
-                        ->orWhere('pupitre_id', $pupitreId); // Ressources pour son pupitre
-                });
+            'fichiers' => function ($query) {
+                $query->with('pupitre');
             }
         ])->get();
 
@@ -36,15 +30,9 @@ class ChantController extends Controller
      */
     public function show(Chant $chant)
     {
-        $user = Auth::user();
-        $pupitreId = $user->pupitre_id;
-
         $chant->load([
-            'fichiers' => function ($query) use ($pupitreId) {
-                $query->with('pupitre')->where(function ($q) use ($pupitreId) {
-                    $q->whereNull('pupitre_id')
-                        ->orWhere('pupitre_id', $pupitreId);
-                });
+            'fichiers' => function ($query) {
+                $query->with('pupitre');
             }
         ]);
 

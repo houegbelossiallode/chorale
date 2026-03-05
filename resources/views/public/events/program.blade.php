@@ -128,7 +128,7 @@
                     @endforelse
 
                     <!-- Composition de la Chorale -->
-                    <div class="pt-20 reveal">
+                    <!-- <div class="pt-20 reveal">
                         <div class="text-center mb-16">
                             <span class="text-[10px] font-bold text-amber-500 uppercase tracking-[0.3em] block mb-4">✦ Les Voix ✦</span>
                             <h2 class="text-3xl md:text-5xl font-serif text-gray-900">Composition de la Chorale</h2>
@@ -162,7 +162,7 @@
                                 @endif
                             @endforeach
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="text-center pt-24 reveal">
                         <a href="{{ route('events') }}" class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-semibold hover:bg-gray-800 transition-all group">
@@ -195,7 +195,7 @@
                     </div>
                     
                     <div class="bg-warm-white rounded-3xl p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                        <pre class="text-lg text-gray-700 font-medium leading-relaxed whitespace-pre-wrap font-serif" x-text="currentLyrics"></pre>
+                        <div class="text-lg text-gray-700 font-medium leading-relaxed font-serif" x-html="currentLyrics"></div>
                     </div>
                 </div>
             </div>

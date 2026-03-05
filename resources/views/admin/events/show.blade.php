@@ -42,20 +42,19 @@
     </div>
 
     {{-- Hero Image --}}
-    @if($event->principalImage)
-        <div class="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-material h-48 sm:h-64 md:h-80">
-            <img src="{{ $event->principalImage->image_path }}" alt="{{ $event->title }}"
-                class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
-                <span
-                    class="inline-block px-2.5 sm:px-3 py-1 bg-[#7367F0] text-white rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-2 sm:mb-3 shadow-lg">
-                    {{ $event->type->libelle ?? 'Événement' }}
-                </span>
-                <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg line-clamp-2">{{ $event->title }}</h2>
-            </div>
+    {{-- Hero Image --}}
+    <div class="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-material h-48 sm:h-64 md:h-80">
+        <img src="{{ $event->thumbnail }}" alt="{{ $event->title }}"
+            class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
+            <span
+                class="inline-block px-2.5 sm:px-3 py-1 bg-[#7367F0] text-white rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-2 sm:mb-3 shadow-lg">
+                {{ $event->type->libelle ?? 'Événement' }}
+            </span>
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg line-clamp-2">{{ $event->title }}</h2>
         </div>
-    @endif
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {{-- Left Column: Details --}}

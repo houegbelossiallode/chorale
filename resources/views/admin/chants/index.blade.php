@@ -4,18 +4,49 @@
 
 @section('content')
     <div class="space-y-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-[#444050]">Répertoire Musical</h1>
                 <p class="text-slate-500 text-sm">Gérez les partitions et les fichiers audio pour les choristes.</p>
             </div>
-            <button onclick="window.location.href='{{ route('admin.chants.create') }}'"
-                class="btn-primary flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Ajouter un chant
-            </button>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <!-- <form action="{{ route('admin.chants.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                    <div class="relative group w-full sm:w-64">
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Rechercher un chant..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all outline-none">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#7367F0] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <select name="type" onchange="this.form.submit()"
+                        class="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#7367F0] transition-all outline-none">
+                        <option value="">Toutes les ressources</option>
+                        <option value="partition" {{ request('type') == 'partition' ? 'selected' : '' }}>Partitions</option>
+                        <option value="audio" {{ request('type') == 'audio' ? 'selected' : '' }}>Audio</option>
+                        <option value="youtube" {{ request('type') == 'youtube' ? 'selected' : '' }}>YouTube</option>
+                        <option value="video" {{ request('type') == 'video' ? 'selected' : '' }}>Vidéo</option>
+                    </select>
+
+                    @if(request()->anyFilled(['search', 'type']))
+                        <a href="{{ route('admin.chants.index') }}" class="text-xs text-slate-400 hover:text-red-500 transition-colors whitespace-nowrap">
+                            Effacer
+                        </a>
+                    @endif
+                </form> -->
+
+                <button onclick="window.location.href='{{ route('admin.chants.create') }}'"
+                    class="btn-primary flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center shadow-lg shadow-[#7367F0]/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Ajouter un chant
+                </button>
+            </div>
         </div>
 
         <!-- Chants Table Card -->
@@ -53,59 +84,55 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-wrap items-center gap-2">
-                                        {{-- Lien de téléchargement du fichier principal du chant --}}
-                                        @if($chant->file_path)
+                                        @php
+                                            $resources = $chant->fichiers->groupBy('type');
+                                            $hasMainPartition = $chant->file_path;
+                                        @endphp
+
+                                        {{-- Partition principale --}}
+                                        @if($hasMainPartition)
                                             <a href="{{ $chant->file_path }}" target="_blank"
-                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#7367F0]/10 text-[#7367F0] hover:bg-[#7367F0]/20 rounded-lg text-xs font-bold transition-colors"
-                                               title="Télécharger la partition principale">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                                </svg>
-                                                Partition
+                                               class="inline-flex items-center gap-1.5 px-2 py-1 bg-[#7367F0]/10 text-[#7367F0] hover:bg-[#7367F0]/20 rounded-md text-[11px] font-bold transition-all"
+                                               title="Partition principale">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                PDF
                                             </a>
                                         @endif
 
-                                        {{-- Autres ressources (fichier_chants) --}}
-                                        @foreach($chant->fichiers as $fichier)
-                                            @if($fichier->type == 'audio' || $fichier->type == 'youtube')
-                                                <button @click="$dispatch('open-media', { type: '{{ $fichier->type }}', url: '{{ Str::startsWith($fichier->file_path, ['http://', 'https://']) ? $fichier->file_path : asset('storage/' . $fichier->file_path) }}', title: '{{ addslashes($chant->title) }}' })"
-                                                   class="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                                                   title="{{ ucfirst($fichier->type) }} ({{ $fichier->pupitre ? $fichier->pupitre->name : 'Tous' }})">
-                                                    @switch($fichier->type)
-                                                        @case('audio')
-                                                            <div class="bg-blue-50 text-blue-500 p-1.5 rounded">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                                                            </div>
-                                                            @break
-                                                        @case('youtube')
-                                                            <div class="bg-red-50 text-red-600 p-1.5 rounded">
-                                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                                                            </div>
-                                                            @break
-                                                    @endswitch
-                                                </button>
-                                            @else
-                                                <a href="{{ Str::startsWith($fichier->file_path, ['http://', 'https://']) ? $fichier->file_path : asset('storage/' . $fichier->file_path) }}" target="_blank"
-                                                   class="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                                                   title="{{ ucfirst($fichier->type) }} ({{ $fichier->pupitre ? $fichier->pupitre->name : 'Tous' }})">
-                                                    @switch($fichier->type)
-                                                        @case('partition')
-                                                            <div class="bg-red-50 text-red-500 p-1.5 rounded">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                            </div>
-                                                            @break
-                                                        @case('video')
-                                                            <div class="bg-purple-50 text-purple-500 p-1.5 rounded">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                                            </div>
-                                                            @break
-                                                    @endswitch
-                                                </a>
-                                            @endif
+                                        {{-- Autres ressources groupées --}}
+                                        @foreach($resources as $type => $group)
+                                            @php
+                                                $count = $group->count();
+                                                $bgClass = match($type) {
+                                                    'partition' => 'bg-red-50 text-red-500',
+                                                    'audio' => 'bg-blue-50 text-blue-500',
+                                                    'youtube' => 'bg-red-50 text-red-600',
+                                                    'video' => 'bg-purple-50 text-purple-500',
+                                                    default => 'bg-slate-50 text-slate-500',
+                                                };
+                                            @endphp
+                                            <div class="inline-flex items-center gap-1 px-2 py-1 {{ $bgClass }} rounded-md text-[11px] font-bold cursor-default"
+                                                 title="{{ $count }} {{ $type }}(s)">
+                                                @switch($type)
+                                                    @case('partition')
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                        @break
+                                                    @case('audio')
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                                                        @break
+                                                    @case('youtube')
+                                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                                                        @break
+                                                    @case('video')
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                        @break
+                                                @endswitch
+                                                <span>{{ $count }}</span>
+                                            </div>
                                         @endforeach
 
-                                        @if(!$chant->file_path && $chant->fichiers->isEmpty())
-                                            <span class="text-xs text-slate-400 italic">Aucune ressource</span>
+                                        @if(!$hasMainPartition && $resources->isEmpty())
+                                            <span class="text-xs text-slate-400 italic">Aucune</span>
                                         @endif
                                     </div>
                                 </td>
@@ -113,30 +140,39 @@
                                     {{ $chant->created_at->format('d/m/Y') }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.chants.show', $chant->id) }}" class="btn-icon" title="Voir le détail">
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <button @click="open = !open" @click.away="open = false" 
+                                            class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-[#7367F0]">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                                             </svg>
-                                        </a>
-                                        <a href="{{ route('admin.chants.edit', $chant->id) }}" class="btn-icon">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
-                                        <form action="{{ route('admin.chants.destroy', $chant->id) }}" method="POST"
-                                            class="inline" onsubmit="return confirm('Supprimer ce chant ?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-icon btn-icon-danger">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        </button>
+
+                                        <div x-show="open" 
+                                            x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter-start="transform opacity-0 scale-95"
+                                            x-transition:enter-end="transform opacity-100 scale-100"
+                                            class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">
+                                            <div class="py-1">
+                                                <a href="{{ route('admin.chants.show', $chant->id) }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-[#7367F0] transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    Détails
+                                                </a>
+                                                <a href="{{ route('admin.chants.edit', $chant->id) }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-[#7367F0] transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    Modifier
+                                                </a>
+                                                <div class="border-t border-slate-50"></div>
+                                                <form action="{{ route('admin.chants.destroy', $chant->id) }}" method="POST" onsubmit="return confirm('Supprimer ce chant ?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        Supprimer
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -150,6 +186,13 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            @if($chants->hasPages())
+                <div class="px-6 py-4 bg-slate-50 border-t border-gray-100">
+                    {{ $chants->links() }}
+                </div>
+            @endif
         </div>
     </div>
 @endsection

@@ -78,8 +78,8 @@
                                 <div class="w-8 h-[2px] bg-[#7367F0]"></div>
                                 Paroles & Texte
                             </h3>
-                            <div class="whitespace-pre-wrap text-base md:text-lg text-slate-700 leading-relaxed font-serif italic text-center max-w-2xl mx-auto px-4 break-words">
-                                {{ $chant->parole }}
+                            <div class="text-base md:text-lg text-slate-700 leading-relaxed font-serif italic text-center max-w-2xl mx-auto px-4 break-words">
+                                {!! $chant->parole !!}
                             </div>
                         </div>
                     </div>
@@ -170,13 +170,13 @@
                                         <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">
                                             {{ $audio->pupitre ? $audio->pupitre->name : 'Tutti' }}
                                         </span>
-                                        <a href="{{ Str::startsWith($audio->file_path, ['http://', 'https://']) ? $audio->file_path : asset('storage/' . $audio->file_path) }}" download
+                                        <!-- <a href="{{ Str::startsWith($audio->file_path, ['http://', 'https://']) ? $audio->file_path : asset('storage/' . $audio->file_path) }}" download
                                             class="w-6 h-6 flex items-center justify-center bg-white rounded-lg border border-gray-100 text-[#7367F0] hover:scale-110 transition-transform shadow-sm">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                     d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                             </svg>
-                                        </a>
+                                        </a> -->
                                     </div>
                                     <button @click="$dispatch('open-media', { type: 'audio', url: '{{ Str::startsWith($audio->file_path, ['http://', 'https://']) ? $audio->file_path : asset('storage/' . $audio->file_path) }}', title: '{{ addslashes($chant->title) }}' })" class="w-full py-2 bg-white rounded-xl border border-gray-200 text-[#7367F0] text-xs font-bold hover:bg-[#7367F0]/5 flex items-center justify-center gap-2 transition-all shadow-sm">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

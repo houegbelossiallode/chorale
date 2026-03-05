@@ -7,6 +7,7 @@ use App\Models\Chant;
 use App\Models\FichierChant;
 use App\Models\Pupitre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Services\SupabaseService;
@@ -19,9 +20,54 @@ class ChantController extends Controller
     {
         $this->supabase = $supabase;
     }
-    public function index()
+
+    public function downloadMain(Chant $chant)
     {
-        $chants = Chant::with(['fichiers'])->get();
+        if (!$chant->file_path) {
+            return back()->with('error', 'Aucune partition principale pour ce chant.');
+        }
+
+        try {
+            $response = Http::get($chant->file_path);
+
+            if (!$response->successful()) {
+                throw new \Exception('Impossible de récupérer le fichier sur le stockage distant.');
+            }
+
+            $extension = pathinfo(parse_url($chant->file_path, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'pdf';
+            $filename = Str::slug($chant->title) . '-partition.' . $extension;
+            $contentType = $response->header('Content-Type') ?: 'application/pdf';
+
+            return response($response->body(), 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors du téléchargement de la partition principale: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors du téléchargement.');
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $query = Chant::query()->with(['fichiers']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('composer', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $type = $request->type;
+            $query->whereHas('fichiers', function ($q) use ($type) {
+                $q->where('type', $type);
+            });
+        }
+
+        $chants = $query->latest()->paginate(7)->withQueryString();
         return view('admin.chants.index', compact('chants'));
     }
 

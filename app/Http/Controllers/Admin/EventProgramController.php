@@ -55,7 +55,9 @@ class EventProgramController extends Controller
         $html .= '.column{width:50%;vertical-align:top;padding:0 10px;}';
         $html .= '.item{margin-bottom:15px;}';
         $html .= '.partie{text-decoration:underline;font-weight:bold;text-transform:uppercase;}';
-        $html .= '.lyrics{font-family:serif;font-size:10pt;margin-top:2px;display:block;line-height:1.1;}</style></head><body>';
+        $html .= '.lyrics{font-family:serif;font-size:10pt;margin-top:2px;display:block;line-height:1.1;}';
+        $html .= '.lyrics p { margin: 0; padding: 0; line-height: 1.1; }';
+        $html .= '</style></head><body>';
 
         // Encodage du logo en base64 pour PDF
         $logoPath = public_path('images/logo chorale st oscar romero noir fond blanc.png');
@@ -89,8 +91,7 @@ class EventProgramController extends Controller
                 $item = $col1[$i];
                 $html .= '<div class="item"><span class="partie">' . e($item->partie_titre) . '</span> : <strong>' . e($item->chant_title) . '</strong>';
                 if ($item->parole) {
-                    $paroles = preg_replace('/(\r?\n){3,}/', "\n\n", trim($item->parole)); // Évite plus de 2 sauts de ligne à la suite
-                    $html .= '<div class="lyrics">' . nl2br(e($paroles)) . '</div>';
+                    $html .= '<div class="lyrics">' . $item->parole . '</div>';
                 }
                 $html .= '</div>';
             }
@@ -102,8 +103,7 @@ class EventProgramController extends Controller
                 $item = $col2[$i];
                 $html .= '<div class="item"><span class="partie">' . e($item->partie_titre) . '</span> : <strong>' . e($item->chant_title) . '</strong>';
                 if ($item->parole) {
-                    $paroles = preg_replace('/(\r?\n){3,}/', "\n\n", trim($item->parole)); // Évite plus de 2 sauts de ligne à la suite
-                    $html .= '<div class="lyrics">' . nl2br(e($paroles)) . '</div>';
+                    $html .= '<div class="lyrics">' . $item->parole . '</div>';
                 }
                 $html .= '</div>';
             }

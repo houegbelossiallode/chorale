@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Type extends Model
 {
-    protected $fillable = ['libelle'];
+    protected $fillable = ['libelle', 'default_image', 'actif'];
 
     public function events()
     {

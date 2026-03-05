@@ -4,23 +4,26 @@
 
 @section('content')
     <div class="space-y-6" x-data="{ 
-                showModal: false, 
-                editMode: false, 
-                typeId: null, 
-                libelle: '',
-                openCreate() {
-                    this.editMode = false;
-                    this.typeId = null;
-                    this.libelle = '';
-                    this.showModal = true;
-                },
-                openEdit(type) {
-                    this.editMode = true;
-                    this.typeId = type.id;
-                    this.libelle = type.libelle;
-                    this.showModal = true;
-                }
-            }">
+                    showModal: false, 
+                    editMode: false, 
+                    typeId: null, 
+                    libelle: '',
+                    defaultImage: '',
+                    openCreate() {
+                        this.editMode = false;
+                        this.typeId = null;
+                        this.libelle = '';
+                        this.defaultImage = '';
+                        this.showModal = true;
+                    },
+                    openEdit(type) {
+                        this.editMode = true;
+                        this.typeId = type.id;
+                        this.libelle = type.libelle;
+                        this.defaultImage = type.default_image || '';
+                        this.showModal = true;
+                    }
+                }">
         {{-- Header --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -52,6 +55,18 @@
                     <h3 class="text-lg font-bold text-[#444050] mb-1">{{ $type->libelle }}</h3>
                     <p class="text-xs text-[#7367F0] font-medium uppercase tracking-wider mb-4">{{ $type->events_count }}
                         événement{{ $type->events_count > 1 ? 's' : '' }} associé{{ $type->events_count > 1 ? 's' : '' }}</p>
+
+                    @if($type->default_image)
+                        <div class="mb-3">
+                            <img src="{{ $type->default_image }}" alt="Image par défaut"
+                                class="w-full h-20 object-cover rounded-lg">
+                            <p class="text-[10px] text-slate-400 mt-1 font-medium">Image par défaut</p>
+                        </div>
+                    @else
+                        <div class="mb-3 h-20 bg-slate-50 rounded-lg flex items-center justify-center">
+                            <p class="text-[10px] text-slate-300 italic">Aucune image par défaut</p>
+                        </div>
+                    @endif
 
                     <div class="flex items-center justify-between pt-4 border-t border-slate-50">
                         <button @click="openEdit({{ json_encode($type) }})"
@@ -110,8 +125,7 @@
                         </svg>
                     </button>
                 </div>
-                <form
-                    :action="editMode ? '{{ route('admin.types.index') }}/' + typeId : '{{ route('admin.types.store') }}'"
+                <form :action="editMode ? '{{ route('admin.types.index') }}/' + typeId : '{{ route('admin.types.store') }}'"
                     method="POST" class="p-8 space-y-6">
                     @csrf
                     <template x-if="editMode">
@@ -123,6 +137,22 @@
                         <input type="text" name="libelle" x-model="libelle"
                             class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
                             placeholder="Ex: Concert, Répétition, ..." required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-widest">Image par
+                            défaut (URL)</label>
+                        <input type="url" name="default_image" x-model="defaultImage"
+                            class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all"
+                            placeholder="https://...">
+                        <template x-if="defaultImage">
+                            <div class="mt-3">
+                                <img :src="defaultImage" alt="Aperçu"
+                                    class="w-full h-28 object-cover rounded-lg border border-slate-100"
+                                    onerror="this.style.display='none'">
+                                <p class="text-[10px] text-slate-400 mt-1">Aperçu de l'image par défaut</p>
+                            </div>
+                        </template>
+                        <p class="text-[11px] text-slate-400 mt-1">Laissez vide pour utiliser l'image générique.</p>
                     </div>
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" @click="showModal = false" class="btn-secondary">Annuler</button>

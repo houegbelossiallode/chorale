@@ -74,8 +74,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ $message->embed(public_path('images/logo chorale st oscar romero blanc.png')) }}" alt="Logo"
-                style="width: 80px; height: auto; margin-bottom: 10px;">
+            <!-- <img src="{{ $message->embed(public_path('images/logo chorale st oscar romero blanc.png')) }}" alt="Logo"
+                style="width: 80px; height: auto; margin-bottom: 10px;"> -->
             <h1 style="margin: 0; font-size: 24px;">Rappel de Répétition</h1>
         </div>
         <div class="content">

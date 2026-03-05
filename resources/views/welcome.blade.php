@@ -313,7 +313,7 @@
                         style="transition-delay: {{ $i * 80 }}ms;">
                         <!-- Image Header -->
                         <div class="aspect-[16/9] overflow-hidden relative">
-                            <img src="{{ $event->principalImage ? $event->principalImage->image_path : 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' }}"
+                            <img src="{{ $event->thumbnail }}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
                                 alt="{{ $event->title }}">
                             <div

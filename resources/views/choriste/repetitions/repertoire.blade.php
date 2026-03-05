@@ -203,7 +203,7 @@
         </div>
 
         <!-- Composition de la Chorale -->
-        <div class="space-y-6 pb-12">
+        <!-- <div class="space-y-6 pb-12">
             <div class="flex items-center gap-4">
                 <h2 class="text-xl font-bold text-[#444050]">Composition de la Chorale</h2>
                 <div class="h-px flex-1 bg-slate-100"></div>
@@ -236,7 +236,7 @@
                     @endif
                 @endforeach
             </div>
-        </div>
+        </div> -->
 
         <!-- Modals Identiques à la page événement -->
         @include('choriste.repetitions.partials.modals')

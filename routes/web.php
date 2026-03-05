@@ -55,6 +55,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('pupitres', \App\Http\Controllers\Admin\PupitreController::class);
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
     Route::resource('chants', \App\Http\Controllers\Admin\ChantController::class);
+    Route::get('chants/{chant}/download', [\App\Http\Controllers\Admin\ChantController::class, 'downloadMain'])->name('chants.download');
+
     Route::name('finance.')->group(function () {
         Route::resource('finance-categories', \App\Http\Controllers\Admin\FinanceCategoryController::class);
         Route::resource('transactions', \App\Http\Controllers\Admin\TransactionController::class);
@@ -96,6 +98,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     Route::post('fichier-chants', [\App\Http\Controllers\Admin\FichierChantController::class, 'store'])->name('fichier-chants.store');
     Route::post('chants/{chant}/record', [\App\Http\Controllers\Admin\FichierChantController::class, 'record'])->name('chants.record');
+    Route::get('fichier-chants/{fichierChant}/download', [\App\Http\Controllers\Admin\FichierChantController::class, 'download'])->name('fichier-chants.download');
     Route::delete('fichier-chants/{fichierChant}', [\App\Http\Controllers\Admin\FichierChantController::class, 'destroy'])->name('fichier-chants.destroy');
 });
 

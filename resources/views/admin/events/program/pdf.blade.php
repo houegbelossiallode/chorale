@@ -81,9 +81,7 @@
                 <div class="section">
                     <div><span class="partie">{{ $item->partie_titre }}</span> : <strong>{{ $item->chant_title }}</strong>
                     </div>
-                    @if($item->parole)
-                        <div class="lyrics">{!! nl2br(e($item->parole)) !!}</div>
-                    @endif
+                    <div class="lyrics">{!! $item->parole !!}</div>
                 </div>
             @endforeach
         </div>
@@ -93,7 +91,7 @@
                     <div><span class="partie">{{ $item->partie_titre }}</span> : <strong>{{ $item->chant_title }}</strong>
                     </div>
                     @if($item->parole)
-                        <div class="lyrics">{!! nl2br(e($item->parole)) !!}</div>
+                        <div class="lyrics">{!! $item->parole !!}</div>
                     @endif
                 </div>
             @endforeach
