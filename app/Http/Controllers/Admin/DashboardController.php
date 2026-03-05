@@ -68,7 +68,7 @@ class DashboardController extends Controller
         $pupitre = $user->pupitre;
 
         $choristeStats = [
-            'next_rehearsals' => \App\Models\Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
+            'next_rehearsals' => \App\Models\Repetition::with(['repertoires.chant', 'repertoires.partieEvent'])
                 ->where('start_time', '>=', now())
                 ->orderBy('start_time')
                 ->take(3)

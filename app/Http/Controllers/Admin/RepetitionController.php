@@ -55,7 +55,7 @@ class RepetitionController extends Controller
                 ])->get();
 
         $allChants = Chant::orderBy('title')->get();
-        $repetition->load(['repertoires']);
+        $repetition->load(['repertoires.chant']);
 
         $events = \App\Models\Event::with(['repertoireEntries.chant', 'repertoireEntries.partieEvent'])
             ->orderBy('start_at', 'desc')

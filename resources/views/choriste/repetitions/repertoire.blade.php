@@ -39,9 +39,8 @@
                     <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Votre Progression</p>
                     <div class="flex items-center gap-3">
                         @php
-                            $totalChants = $repertoire->count() + $extraChants->count();
-                            $recordedChants = $repertoire->filter(fn($r) => $r->enregistrements->count() > 0)->count() +
-                                $extraChants->filter(fn($c) => $c->enregistrements->count() > 0)->count();
+                            $totalChants = $repertoire->count();
+                            $recordedChants = $repertoire->filter(fn($r) => $r->enregistrements->count() > 0)->count();
                             $percent = $totalChants > 0 ? ($recordedChants / $totalChants) * 100 : 0;
                         @endphp
                         <div class="w-32 h-2 bg-white/20 rounded-full overflow-hidden">
@@ -156,39 +155,39 @@
 
         <!-- Composition de la Chorale -->
         <!-- <div class="space-y-6 pb-12">
-                    <div class="flex items-center gap-4">
-                        <h2 class="text-xl font-bold text-[#444050]">Composition de la Chorale</h2>
-                        <div class="h-px flex-1 bg-slate-100"></div>
-                    </div>
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-xl font-bold text-[#444050]">Composition de la Chorale</h2>
+                            <div class="h-px flex-1 bg-slate-100"></div>
+                        </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        @foreach($pupitres as $pupitre)
-                            @if($pupitre->users->count() > 0)
-                                <div
-                                    class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h3 class="font-bold text-slate-700">{{ $pupitre->name }}</h3>
-                                        <span class="text-xs font-bold text-[#7367F0] bg-[#7367F0]/10 px-2 py-0.5 rounded-md">
-                                            {{ $pupitre->users->count() }}
-                                        </span>
-                                    </div>
-                                    <div class="space-y-2">
-                                        @foreach($pupitre->users as $choriste)
-                                            <div class="flex items-center gap-2 text-xs text-slate-500">
-                                                <div
-                                                    class="w-1 h-1 rounded-full {{ Auth::id() == $choriste->id ? 'bg-[#7367F0]' : 'bg-slate-200' }}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            @foreach($pupitres as $pupitre)
+                                @if($pupitre->users->count() > 0)
+                                    <div
+                                        class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h3 class="font-bold text-slate-700">{{ $pupitre->name }}</h3>
+                                            <span class="text-xs font-bold text-[#7367F0] bg-[#7367F0]/10 px-2 py-0.5 rounded-md">
+                                                {{ $pupitre->users->count() }}
+                                            </span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            @foreach($pupitre->users as $choriste)
+                                                <div class="flex items-center gap-2 text-xs text-slate-500">
+                                                    <div
+                                                        class="w-1 h-1 rounded-full {{ Auth::id() == $choriste->id ? 'bg-[#7367F0]' : 'bg-slate-200' }}">
+                                                    </div>
+                                                    <span class="{{ Auth::id() == $choriste->id ? 'font-bold text-[#444050]' : '' }}">
+                                                        {{ $choriste->name }}
+                                                    </span>
                                                 </div>
-                                                <span class="{{ Auth::id() == $choriste->id ? 'font-bold text-[#444050]' : '' }}">
-                                                    {{ $choriste->name }}
-                                                </span>
-                                            </div>
-                                        @endforeach
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div> -->
+                                @endif
+                            @endforeach
+                        </div>
+                    </div> -->
 
         <!-- Modals Identiques à la page événement -->
         @include('choriste.repetitions.partials.modals')
