@@ -29,8 +29,6 @@ class RepetitionController extends Controller
      */
     public function repertoire(Repetition $repetition)
     {
-        // 0. Récupérer les IDs des chants sélectionnés pour cette répétition
-        $selectedChantIds = $repetition->chants->pluck('id')->toArray();
 
         // 1. Charger les répertoires liés directement à cette répétition
         $repertoire = $repetition->repertoires()->with([
