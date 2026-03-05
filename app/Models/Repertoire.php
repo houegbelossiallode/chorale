@@ -28,4 +28,9 @@ class Repertoire extends Model
     {
         return $this->hasMany(Enregistrement::class);
     }
+
+    public function repetitions()
+    {
+        return $this->belongsToMany(Repetition::class, 'repertoire_repetition');
+    }
 }

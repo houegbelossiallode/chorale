@@ -20,7 +20,7 @@ class RepetitionController extends Controller
      */
     public function index()
     {
-        $repetitions = Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
+        $repetitions = Repetition::orderBy('updated_at', 'desc')->with(['repertoires.chant', 'repertoires.partieEvent'])
             ->withCount('presences')
             ->latest()
             ->paginate(10);
@@ -55,22 +55,23 @@ class RepetitionController extends Controller
                 ])->get();
 
         $allChants = Chant::orderBy('title')->get();
-        $repetition->load('chants');
+        $repetition->load(['repertoires']);
 
         $events = \App\Models\Event::with(['repertoireEntries.chant', 'repertoireEntries.partieEvent'])
             ->orderBy('start_at', 'desc')
-            ->take(20)
+            ->take(30)
             ->get()
             ->map(function ($e) {
                 return [
                     'id' => $e->id,
-                    'title' => $e->title . ' (' . $e->start_at->format('d/m/Y') . ')',
+                    'title' => $e->title . ' (' . ($e->start_at ? $e->start_at->format('d/m/Y') : 'Date inconnue') . ')',
                     'repertoire' => $e->repertoireEntries->groupBy(function ($r) {
                         return $r->partieEvent->titre ?? 'Sans partie';
                     })->map(function ($items) {
                         return $items->map(function ($r) {
                             return [
-                                'id' => $r->chant_id,
+                                'id' => $r->id, // Repertoire ID
+                                'chant_id' => $r->chant_id,
                                 'title' => $r->chant->title,
                                 'composer' => $r->chant->composer
                             ];
@@ -94,11 +95,7 @@ class RepetitionController extends Controller
 
     public function syncChants(Request $request, Repetition $repetition)
     {
-        $repetition->chants()->sync($request->input('chants', []));
-
-        if ($request->has('event_id')) {
-            $repetition->update(['event_id' => $request->input('event_id')]);
-        }
+        $repetition->repertoires()->sync($request->input('repertoire_ids', []));
 
         return back()->with('success', 'Programme musical mis à jour.');
     }
@@ -175,7 +172,7 @@ class RepetitionController extends Controller
         }
 
         // Charger les relations nécessaires pour l'email
-        $repetition->load(['chants', 'event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent']);
+        $repetition->load(['repertoires.chant', 'repertoires.partieEvent']);
 
         try {
             // Envoi des mails

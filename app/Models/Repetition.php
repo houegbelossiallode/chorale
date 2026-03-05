@@ -6,20 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Repetition extends Model
 {
-    protected $fillable = ['titre', 'description', 'lieu', 'start_time', 'end_time', 'event_id'];
+    protected $fillable = ['titre', 'description', 'lieu', 'start_time', 'end_time'];
 
     public function presences()
     {
         return $this->hasMany(Presence::class);
     }
 
-    public function event()
+    public function repertoires()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsToMany(Repertoire::class, 'repertoire_repetition');
     }
 
-    public function chants()
-    {
-        return $this->belongsToMany(Chant::class, 'chant_repetitions');
-    }
 }

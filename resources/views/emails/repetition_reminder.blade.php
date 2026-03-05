@@ -91,24 +91,21 @@
                 <p><strong>📍 Lieu :</strong> {{ $repetition->lieu }}</p>
             </div>
 
-            @if($repetition->chants->count() > 0)
+            @if($repetition->repertoires->count() > 0)
                 <h3>Chants à préparer :</h3>
 
-                @if($repetition->event)
-                    @php
-                        $repertoire = $repetition->event->repertoireEntries->filter(function ($r) use ($repetition) {
-                            return $repetition->chants->pluck('id')->contains($r->chant_id);
-                        })->groupBy(function ($r) {
-                            return $r->partieEvent->titre ?? 'Autre';
-                        });
+                @php
+                    $events = $repetition->repertoires->groupBy('event_id');
+                @endphp
 
-                        $simple_chants = $repetition->chants->filter(function ($c) use ($repetition) {
-                            return !$repetition->event->repertoireEntries->pluck('chant_id')->contains($c->id);
-                        });
-                    @endphp
-
-                    @foreach($repertoire as $partie => $entries)
-                        <div class="part-header text-primary">{{ $partie }}</div>
+                @foreach($events as $eventId => $items)
+                    @php $event = $items->first()->event; @endphp
+                    <div
+                        style="font-weight: bold; color: #4834D4; margin-top: 15px; font-size: 14px; border-bottom: 2px solid #eee; padding-bottom: 5px;">
+                        Agenda : {{ $event->title }}
+                    </div>
+                    @foreach($items->groupBy(fn($i) => $i->partieEvent->titre ?? 'Autre') as $partie => $entries)
+                        <div class="part-header">{{ $partie }}</div>
                         <ul class="chant-list">
                             @foreach($entries as $entry)
                                 <li class="chant-item">
@@ -118,28 +115,7 @@
                             @endforeach
                         </ul>
                     @endforeach
-
-                    @if($simple_chants->count() > 0)
-                        <div class="part-header">Autres chants (Hors programme)</div>
-                        <ul class="chant-list">
-                            @foreach($simple_chants as $chant)
-                                <li class="chant-item">
-                                    <strong>{{ $chant->title }}</strong><br>
-                                    <small>{{ $chant->composer ?: 'Chef de Choeur' }}</small>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                @else
-                    <ul class="chant-list">
-                        @foreach($repetition->chants as $chant)
-                            <li class="chant-item">
-                                <strong>{{ $chant->title }}</strong><br>
-                                <small>{{ $chant->composer ?: 'Chef de Choeur' }}</small>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+                @endforeach
             @endif
 
             @if($repetition->description)
