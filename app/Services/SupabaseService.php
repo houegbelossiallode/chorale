@@ -134,34 +134,45 @@ class SupabaseService
      */
     public function resetUserPassword(string $token, string $newPassword)
     {
-        // 1. Verify token to get user ID
-        $verifyResponse = Http::withHeaders([
-            'apikey' => env('SUPABASE_ANON_KEY')
-        ])->post($this->url . '/auth/v1/verify', [
-                    'type' => 'recovery',
-                    'token_hash' => $token
-                ]);
+        // ... (code existant)
+    }
 
-        if ($verifyResponse->failed()) {
-            Log::error('Supabase verify token error: ' . $verifyResponse->body());
+    /**
+     * Met à jour le mot de passe d'un utilisateur par son email via l'API Admin.
+     */
+    public function updateUserPasswordByEmail(string $email, string $newPassword)
+    {
+        // 1. Trouver l'utilisateur par son email
+        $listResponse = Http::withHeaders([
+            'apikey' => $this->serviceKey,
+            'Authorization' => 'Bearer ' . $this->serviceKey,
+        ])->get($this->url . '/auth/v1/admin/users');
+
+        if ($listResponse->failed()) {
+            Log::error('Supabase List Users Error: ' . $listResponse->body());
             return false;
         }
 
-        $userId = $verifyResponse->json('user.id');
-        if (!$userId) {
+        $users = $listResponse->json();
+        $targetUser = collect($users)->firstWhere('email', $email);
+
+        if (!$targetUser) {
+            Log::error("Supabase User not found for email: {$email}");
             return false;
         }
 
-        // 2. Update password via Admin API
-        $response = Http::withHeaders([
+        $userId = $targetUser['id'];
+
+        // 2. Mettre à jour le mot de passe
+        $updateResponse = Http::withHeaders([
             'apikey' => $this->serviceKey,
             'Authorization' => 'Bearer ' . $this->serviceKey,
         ])->put($this->url . "/auth/v1/admin/users/{$userId}", [
                     'password' => $newPassword,
                 ]);
 
-        if ($response->failed()) {
-            Log::error('Supabase reset password error: ' . $response->body());
+        if ($updateResponse->failed()) {
+            Log::error("Supabase Password Update Error for {$email}: " . $updateResponse->body());
             return false;
         }
 

@@ -79,7 +79,17 @@ class RepetitionController extends Controller
                 ];
             });
 
-        return view('admin.suivi.repetitions.show', compact('repetition', 'members', 'allChants', 'events'));
+        $presences = $members->mapWithKeys(function ($m) use ($repetition) {
+            $presence = $m->presences->first(); // On a déjà filtré par repetition_id dans le with
+            return [
+                $m->id => [
+                    'status' => $presence?->status,
+                    'motif' => $presence?->motif,
+                ],
+            ];
+        });
+
+        return view('admin.suivi.repetitions.show', compact('repetition', 'members', 'allChants', 'events', 'presences'));
     }
 
     public function syncChants(Request $request, Repetition $repetition)

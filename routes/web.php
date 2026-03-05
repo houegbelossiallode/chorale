@@ -46,6 +46,12 @@ Route::post('/password/reset', [\App\Http\Controllers\Auth\PasswordResetControll
 Route::post('/api/supabase-register', [\App\Http\Controllers\Auth\AuthSyncController::class, 'register']);
 Route::post('/logout', [\App\Http\Controllers\Auth\AuthSyncController::class, 'logout'])->name('logout');
 
+// Password change routes (forced)
+Route::middleware('auth')->group(function () {
+    Route::get('/password/change', [\App\Http\Controllers\Auth\PasswordChangeController::class, 'show'])->name('password.change');
+    Route::post('/password/change', [\App\Http\Controllers\Auth\PasswordChangeController::class, 'update'])->name('password.change.update');
+});
+
 // Member Dashboard Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');

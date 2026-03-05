@@ -14,7 +14,7 @@
                 <div class="text-center md:text-left">
                     <h1 class="text-2xl font-semibold text-[#444050]">Bienvenue, {{ Auth::user()->first_name }}</h1>
                     <p class="text-[14px] text-slate-400 font-medium">Membre du pupitre : <span
-                            class="text-[#7367F0]">{{ $choristeStats['pupitre']?->nom ?? 'Non défini' }}</span></p>
+                            class="text-[#7367F0]">{{ $choristeStats['pupitre']?->name ?? 'Non défini' }}</span></p>
                 </div>
             </div>
             <div class="flex items-center justify-center md:justify-end gap-3">

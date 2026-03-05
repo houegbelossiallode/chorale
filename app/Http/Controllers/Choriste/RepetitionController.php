@@ -17,6 +17,7 @@ class RepetitionController extends Controller
     {
         $repetitions = Repetition::with(['event.repertoireEntries.chant', 'event.repertoireEntries.partieEvent', 'chants'])
             ->withCount('presences')
+            ->where('start_time', '>=', now()->startOfDay())
             ->orderBy('start_time', 'desc')
             ->paginate(6);
 
