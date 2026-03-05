@@ -29,7 +29,10 @@ class RepetitionController extends Controller
      */
     public function repertoire(Repetition $repetition)
     {
-        // 1. Charger le répertoire de l'événement lié s'il existe
+        // 0. Récupérer les IDs des chants sélectionnés pour cette répétition
+        $selectedChantIds = $repetition->chants->pluck('id')->toArray();
+
+        // 1. Charger le répertoire de l'événement lié s'il existe, filtré par les chants de la répétition
         $repertoire = collect();
         if ($repetition->event_id) {
             $repertoire = Repertoire::with([
@@ -40,23 +43,24 @@ class RepetitionController extends Controller
                 }
             ])
                 ->where('repertoire.event_id', $repetition->event_id)
+                ->whereIn('repertoire.chant_id', $selectedChantIds) // FILTRE ICI
                 ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
                 ->select('repertoire.*')
                 ->orderBy('partie_events.ordre')
                 ->get();
         }
 
-        // 2. Charger les chants spécifiques à la répétition (ceux qui ne sont pas dans l'agenda)
-        $agendaChantIds = $repertoire->pluck('chant_id')->toArray();
+        // 2. Charger les chants spécifiques à la répétition (ceux qui ne sont pas dans le répertoire de l'agenda)
+        $agendaChantIdsInRepetition = $repertoire->pluck('chant_id')->toArray();
         $extraChants = $repetition->chants()
             ->with([
                 'fichiers',
                 'enregistrements' => function ($q) {
                     $q->where('user_id', Auth::id())
-                        ->whereNull('repertoire_id'); // Pour ne pas mélanger avec les enregistrements d'agenda
+                        ->whereNull('repertoire_id');
                 }
             ])
-            ->whereNotIn('chants.id', $agendaChantIds)
+            ->whereNotIn('chants.id', $agendaChantIdsInRepetition) // On exclut ceux déjà chargés via le répertoire
             ->get();
 
         $pupitres = \App\Models\Pupitre::with('users')->get();
