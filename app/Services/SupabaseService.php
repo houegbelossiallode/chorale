@@ -12,8 +12,8 @@ class SupabaseService
 
     public function __construct()
     {
-        $this->url = env('SUPABASE_URL');
-        $this->serviceKey = env('SUPABASE_SERVICE_ROLE_KEY'); // Utiliser la clé Service Role pour outrepasser les RLS
+        $this->url = config('services.supabase.url');
+        $this->serviceKey = config('services.supabase.service_key'); // Utiliser la clé Service Role pour outrepasser les RLS
     }
 
     /**
@@ -142,26 +142,34 @@ class SupabaseService
      */
     public function updateUserPasswordByEmail(string $email, string $newPassword)
     {
-        // 1. Trouver l'utilisateur par son email
+        // 1. Trouver l'utilisateur par son email avec filtrage
         $listResponse = Http::withHeaders([
             'apikey' => $this->serviceKey,
             'Authorization' => 'Bearer ' . $this->serviceKey,
-        ])->get($this->url . '/auth/v1/admin/users');
+        ])->get($this->url . '/auth/v1/admin/users', [
+                    'email' => $email
+                ]);
 
         if ($listResponse->failed()) {
             Log::error('Supabase List Users Error: ' . $listResponse->body());
             return false;
         }
 
-        $users = $listResponse->json();
-        $targetUser = collect($users)->firstWhere('email', $email);
+        $data = $listResponse->json();
+
+        // GoTrue Admin API returns { "users": [...], "aud": "..." } or sometimes just [...]
+        $usersList = isset($data['users']) ? $data['users'] : $data;
+
+        // Le filtrage peut retourner un tableau, on prend le premier qui match exactement
+        $targetUser = collect($usersList)->firstWhere('email', $email);
 
         if (!$targetUser) {
-            Log::error("Supabase User not found for email: {$email}");
+            Log::error("Supabase User not found for email: {$email}", ['response_sample' => collect($usersList)->take(1)]);
             return false;
         }
 
         $userId = $targetUser['id'];
+        Log::info("Found Supabase User ID for update", ['email' => $email, 'userId' => $userId]);
 
         // 2. Mettre à jour le mot de passe
         $updateResponse = Http::withHeaders([

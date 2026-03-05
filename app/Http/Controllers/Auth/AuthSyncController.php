@@ -58,9 +58,14 @@ class AuthSyncController extends Controller
         Auth::login($user, true);
 
         $role = strtolower($user->role->libelle ?? '');
-        $redirect = str_contains($role, 'admin') || str_contains($role, 'administrateur')
-            ? route('admin.dashboard')
-            : route('choriste.dashboard');
+
+        if ($user->must_change_password) {
+            $redirect = route('password.change');
+        } else {
+            $redirect = str_contains($role, 'admin') || str_contains($role, 'administrateur')
+                ? route('admin.dashboard')
+                : route('choriste.dashboard');
+        }
 
         return response()->json([
             'status' => 'success',

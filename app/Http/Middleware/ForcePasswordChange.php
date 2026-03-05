@@ -17,7 +17,7 @@ class ForcePasswordChange
     {
         if (auth()->check() && auth()->user()->must_change_password) {
             // Ne pas rediriger si on est déjà sur la page de changement ou si on se déconnecte
-            if (!$request->routeIs('password.change') && !$request->is('logout')) {
+            if (!$request->routeIs('password.change', 'password.change.update') && !$request->is('logout') && !$request->expectsJson()) {
                 return redirect()->route('password.change');
             }
         }
