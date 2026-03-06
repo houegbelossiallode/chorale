@@ -32,8 +32,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span
-                    class="absolute top-2 right-2 w-3.5 h-3.5 bg-[#EA5455] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">2</span>
+                @if(auth()->user()->unreadNotifications->count() > 0)
+                    <span
+                        class="absolute top-2 right-2 w-3.5 h-3.5 bg-[#EA5455] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                        {{ auth()->user()->unreadNotifications->count() }}
+                    </span>
+                @endif
             </button>
 
             <!-- Notifications Dropdown (Absolute right for mobile) -->
@@ -43,41 +47,55 @@
                 style="display: none;">
                 <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <h4 class="text-[14px] font-semibold text-[#444050]">Notifications</h4>
-                    <span class="text-[9px] font-bold bg-[#E7E7FF] text-[#7367F0] px-2 py-0.5 rounded uppercase">2
-                        Nouvelles</span>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span class="text-[9px] font-bold bg-[#E7E7FF] text-[#7367F0] px-2 py-0.5 rounded uppercase">
+                            {{ auth()->user()->unreadNotifications->count() }} Nouvelles
+                        </span>
+                    @endif
                 </div>
                 <div class="max-h-[300px] overflow-y-auto custom-scrollbar-slim">
-                    <!-- Notification Item 1 -->
-                    <a href="#"
-                        class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50">
-                        <div
-                            class="w-9 h-9 rounded-full bg-[#DFF7E9] text-[#28C76F] flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
+                    @forelse(auth()->user()->notifications->take(10) as $notification)
+                        <a href="{{ $notification->data['url'] ?? '#' }}"
+                            class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 {{ $notification->read_at ? 'opacity-60' : '' }}">
+                            <div
+                                class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 {{ $notification->read_at ? 'bg-slate-100 text-slate-400' : 'bg-[#FFF1E3] text-[#FF9F43]' }}">
+                                @if(($notification->data['type'] ?? '') === 'repetition_reminder')
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[13px] font-semibold text-[#444050]">
+                                    {{ $notification->data['title'] ?? 'Notification' }}</p>
+                                <p class="text-[11px] text-slate-400 line-clamp-2">
+                                    {{ $notification->data['message'] ?? '' }}</p>
+                                <p class="text-[9px] text-slate-300 mt-1 uppercase font-bold">
+                                    {{ $notification->created_at->diffForHumans() }}</p>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="px-4 py-8 text-center">
+                            <p class="text-xs text-slate-400 italic">Aucune notification pour le moment.</p>
                         </div>
-                        <div class="min-w-0">
-                            <p class="text-[13px] font-semibold text-[#444050]">Nouveau membre</p>
-                            <p class="text-[11px] text-slate-400 line-clamp-1">Jean-Baptiste vient de s'inscrire.</p>
-                        </div>
-                    </a>
-                    <!-- Notification Item 2 -->
-                    <a href="#"
-                        class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50">
-                        <div
-                            class="w-9 h-9 rounded-full bg-[#FFF1E3] text-[#FF9F43] flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-[13px] font-semibold text-[#444050]">Répétition</p>
-                            <p class="text-[11px] text-slate-400 line-clamp-1">Début dans 2 heures.</p>
-                        </div>
-                    </a>
+                    @endforelse
                 </div>
+                @if(auth()->user()->unreadNotifications->count() > 0)
+                    <div class="p-2 bg-slate-50 border-t border-slate-100 text-center">
+                        <form action="{{ route('notifications.markAllAsRead') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="text-[10px] font-bold text-[#7367F0] uppercase hover:underline">
+                                Tout marquer comme lu
+                            </button>
+                        </form>
+                    </div>
+                @endif
             </div>
         </div>
 

@@ -168,24 +168,32 @@
                     </div>
                     <div class="divide-y divide-slate-50">
                         @forelse($choristeStats['notifications'] as $notification)
-                            <div class="px-6 py-4 hover:bg-slate-50 transition-colors">
+                            <a href="{{ $notification->data['url'] ?? '#' }}"
+                                class="block px-6 py-4 hover:bg-slate-50 transition-colors {{ $notification->read_at ? 'opacity-60' : '' }}">
                                 <div class="flex gap-3">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 {{ $notification->read_at ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-500' }}">
+                                        @if(($notification->data['type'] ?? '') === 'repetition_reminder')
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        @endif
                                     </div>
                                     <div class="min-w-0">
                                         <p class="text-[13px] font-semibold text-[#444050] leading-tight mb-1">
-                                            {{ $notification->title }}
+                                            {{ $notification->data['title'] ?? 'Notification' }}
                                         </p>
                                         <p class="text-[11px] text-slate-400">{{ $notification->created_at->diffForHumans() }}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         @empty
                             <div class="p-6 text-center text-slate-400 text-xs italic">Aucune annonce.</div>
                         @endforelse

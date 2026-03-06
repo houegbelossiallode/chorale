@@ -175,8 +175,9 @@ class ChantController extends Controller
             Storage::disk('public')->delete($fichier->file_path);
             $fichier->delete();
         }
-        $chant->delete();
-
+        $chant->update([
+            'actif' => $chant->actif === 'OUI' ? 'NON' : 'OUI'
+        ]);
         return redirect()->route('admin.chants.index')->with('success', 'Chant supprimé.');
     }
 }

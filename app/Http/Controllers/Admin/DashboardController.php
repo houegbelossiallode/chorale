@@ -92,7 +92,7 @@ class DashboardController extends Controller
                 ->get(),
             'total_chants_count' => \App\Models\Chant::count(),
             'attendance_streak' => rand(3, 8), // Simulé pour l'instant
-            'notifications' => Post::latest()->take(5)->get(), // Utilisation des posts comme notifications
+            'notifications' => $user->notifications->take(5), // Utilisation des vraies notifications
         ];
 
         return view('dashboard.choriste', compact('choristeStats'));

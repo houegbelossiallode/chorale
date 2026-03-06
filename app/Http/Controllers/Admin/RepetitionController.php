@@ -58,8 +58,8 @@ class RepetitionController extends Controller
         $repetition->load(['repertoires.chant']);
 
         $events = \App\Models\Event::with(['repertoireEntries.chant', 'repertoireEntries.partieEvent'])
-            ->orderBy('start_at','desc')
-            ->where('start_at','>=',now())
+            ->orderBy('start_at', 'desc')
+            ->where('start_at', '>=', now())
             ->take(30)
             ->get()
             ->map(function ($e) {
@@ -176,13 +176,11 @@ class RepetitionController extends Controller
         $repetition->load(['repertoires.chant', 'repertoires.partieEvent']);
 
         try {
-            // Envoi des mails
+            // Envoi des notifications (E-mail + Base de données)
             foreach ($choristes as $choriste) {
-                if ($choriste->email) {
-                    Mail::to($choriste->email)->send(new RepetitionReminderMail($repetition));
-                }
+                $choriste->notify(new \App\Notifications\RepetitionReminderNotification($repetition));
             }
-            return back()->with('success', 'Relance envoyée avec succès à ' . $choristes->count() . ' chorist(e)s.');
+            return back()->with('success', 'Relance envoyée avec succès à ' . $choristes->count() . ' chorist(e)s via e-mail et cloche de notification.');
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur lors de l\'envoi de la relance : ' . $e->getMessage());
         }

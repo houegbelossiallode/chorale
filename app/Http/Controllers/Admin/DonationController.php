@@ -15,14 +15,14 @@ class DonationController extends Controller
      */
     public function index()
     {
-        $donations = Donation::with(['donateur', 'projet'])->latest()->paginate(20);
+        $donations = Donation::with(['donateur', 'projet'])->where('actif','OUI')->orderBy('updated_at','desc')->paginate(20);
         return view('admin.finance.donations.index', compact('donations'));
     }
 
     public function create()
     {
-        $projets = Projet::all();
-        $donateurs = Donateur::all();
+        $projets = Projet::where('actif','OUI')->get();
+        $donateurs = Donateur::where('actif','OUI')->get();
         return view('admin.finance.donations.create', compact('projets', 'donateurs'));
     }
 
@@ -67,7 +67,9 @@ class DonationController extends Controller
     {
         // Decrement project 'atteint' amount
         $donation->projet->decrement('atteint', $donation->amount);
-        $donation->delete();
+        $donation->update([
+            'actif' => $donation->actif === 'OUI' ? 'NON' : 'OUI'
+        ]);
         return back()->with('success', 'Donation annulée.');
     }
 }
