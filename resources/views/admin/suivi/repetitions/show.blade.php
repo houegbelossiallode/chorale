@@ -149,8 +149,8 @@
                                                 <button @click="updatePresence({{ $member->id }}, 'present')" title="PrÃ©sent"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'present' ?
-                                                                                                                                                                            'bg-[#28C76F] text-white border-[#28C76F] shadow-sm' :
-                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#28C76F]/30 hover:text-[#28C76F]'">
+                                                                                                                                                                                            'bg-[#28C76F] text-white border-[#28C76F] shadow-sm' :
+                                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#28C76F]/30 hover:text-[#28C76F]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M5 13l4 4L19 7" />
@@ -159,8 +159,8 @@
                                                 <button @click="updatePresence({{ $member->id }}, 'absent')" title="Absent"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'absent' ?
-                                                                                                                                                                            'bg-[#EA5455] text-white border-[#EA5455] shadow-sm' :
-                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#EA5455]/30 hover:text-[#EA5455]'">
+                                                                                                                                                                                            'bg-[#EA5455] text-white border-[#EA5455] shadow-sm' :
+                                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#EA5455]/30 hover:text-[#EA5455]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M6 18L18 6M6 6l12 12" />
@@ -169,8 +169,8 @@
                                                 <button @click="updatePresence({{ $member->id }}, 'justifie')" title="JustifiÃ©"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'justifie' ?
-                                                                                                                                                                            'bg-[#FF9F43] text-white border-[#FF9F43] shadow-sm' :
-                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#FF9F43]/30 hover:text-[#FF9F43]'">
+                                                                                                                                                                                            'bg-[#FF9F43] text-white border-[#FF9F43] shadow-sm' :
+                                                                                                                                                                                            'bg-white text-slate-300 border-slate-100 hover:border-[#FF9F43]/30 hover:text-[#FF9F43]'">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -219,8 +219,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'present')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'present' ?
-                                                                                                                                                                'bg-[#28C76F] text-white border-[#28C76F] shadow-md' :
-                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                                'bg-[#28C76F] text-white border-[#28C76F] shadow-md' :
+                                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M5 13l4 4L19 7" />
@@ -229,8 +229,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'absent')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'absent' ?
-                                                                                                                                                                'bg-[#EA5455] text-white border-[#EA5455] shadow-md' :
-                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                                'bg-[#EA5455] text-white border-[#EA5455] shadow-md' :
+                                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M6 18L18 6M6 6l12 12" />
@@ -239,8 +239,8 @@
                                     <button @click="updatePresence({{ $member->id }}, 'justifie')"
                                         class="py-2.5 rounded-xl flex items-center justify-center transition-all border outline-none"
                                         :class="presences[{{ $member->id }}].status === 'justifie' ?
-                                                                                                                                                                'bg-[#FF9F43] text-white border-[#FF9F43] shadow-md' :
-                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
+                                                                                                                                                                                'bg-[#FF9F43] text-white border-[#FF9F43] shadow-md' :
+                                                                                                                                                                                'bg-white text-slate-300 border-slate-100'">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -265,25 +265,17 @@
                             Gérer le programme
                         </h3>
                     </div>
-                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-4 space-y-4">
                         @forelse($repetition->repertoires as $item)
-                            <div
-                                class="p-3 bg-slate-50/50 rounded-xl border border-slate-100 group hover:shadow-sm transition-all text-center sm:text-left flex flex-col justify-center min-h-[5rem]">
-                                <div class="flex flex-col gap-1 min-w-0">
-                                    @if($item->partieEvent)
-                                        <span class="text-[8px] font-black text-[#7367F0] uppercase tracking-tighter">
-                                            {{ $item->partieEvent->titre }}
-                                        </span>
-                                    @endif
-                                    <p class="font-bold text-[#444050] text-xs leading-tight line-clamp-2">
-                                        {{ $item->chant->title }}
-                                    </p>
-                                    <p class="text-[10px] text-slate-400 truncate">
-                                        {{ $item->chant->composer ?? 'Chef de Choeur' }}
-                                    </p>
-                                </div>
-                            </div>
+                            @php break; @endphp
                         @empty
+                        @endforelse
+                        @php
+                            $grouped = $repetition->repertoires->groupBy(function ($item) {
+                                return $item->event?->title ?? 'Sans événement';
+                            });
+                        @endphp
+                        @if($grouped->isEmpty())
                             <div
                                 class="col-span-1 sm:col-span-2 text-center flex flex-col items-center justify-center py-12 px-4 h-full">
                                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
@@ -300,7 +292,42 @@
                                     le
                                     programme</button>
                             </div>
-                        @endforelse
+                        @else
+                            @foreach($grouped as $eventTitle => $items)
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <svg class="w-3 h-3 text-[#7367F0] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <span
+                                            class="text-[9px] font-black text-[#7367F0] uppercase tracking-widest truncate">{{ $eventTitle }}</span>
+                                        <div class="h-px flex-1 bg-slate-100"></div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        @foreach($items as $item)
+                                            <div
+                                                class="p-3 bg-slate-50/50 rounded-xl border border-slate-100 group hover:shadow-sm transition-all flex flex-col justify-center min-h-[4rem]">
+                                                <div class="flex flex-col gap-0.5 min-w-0">
+                                                    @if($item->partieEvent)
+                                                        <span class="text-[8px] font-black text-[#7367F0] uppercase tracking-tighter">
+                                                            {{ $item->partieEvent->titre }}
+                                                        </span>
+                                                    @endif
+                                                    <p class="font-bold text-[#444050] text-xs leading-tight line-clamp-2">
+                                                        {{ $item->chant->title }}
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-400 truncate">
+                                                        {{ $item->chant->composer ?? 'Chef de Choeur' }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
 
