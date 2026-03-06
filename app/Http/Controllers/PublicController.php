@@ -19,7 +19,7 @@ class PublicController extends Controller
         $latest_news = Post::where('type', 'news')
             ->whereNotNull('published_at')
             ->latest()
-            ->take(3)
+            ->take(6)
             ->get();
         $upcoming_events = Event::where('is_public', DB::raw('true'))
             // ->where('start_at', '>=', now())
