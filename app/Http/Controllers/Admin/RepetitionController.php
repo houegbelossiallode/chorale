@@ -58,7 +58,8 @@ class RepetitionController extends Controller
         $repetition->load(['repertoires.chant']);
 
         $events = \App\Models\Event::with(['repertoireEntries.chant', 'repertoireEntries.partieEvent'])
-            ->orderBy('start_at', 'desc')
+            ->orderBy('start_at','desc')
+            ->where('start_at','>=',now())
             ->take(30)
             ->get()
             ->map(function ($e) {

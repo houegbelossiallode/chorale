@@ -70,7 +70,7 @@ class PasswordResetController extends Controller
         // Verify token and update password
         $result = $this->supabase->resetUserPassword($token, $email, $newPassword);
         if ($result) {
-            return redirect()->route('login')->with('status', 'Password has been reset.');
+            return redirect()->route('login')->with('success', 'Bravo vôtre mot de passe a été réinitialisé.');
         }
         return redirect()->back()->with('error', 'Invalid or expired token.');
     }

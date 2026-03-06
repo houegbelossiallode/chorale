@@ -75,6 +75,19 @@
                             <p class="text-gray-400 text-sm">Connectez-vous pour accéder à votre espace membre</p>
                         </div>
 
+                        @if (session('success'))
+                            <div
+                                class="mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl text-green-600 text-sm font-medium">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
                         <form id="loginForm" x-data="{ loading: false }" @submit.prevent="handleLogin($el, $data)"
                             class="space-y-5">
                             <div>
