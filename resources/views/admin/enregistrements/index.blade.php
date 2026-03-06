@@ -99,7 +99,7 @@
                                                 </td>
                                                 <td class="px-8 py-4">
                                                     <audio controls class="h-8 w-40 opacity-70 hover:opacity-100 transition-opacity">
-                                                        <source src="{{ asset('storage/' . $rec->file_path) }}" type="audio/mpeg">
+                                                        <source src="{{ Str::startsWith($rec->file_path, ['http://', 'https://']) ? $rec->file_path : asset('storage/' . $rec->file_path) }}" type="audio/mpeg">
                                                     </audio>
                                                 </td>
                                                 <td class="px-8 py-4">
@@ -186,7 +186,7 @@
                                         <td class="px-8 py-4 text-sm font-bold text-slate-700">{{ $rec->chant->title }}</td>
                                         <td class="px-8 py-4">
                                             <audio controls class="h-8 w-40 opacity-70 hover:opacity-100 transition-opacity">
-                                                <source src="{{ asset('storage/' . $rec->file_path) }}" type="audio/mpeg">
+                                                <source src="{{ Str::startsWith($rec->file_path, ['http://', 'https://']) ? $rec->file_path : asset('storage/' . $rec->file_path) }}" type="audio/mpeg">
                                             </audio>
                                         </td>
                                         <td class="px-8 py-4">

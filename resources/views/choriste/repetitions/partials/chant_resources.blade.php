@@ -1,13 +1,14 @@
 <!-- Partition Générale -->
 @if($chant->file_path)
-    <a href="{{ asset('storage/' . $chant->file_path) }}" target="_blank"
-        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-all shadow-sm"
-        title="Partition Générale">
+    <button
+        onclick="downloadFile('{{ Str::startsWith($chant->file_path, ['http://', 'https://']) ? $chant->file_path : asset('storage/' . $chant->file_path) }}', '{{ basename($chant->file_path) }}')"
+        class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-all shadow-sm cursor-pointer"
+        title="Télécharger la Partition Générale">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-    </a>
+    </button>
 @endif
 
 <!-- Paroles -->
@@ -42,9 +43,9 @@
             @endif
         </button>
     @else
-        <a href="{{ Str::startsWith($fichier->file_path, ['http://', 'https://']) ? $fichier->file_path : asset('storage/' . $fichier->file_path) }}"
-            target="_blank"
-            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-[#7367F0]/10 hover:text-[#7367F0] border border-slate-100 transition-all uppercase"
+        <button
+            onclick="downloadFile('{{ Str::startsWith($fichier->file_path, ['http://', 'https://']) ? $fichier->file_path : asset('storage/' . $fichier->file_path) }}', '{{ addslashes(basename($fichier->file_path)) }}')"
+            class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-[#7367F0]/10 hover:text-[#7367F0] border border-slate-100 transition-all cursor-pointer"
             title="{{ $fichier->type }} - {{ $fichier->pupitre->name ?? 'Tous' }}">
             @if($fichier->type == 'pdf' || $fichier->type == 'partition')
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,10 +58,29 @@
                         d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                 </svg>
             @endif
-        </a>
+        </button>
     @endif
 @endforeach
 
 @if(!$chant->file_path && !$chant->parole && $chant->fichiers->count() == 0)
     <span class="text-[10px] text-slate-300 italic">Aucune</span>
 @endif
+
+<script>
+    if (typeof downloadFile === 'undefined') {
+        function downloadFile(url, filename) {
+            fetch(url)
+                .then(res => res.blob())
+                .then(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = filename || 'fichier';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                })
+                .catch(() => window.open(url, '_blank'));
+        }
+    }
+</script>

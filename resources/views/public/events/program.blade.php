@@ -77,11 +77,11 @@
 
                                                 <!-- Partition Générale -->
                                                 @if($item->score_path)
-                                                    <a href="{{ asset('storage/' . $item->score_path) }}" target="_blank"
-                                                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all hover:bg-gray-800">
+                                                    <button onclick="downloadFile('{{ Str::startsWith($item->score_path, ['http://', 'https://']) ? $item->score_path : asset('storage/' . $item->score_path) }}', '{{ addslashes(basename($item->score_path)) }}')"
+                                                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all hover:bg-gray-800 cursor-pointer">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                                         Partition
-                                                    </a>
+                                                    </button>
                                                 @endif
 
                                                 <!-- Autres Ressources -->
@@ -202,3 +202,22 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function downloadFile(url, filename) {
+        fetch(url)
+            .then(res => res.blob())
+            .then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename || 'fichier';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            })
+            .catch(() => window.open(url, '_blank'));
+    }
+</script>
+@endpush

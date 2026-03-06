@@ -67,7 +67,7 @@ class ChantController extends Controller
             });
         }
 
-        $chants = $query->latest()->paginate(7)->withQueryString();
+        $chants = $query->orderBy('updated_at','desc')->paginate(7)->withQueryString();
         return view('admin.chants.index', compact('chants'));
     }
 

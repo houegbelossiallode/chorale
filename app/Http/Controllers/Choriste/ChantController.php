@@ -20,7 +20,7 @@ class ChantController extends Controller
             'fichiers' => function ($query) {
                 $query->with('pupitre');
             }
-        ])->get();
+        ])->orderBy('updated_at','desc')->get();
 
         return view('choriste.chants.index', compact('chants'));
     }
