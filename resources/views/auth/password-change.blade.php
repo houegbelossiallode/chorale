@@ -145,7 +145,7 @@
                             </button>
                         </form>
 
-                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                        <!-- <div class="mt-8 pt-6 border-t border-gray-100 text-center">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit"
@@ -158,7 +158,7 @@
                                     Déconnexion
                                 </button>
                             </form>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
