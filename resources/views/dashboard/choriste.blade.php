@@ -201,7 +201,7 @@
                 </div>
 
                 <!-- Pupitre Stats (Performance Style) -->
-                <div class="card-material p-6">
+                <!-- <div class="card-material p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h4 class="text-[15px] font-semibold text-[#444050]">Mon Pupitre</h4>
                         <span
@@ -226,7 +226,7 @@
                                 +{{ $choristeStats['pupitre_members']->count() - 5 }} autres membres</p>
                         @endif
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
