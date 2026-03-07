@@ -170,7 +170,7 @@
                                 class="text-[10px] sm:text-[12px] text-slate-400 uppercase tracking-widest border-b border-slate-50">
                                 <th class="px-3 sm:px-6 py-3 font-semibold">Membre</th>
                                 <th class="px-3 sm:px-6 py-3 font-semibold hidden sm:table-cell">Adhésion</th>
-                                <th class="px-3 sm:px-6 py-3 font-semibold text-right sm:text-left">Statut</th>
+                                <!-- <th class="px-3 sm:px-6 py-3 font-semibold text-right sm:text-left">Compte</th> -->
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
@@ -191,10 +191,10 @@
                                         class="px-3 sm:px-6 py-3 text-[12px] sm:text-[14px] text-slate-500 whitespace-nowrap hidden sm:table-cell">
                                         {{ $member->created_at->translatedFormat('d M Y') }}
                                     </td>
-                                    <td class="px-3 sm:px-6 py-3 text-right sm:text-left">
+                                    <!-- <td class="px-3 sm:px-6 py-3 text-right sm:text-left">
                                         <span
                                             class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#DFF7E9] text-[#28C76F] uppercase whitespace-nowrap">Actif</span>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             @endforeach
                         </tbody>
