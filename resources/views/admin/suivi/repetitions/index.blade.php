@@ -4,38 +4,38 @@
 
 @section('content')
     <div class="space-y-6" x-data="{
-                    repModal: false,
-                    autoModal: false,
-                    editMode: false,
-                    currentId: null,
-                    formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
-                    actionUrl: '{{ route('admin.repetitions.store') }}',
-                    selectedRep: null,
-                    showProgramModal: false,
+                            repModal: false,
+                            autoModal: false,
+                            editMode: false,
+                            currentId: null,
+                            formData: { titre: '', start_time: '', end_time: '', lieu: '', description: '' },
+                            actionUrl: '{{ route('admin.repetitions.store') }}',
+                            selectedRep: null,
+                            showProgramModal: false,
 
-                    openProgram(rep) {
-                        this.selectedRep = rep;
-                        this.showProgramModal = true;
-                    },
+                            openProgram(rep) {
+                                this.selectedRep = rep;
+                                this.showProgramModal = true;
+                            },
 
-                    openModal(rep = null) {
-                        if (rep) {
-                            this.editMode = true;
-                            this.currentId = rep.id;
-                            this.formData.titre = rep.titre;
-                            this.formData.start_time = rep.start_time.substring(0, 16);
-                            this.formData.end_time = rep.end_time.substring(0, 16);
-                            this.formData.lieu = rep.lieu;
-                            this.formData.description = rep.description;
-                            this.actionUrl = `/admin/repetitions/${rep.id}`;
-                        } else {
-                            this.editMode = false;
-                            this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
-                            this.actionUrl = '{{ route('admin.repetitions.store') }}';
-                        }
-                        this.repModal = true;
-                    }
-                }">
+                            openModal(rep = null) {
+                                if (rep) {
+                                    this.editMode = true;
+                                    this.currentId = rep.id;
+                                    this.formData.titre = rep.titre;
+                                    this.formData.start_time = rep.start_time.substring(0, 16);
+                                    this.formData.end_time = rep.end_time.substring(0, 16);
+                                    this.formData.lieu = rep.lieu;
+                                    this.formData.description = rep.description;
+                                    this.actionUrl = `/admin/repetitions/${rep.id}`;
+                                } else {
+                                    this.editMode = false;
+                                    this.formData = { titre: '', start_time: '', end_time: '', lieu: '', description: '' };
+                                    this.actionUrl = '{{ route('admin.repetitions.store') }}';
+                                }
+                                this.repModal = true;
+                            }
+                        }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-[#444050]">Gestion des Répétitions</h1>
@@ -156,7 +156,7 @@
                                                                     <button @click="open = false; openProgram({{ json_encode([
                                 'titre' => $rep->titre,
                                 'start_time' => \Carbon\Carbon::parse($rep->start_time)->translatedFormat('l d F Y'),
-                                'events' => $rep->repertoires->groupBy('event_id')->map(function ($reps, $eventId) {
+                                'events' => $rep->repertoires->whereNotNull('event_id')->groupBy('event_id')->map(function ($reps, $eventId) {
                                     $event = $reps->first()->event;
                                     return [
                                         'title' => $event->title,
@@ -172,6 +172,14 @@
                                                 ];
                                             });
                                         })
+                                    ];
+                                })->values()->all(),
+                                'simple_chants' => $rep->repertoires->whereNull('event_id')->map(function ($r) {
+                                    return [
+                                        'title' => $r->chant->title,
+                                        'composer' => $r->chant->composer,
+                                        'file_path' => $r->chant->file_path,
+                                        'partie' => $r->partieEvent->titre ?? 'Général'
                                     ];
                                 })->values()->all(),
                             ]) }})" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all uppercase tracking-widest">
@@ -301,7 +309,7 @@
                                         <button @click="openProgram({{ json_encode([
                         'titre' => $rep->titre,
                         'start_time' => \Carbon\Carbon::parse($rep->start_time)->translatedFormat('l d F Y'),
-                        'events' => $rep->repertoires->groupBy('event_id')->map(function ($reps, $eventId) {
+                        'events' => $rep->repertoires->whereNotNull('event_id')->groupBy('event_id')->map(function ($reps, $eventId) {
                             $event = $reps->first()->event;
                             return [
                                 'title' => $event->title,
@@ -317,6 +325,14 @@
                                         ];
                                     });
                                 })
+                            ];
+                        })->values()->all(),
+                        'simple_chants' => $rep->repertoires->whereNull('event_id')->map(function ($r) {
+                            return [
+                                'title' => $r->chant->title,
+                                'composer' => $r->chant->composer,
+                                'file_path' => $r->chant->file_path,
+                                'partie' => $r->partieEvent->titre ?? 'Général'
                             ];
                         })->values()->all(),
                     ]) }})" class="w-10 h-10 rounded-lg flex items-center justify-center text-blue-600 bg-white shadow-sm border border-slate-100 hover:scale-105 transition-all"
@@ -631,7 +647,7 @@
             class="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" x-cloak
             x-transition.opacity>
 
-            <div class="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] transform transition-all border border-slate-100"
+            <div class="bg-white rounded-[2.5rem] w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] transform transition-all border border-slate-100"
                 @click.away="showProgramModal = false">
 
                 <!-- Header -->
@@ -658,70 +674,52 @@
 
                 <!-- Content -->
                 <div class="flex-1 overflow-y-auto p-8 custom-scrollbar-slim">
-                    <!-- Event Banners if linked -->
                     <template x-for="event in selectedRep?.events" :key="event.title">
-                        <div class="mb-8 p-6 rounded-3xl bg-blue-50 border border-blue-100/50 space-y-6">
-                            <div class="flex items-center gap-5">
+                        <div class="mb-10 space-y-6">
+                            <div class="flex items-center gap-4 bg-slate-50/50 p-4 rounded-3xl border border-slate-100">
                                 <div
-                                    class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </div>
-                                <div>
-                                    <div class="flex items-center gap-2 mb-0.5">
-                                        <span class="text-[9px] font-black uppercase text-blue-600 tracking-[0.2em]">Agenda
-                                            Associé</span>
-                                    </div>
-                                    <h4 class="text-lg font-black text-[#444050] leading-tight" x-text="event.title"></h4>
-                                    <p class="text-xs text-blue-500 font-bold" x-text="event.date"></p>
+                                <div class="min-w-0">
+                                    <h4 class="text-lg font-black text-[#444050] tracking-tight truncate"
+                                        x-text="event.title"></h4>
+                                    <p class="text-[10px] font-black uppercase text-blue-600 tracking-widest"
+                                        x-text="event.date"></p>
                                 </div>
                             </div>
 
-                            <!-- Repertoire Groups for this event -->
-                            <div class="space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <template x-for="(chants, partie) in event.repertoire" :key="partie">
-                                    <div class="last:mb-0">
-                                        <h5
-                                            class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 pl-1 flex items-center gap-3">
-                                            <span x-text="partie"></span>
-                                            <div class="h-[1px] flex-1 bg-slate-100"></div>
-                                        </h5>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div
+                                        class="bg-white rounded-2xl border border-slate-100 p-5 space-y-4 hover:shadow-md transition-all flex flex-col h-full group">
+                                        <div class="flex items-center justify-between border-b border-slate-50 pb-3">
+                                            <h5 class="text-[10px] font-black text-[#7367F0] uppercase tracking-[0.2em]"
+                                                x-text="partie"></h5>
+                                            <span class="text-[9px] font-bold text-slate-300"
+                                                x-text="chants.length + ' chant' + (chants.length > 1 ? 's' : '')"></span>
+                                        </div>
+                                        <div class="space-y-3 flex-1">
                                             <template x-for="chant in chants" :key="chant.title">
-                                                <div
-                                                    class="p-4 rounded-2xl border border-white bg-white/50 hover:border-[#7367F0]/30 transition-all flex items-center gap-4 group">
+                                                <div class="flex items-center gap-3 group/chant">
                                                     <div
-                                                        class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:bg-[#7367F0] group-hover:text-white transition-all shadow-sm">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        class="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center group-hover/chant:bg-[#7367F0]/10 group-hover/chant:text-[#7367F0] transition-all shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                             viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2"
                                                                 d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                                         </svg>
                                                     </div>
-                                                    <div class="min-w-0 flex-1">
-                                                        <p class="font-bold text-sm text-[#444050] truncate"
+                                                    <div class="min-w-0">
+                                                        <p class="font-bold text-xs text-[#444050] truncate"
                                                             x-text="chant.title"></p>
-                                                        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-tighter truncate"
+                                                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter truncate"
                                                             x-text="chant.composer || 'CHEF DE CHOEUR'"></p>
                                                     </div>
-                                                    <template x-if="chant.file_path">
-                                                        <!-- <button
-                                                            @click="$dispatch('open-media', { type: 'audio', url: chant.file_path, title: chant.title })"
-                                                            class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
-                                                        </button> -->
-                                                    </template>
                                                 </div>
                                             </template>
                                         </div>
@@ -733,43 +731,32 @@
 
                     <!-- Simple Chants List (if no linked Event or extra chants) -->
                     <template x-if="selectedRep?.simple_chants && selectedRep.simple_chants.length > 0">
-                        <div>
-                            <template x-if="selectedRep?.events && selectedRep.events.length > 0">
-                                <h5
-                                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 pl-1 flex items-center gap-3">
-                                    <span>Autres chants (Hors agenda)</span>
-                                    <div class="h-[1px] flex-1 bg-slate-100"></div>
-                                </h5>
-                            </template>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-3">
+                                <div class="h-px flex-1 bg-slate-100"></div>
+                                <h5 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Chants
+                                    complémentaires</h5>
+                                <div class="h-px flex-1 bg-slate-100"></div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <template x-for="chant in selectedRep.simple_chants" :key="chant.title">
                                     <div
                                         class="p-4 rounded-2xl border border-slate-100 bg-white hover:border-[#7367F0]/30 transition-all flex items-center gap-4 group">
                                         <div
-                                            class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#7367F0] group-hover:text-white transition-all shadow-sm">
+                                            class="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-[#7367F0] group-hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                             </svg>
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-bold text-sm text-[#444050] truncate" x-text="chant.title">
-                                            </p>
+                                        <div class="min-w-0">
+                                            <p class="text-[8px] font-black text-[#7367F0] uppercase tracking-tighter"
+                                                x-text="chant.partie"></p>
+                                            <p class="font-bold text-sm text-[#444050] truncate" x-text="chant.title"></p>
                                             <p class="text-[10px] uppercase font-bold text-slate-400 tracking-tighter truncate"
                                                 x-text="chant.composer || 'Chef de Choeur'"></p>
                                         </div>
-                                        <template x-if="chant.file_path">
-                                            <button
-                                                @click="$dispatch('open-media', { type: 'audio', url: chant.file_path, title: chant.title })"
-                                                class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </button>
-                                        </template>
                                     </div>
                                 </template>
                             </div>
