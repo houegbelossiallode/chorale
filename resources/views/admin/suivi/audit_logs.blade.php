@@ -5,8 +5,24 @@
 @section('content')
     <div class="space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 class="text-xl sm:text-2xl font-semibold text-[#444050]">Suivi des Activités</h3>
-            <p class="text-sm text-slate-400">Historique des connexions et déconnexions</p>
+            <div>
+                <h3 class="text-xl sm:text-2xl font-semibold text-[#444050]">Suivi des Activités</h3>
+                @if(isset($filteredUser))
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="px-3 py-1 bg-[#7367F0]/10 text-[#7367F0] rounded-full text-xs font-bold flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Filtre : {{ $filteredUser->first_name }} {{ $filteredUser->last_name }}
+                        </span>
+                        <a href="{{ route('admin.audit-logs.index') }}" class="text-[10px] text-slate-400 font-bold uppercase hover:text-[#7367F0] transition-colors">
+                            Réinitialiser
+                        </a>
+                    </div>
+                @else
+                    <p class="text-sm text-slate-400">Historique des connexions et déconnexions</p>
+                @endif
+            </div>
         </div>
 
         <div class="bg-white rounded-xl border border-slate-100 shadow-material overflow-hidden">
