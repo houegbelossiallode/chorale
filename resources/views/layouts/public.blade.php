@@ -233,9 +233,18 @@
                     <div class="w-px h-6 mx-3" :class="scrolled ? 'bg-gray-200' : 'bg-white/20'"></div>
 
                     <div class="flex items-center gap-3">
-                        
+                        @auth
+                            @php
+                                $dashboardRoute = auth()->user()->role && strtolower(auth()->user()->role->libelle) === 'admin' 
+                                    ? route('admin.dashboard') 
+                                    : route('choriste.dashboard');
+                            @endphp
+                            <a href="{{ $dashboardRoute }}" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-500"
+                               :class="scrolled ? 'text-[#7367F0] hover:bg-[#7367F0]/5 border border-[#7367F0]/10' : 'text-white border border-white/20 hover:bg-white/10'">Dashboard</a>
+                        @else
                             <a href="/login" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-500"
                                :class="scrolled ? 'text-gray-600 hover:text-amber-700 hover:bg-amber-50' : 'text-white/80 hover:text-white hover:bg-white/10'">Connexion</a>
+                        @endauth
                        
                         <a href="/don" class="relative px-6 py-2.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-amber-500/25 transition-all duration-500 hover:scale-105 overflow-hidden group">
                             <span class="relative z-10">✦ Faire un Don</span>
