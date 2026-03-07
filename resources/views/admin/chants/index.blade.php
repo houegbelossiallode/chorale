@@ -75,8 +75,9 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#444050] group-hover:text-[#7367F0] transition-colors">
-                                                {{ $chant->title }}</p>
+                                            <a href="{{ route('admin.chants.show', $chant->id) }}" class="font-bold text-[#444050] hover:text-[#7367F0] transition-colors block">
+                                                {{ $chant->title }}
+                                            </a>
                                             <p class="text-xs text-slate-400">{{ $chant->composer ?? 'Compositeur inconnu' }}
                                             </p>
                                         </div>

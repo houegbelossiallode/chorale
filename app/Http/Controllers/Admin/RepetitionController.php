@@ -178,6 +178,7 @@ class RepetitionController extends Controller
         try {
             // Envoi des notifications (E-mail + Base de données)
             foreach ($choristes as $choriste) {
+                /** @var \App\Models\User $choriste */
                 $choriste->notify(new \App\Notifications\RepetitionReminderNotification($repetition));
             }
             return back()->with('success', 'Relance envoyée avec succès à ' . $choristes->count() . ' chorist(e)s via e-mail et cloche de notification.');

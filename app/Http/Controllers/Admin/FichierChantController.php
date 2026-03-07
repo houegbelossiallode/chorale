@@ -25,20 +25,17 @@ class FichierChantController extends Controller
             'chant_id' => 'required|exists:chants,id',
             'type' => 'required|in:partition,audio,video,youtube',
             'pupitre_id' => 'nullable|exists:pupitres,id',
-            'file' => 'sometimes|nullable|file',
+            'file' => 'required_unless:type,youtube|file|mimes:pdf,mp3,wav,m4a,ogg,aac,mp4,mov|max:40960',
             'url' => 'nullable|url',
+        ], [
+            'file.required_unless' => 'Un fichier est requis pour ce type de ressource.',
+            'file.mimes' => 'Le fichier doit être de type : pdf, mp3, wav, m4a, ogg, aac, mp4 ou mov.',
+            'file.max' => 'Le fichier ne doit pas dépasser 40 Mo.',
+            'file.uploaded' => 'Le téléchargement du fichier a échoué. Il est possible que le fichier soit trop volumineux pour le serveur.',
         ]);
 
         \Log::info('FichierChant store called', $request->except('file'));
         \Log::info('Has file: ' . ($request->hasFile('file') ? 'yes' : 'no'));
-
-        // Validation conditionnelle
-        if (in_array($request->type, ['partition', 'audio', 'video'])) {
-            if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
-                \Log::warning('FichierChant: fichier manquant ou invalide');
-                return back()->withErrors(['file' => 'Un fichier valide est requis pour ce type de ressource.'])->withInput();
-            }
-        }
         if ($request->type === 'youtube' && !$request->url) {
             return back()->withErrors(['url' => 'Une URL YouTube est requise.'])->withInput();
         }
@@ -87,7 +84,8 @@ class FichierChantController extends Controller
         ]);
 
         $file = $request->file('audio');
-        $filename = 'record-' . uniqid() . '.webm';
+        $extension = $file->getClientOriginalExtension() ?: 'webm';
+        $filename = 'record-' . uniqid() . '.' . $extension;
         $path = "chants/{$chant->id}/audios/" . Str::slug($chant->title) . '-' . $filename;
 
         \Log::info('Admin Record: Uploading to Supabase path = ' . $path);

@@ -286,6 +286,8 @@
     let timerInterval;
     let startTime;
     let audioBlob;
+    let mimeType = 'audio/webm';
+    let fileExtension = 'webm';
 
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -296,6 +298,18 @@
     const uploadBtn = document.getElementById('uploadBtn');
     const discardBtn = document.getElementById('discardBtn');
     const pupitreSelect = document.getElementById('pupitre_id');
+
+    // Détection du format supporté
+    if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+        fileExtension = 'webm';
+    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+        fileExtension = 'mp4';
+    } else if (MediaRecorder.isTypeSupported('audio/mpeg')) {
+        mimeType = 'audio/mpeg';
+        fileExtension = 'mp3';
+    }
 
     startBtn.onclick = async () => {
         try {
@@ -314,11 +328,11 @@
                 timerElem.textContent = `${Math.floor(diff / 60).toString().padStart(2, '0')}:${(diff % 60).toString().padStart(2, '0')}`;
             }, 1000);
             
-            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
             mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
             
             mediaRecorder.onstop = () => {
-                audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioBlob = new Blob(audioChunks, { type: mimeType });
                 audioPreview.src = URL.createObjectURL(audioBlob);
                 previewContainer.classList.remove('hidden');
                 statusLabel.textContent = "TERMINÉ";
@@ -328,9 +342,9 @@
             
             audioChunks = [];
             mediaRecorder.start();
-            animateBars(stream);
+            try { animateBars(stream); } catch(e) { console.warn(e); }
 
-        } catch (err) { alert("Micro inaccessible !"); }
+        } catch (err) { alert("Erreur: " + (err.message || "Micro inaccessible !")); }
     };
 
     stopBtn.onclick = () => {
@@ -376,7 +390,7 @@
         uploadBtn.innerHTML = '<span class="animate-spin mr-2">◌</span> Envoi...';
         
         const formData = new FormData();
-        formData.append('audio', audioBlob, 'record.webm');
+        formData.append('audio', audioBlob, `record.${fileExtension}`);
         if (pupitreSelect.value) {
             formData.append('pupitre_id', pupitreSelect.value);
         }
