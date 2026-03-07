@@ -708,7 +708,7 @@
                                                             x-text="chant.composer || 'CHEF DE CHOEUR'"></p>
                                                     </div>
                                                     <template x-if="chant.file_path">
-                                                        <button
+                                                        <!-- <button
                                                             @click="$dispatch('open-media', { type: 'audio', url: chant.file_path, title: chant.title })"
                                                             class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -720,7 +720,7 @@
                                                                     stroke-width="2"
                                                                     d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                        </button>
+                                                        </button> -->
                                                     </template>
                                                 </div>
                                             </template>

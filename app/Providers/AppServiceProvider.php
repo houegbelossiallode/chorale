@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Http\ViewComposers\AdminSidebarComposer;
+use Illuminate\Support\Facades\Event as EventFacade;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Failed;
+use App\Models\AuditLog;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -70,5 +75,35 @@ class AppServiceProvider extends ServiceProvider
         Role::observe(RoleObserver::class);
         Post::observe(PostObserver::class);
         Event::observe(EventObserver::class);
+
+        // Audit Logs
+        EventFacade::listen(Login::class, function ($event) {
+            AuditLog::create([
+                'user_id' => $event->user->id,
+                'event' => 'login',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
+        EventFacade::listen(Logout::class, function ($event) {
+            if ($event->user) {
+                AuditLog::create([
+                    'user_id' => $event->user->id,
+                    'event' => 'logout',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            }
+        });
+
+        EventFacade::listen(Failed::class, function ($event) {
+            AuditLog::create([
+                'user_id' => $event->user ? $event->user->id : null,
+                'event' => 'failed_login',
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
     }
 }

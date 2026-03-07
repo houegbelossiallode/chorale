@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\ForcePasswordChange::class,
+            \App\Http\Middleware\UpdateUserActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -108,7 +108,7 @@
                         class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-[#7367F0] font-bold border-2 border-white shadow-sm overflow-hidden text-[13px]">
                         {{ substr(auth()->user()->first_name ?? 'A', 0, 1) }}
                     </div>
-                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#28C76F] border-2 border-white rounded-full">
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 {{ auth()->user()->isOnline() ? 'bg-[#28C76F]' : 'bg-slate-300' }} border-2 border-white rounded-full">
                     </div>
                 </div>
                 <div class="hidden lg:block text-left">

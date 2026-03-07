@@ -346,6 +346,21 @@
                 currentRepertoireId: null,
                 currentChantTitle: '',
                 currentLyrics: '',
+                mimeType: 'audio/webm',
+                fileExtension: 'webm',
+
+                init() {
+                    if (MediaRecorder.isTypeSupported('audio/webm')) {
+                        this.mimeType = 'audio/webm';
+                        this.fileExtension = 'webm';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        this.mimeType = 'audio/mp4';
+                        this.fileExtension = 'mp4';
+                    } else if (MediaRecorder.isTypeSupported('audio/mpeg')) {
+                        this.mimeType = 'audio/mpeg';
+                        this.fileExtension = 'mp3';
+                    }
+                },
 
                 openLyrics(lyrics, title) {
                     this.currentLyrics = lyrics;
@@ -376,7 +391,7 @@
                 async startRecording() {
                     try {
                         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        this.mediaRecorder = new MediaRecorder(stream);
+                        this.mediaRecorder = new MediaRecorder(stream, { mimeType: this.mimeType });
                         this.audioChunks = [];
 
                         this.mediaRecorder.ondataavailable = (event) => {
@@ -384,7 +399,7 @@
                         };
 
                         this.mediaRecorder.onstop = () => {
-                            this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                            this.audioBlob = new Blob(this.audioChunks, { type: this.mimeType });
                         };
 
                         this.mediaRecorder.start();
@@ -406,7 +421,7 @@
                 async saveRecording() {
                     this.isSaving = true;
                     const formData = new FormData();
-                    formData.append('audio', this.audioBlob, 'recording.webm');
+                    formData.append('audio', this.audioBlob, `recording.${this.fileExtension}`);
                     formData.append('chant_id', this.currentChantId);
                     formData.append('repertoire_id', this.currentRepertoireId);
                     formData.append('_token', '{{ csrf_token() }}');

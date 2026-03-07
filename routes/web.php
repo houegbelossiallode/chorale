@@ -58,6 +58,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Admin only routes
     Route::resource('members', \App\Http\Controllers\Admin\MemberController::class);
     Route::post('members/{member}/toggle', [\App\Http\Controllers\Admin\MemberController::class, 'toggleStatus'])->name('members.toggle');
+    Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::resource('pupitres', \App\Http\Controllers\Admin\PupitreController::class);
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
     Route::resource('chants', \App\Http\Controllers\Admin\ChantController::class);
