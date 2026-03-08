@@ -295,10 +295,20 @@
 
                 <div class="mt-6 pt-6 border-t space-y-3" :class="scrolled ? 'border-gray-100' : 'border-white/10'">
                     @unless(View::hasSection('hideAuthActions'))
-                        <!-- @guest -->
+                        @auth
+                            @php
+                                $dashboardRoute = auth()->user()->role && strtolower(auth()->user()->role->libelle) === 'admin' 
+                                    ? route('admin.dashboard') 
+                                    : route('choriste.dashboard');
+                            @endphp
+                            <a href="{{ $dashboardRoute }}" class="block px-6 py-4 rounded-2xl font-bold text-center transition active:scale-95 shadow-lg shadow-amber-500/10"
+                               :class="scrolled ? 'bg-[#7367F0]/10 text-[#7367F0]' : 'bg-white/10 text-amber-300'">
+                                Dashboard
+                            </a>
+                        @else
                             <a href="/login" class="block px-6 py-4 rounded-2xl font-semibold text-center transition active:scale-95" 
                                :class="scrolled ? 'bg-gray-50 text-gray-900' : 'bg-white/5 text-white'">Connexion</a>
-                        <!-- @endguest -->
+                        @endauth
                     @endunless
                     
                    
