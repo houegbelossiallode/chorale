@@ -26,6 +26,41 @@ class EventController extends Controller
         return view('admin.events.index', compact('events'));
     }
 
+    public function api()
+    {
+        $events = Event::with('type')->get();
+
+        $calendarEvents = $events->map(function ($event) {
+            $color = '#7367F0'; // Couleur par défaut (Primary)
+
+            // Personnalisation de la couleur selon le type (optionnel)
+            $type = strtolower($event->type->libelle ?? '');
+            if (str_contains($type, 'concert') || str_contains($type, 'prestation')) {
+                $color = '#28C76F'; // Success (Green)
+            } elseif (str_contains($type, 'répétition') || str_contains($type, 'repetition')) {
+                $color = '#FF9F43'; // Warning (Orange)
+            } elseif (str_contains($type, 'messe')) {
+                $color = '#00CFE8'; // Info (Cyan)
+            }
+
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'start' => $event->start_at->toIso8601String(),
+                'end' => $event->end_at ? $event->end_at->toIso8601String() : $event->start_at->addHours(2)->toIso8601String(),
+                'url' => route('admin.events.show', $event),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'extendedProps' => [
+                    'location' => $event->location,
+                    'type' => $event->type->libelle ?? 'N/A'
+                ]
+            ];
+        });
+
+        return response()->json($calendarEvents);
+    }
+
     public function show(Event $event)
     {
         $event->load(['images', 'type']);
@@ -34,7 +69,7 @@ class EventController extends Controller
 
     public function create()
     {
-        $types = Type::where('actif','OUI')->orderBy('libelle')->get();
+        $types = Type::where('actif', 'OUI')->orderBy('libelle')->get();
         return view('admin.events.create', compact('types'));
     }
 
@@ -85,7 +120,7 @@ class EventController extends Controller
 
     public function edit(Event $event)
     {
-        $types = Type::where('actif','OUI')->orderBy('libelle')->get();
+        $types = Type::where('actif', 'OUI')->orderBy('libelle')->get();
         return view('admin.events.edit', compact('event', 'types'));
     }
 

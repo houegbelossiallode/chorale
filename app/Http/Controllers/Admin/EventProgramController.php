@@ -44,34 +44,42 @@ class EventProgramController extends Controller
             ->orderBy('partie_events.ordre')
             ->get();
 
-        // On construit le HTML de manière ultra-linéaire (sans retours à la ligne inutiles)
+        // On construit le HTML de manière ultra-linéaire
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:11pt;margin:0;padding:20px;}';
-        $html .= '.header{text-align:center;margin-bottom:20px;}';
-        $html .= '.logo{max-width:60px;margin-bottom:5px;}';
-        $html .= '.chorale-name{font-weight:bold;font-size:12pt;display:block;}';
-        $html .= '.title{font-weight:bold;font-size:14pt;margin-top:5px;}';
+        $html .= '<style>body{font-family:"Times New Roman", Times, serif;font-size:11pt;margin:0;padding:20px;color:#000;}';
+        $html .= '.header-table{width:100%;border-collapse:collapse;margin-bottom:30px;}';
+        $html .= '.header-logo{width:65px;vertical-align:middle;}';
+        $html .= '.header-text{vertical-align:middle;padding-left:15px;text-align:left;}';
+        $html .= '.logo{max-width:60px;}';
+        $html .= '.chorale-name{font-weight:bold;font-size:11pt;display:block;}';
+        $html .= '.title{font-weight:bold;font-size:15pt;margin:5px 0;}';
+        $html .= '.date-text{font-size:11pt;color:#333;}';
         $html .= '.main-table{width:100%;border-collapse:collapse;}';
         $html .= '.column{width:50%;vertical-align:top;padding:0 10px;}';
-        $html .= '.item{margin-bottom:15px;}';
+        $html .= '.item{margin-bottom:20px;}';
         $html .= '.partie{text-decoration:underline;font-weight:bold;text-transform:uppercase;}';
-        $html .= '.lyrics{font-family:serif;font-size:10pt;margin-top:2px;display:block;line-height:1.1;}';
-        $html .= '.lyrics p { margin: 0; padding: 0; line-height: 1.1; }';
+        $html .= '.lyrics{font-family:inherit;font-size:11pt;margin-top:4px;display:block;line-height:1.2;}';
+        $html .= '.lyrics p { margin: 0; padding: 0; line-height: 1.2; }';
         $html .= '</style></head><body>';
 
         // Encodage du logo en base64 pour PDF
         $logoPath = public_path('images/logo chorale st oscar romero noir fond blanc.png');
-        $logoHtml = '';
+        $logoTag = '';
         if (file_exists($logoPath)) {
             $base64 = base64_encode(file_get_contents($logoPath));
-            $logoHtml = '<img src="data:image/png;base64,' . $base64 . '" class="logo"><br>';
+            $logoTag = '<img src="data:image/png;base64,' . $base64 . '" class="logo">';
         }
 
-        $html .= '<div class="header">';
-        $html .= $logoHtml;
-        $html .= '<span class="chorale-name">Paroisse Ste Mère Térésa - Chapelle St Oscar Romero - Groupe Louange</span>';
+        // Header avec Logo à côté du titre
+        $html .= '<table class="header-table"><tr>';
+        if ($logoTag) {
+            $html .= '<td class="header-logo">' . $logoTag . '</td>';
+        }
+        $html .= '<td class="header-text">';
+        $html .= '<span class="chorale-name">Paroisse Ste Mère Térésa - Chapelle St Oscar Romero</span>';
         $html .= '<div class="title">' . e($event->title) . '</div>';
-        $html .= '<div>' . \Carbon\Carbon::parse($event->start_at)->translatedFormat('j F Y') . '</div></div>';
+        $html .= '<div class="date-text">' . \Carbon\Carbon::parse($event->start_at)->translatedFormat('j F Y') . '</div>';
+        $html .= '</td></tr></table>';
 
         $html .= '<table class="main-table">';
 

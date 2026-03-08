@@ -78,30 +78,42 @@ class AppServiceProvider extends ServiceProvider
 
         // Audit Logs
         EventFacade::listen(Login::class, function ($event) {
+            $ip = request()->header('X-Forwarded-For')
+                ? explode(',', request()->header('X-Forwarded-For'))[0]
+                : request()->ip();
+
             AuditLog::create([
                 'user_id' => $event->user->id,
                 'event' => 'login',
-                'ip_address' => request()->ip(),
+                'ip_address' => trim($ip),
                 'user_agent' => request()->userAgent(),
             ]);
         });
 
         EventFacade::listen(Logout::class, function ($event) {
             if ($event->user) {
+                $ip = request()->header('X-Forwarded-For')
+                    ? explode(',', request()->header('X-Forwarded-For'))[0]
+                    : request()->ip();
+
                 AuditLog::create([
                     'user_id' => $event->user->id,
                     'event' => 'logout',
-                    'ip_address' => request()->ip(),
+                    'ip_address' => trim($ip),
                     'user_agent' => request()->userAgent(),
                 ]);
             }
         });
 
         EventFacade::listen(Failed::class, function ($event) {
+            $ip = request()->header('X-Forwarded-For')
+                ? explode(',', request()->header('X-Forwarded-For'))[0]
+                : request()->ip();
+
             AuditLog::create([
                 'user_id' => $event->user ? $event->user->id : null,
                 'event' => 'failed_login',
-                'ip_address' => request()->ip(),
+                'ip_address' => trim($ip),
                 'user_agent' => request()->userAgent(),
             ]);
         });

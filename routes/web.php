@@ -82,6 +82,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('menus', \App\Http\Controllers\Admin\MenuController::class);
     Route::resource('sousmenus', \App\Http\Controllers\Admin\SousMenuController::class);
     Route::resource('events/types', \App\Http\Controllers\Admin\TypeController::class);
+    Route::get('events/api', [\App\Http\Controllers\Admin\EventController::class, 'api'])->name('events.api');
     Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
 
     // Configuration des Parties (Global)
