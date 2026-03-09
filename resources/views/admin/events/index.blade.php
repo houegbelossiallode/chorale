@@ -4,46 +4,70 @@
 
 @section('content')
     <div class="space-y-6" x-data="{ 
-                    view: 'grid',
-                    calendarInitialized: false,
-                    initCalendar() {
-                        if (this.calendarInitialized) return;
+                        view: 'grid',
+                        calendarInitialized: false,
+                        initCalendar() {
+                            if (this.calendarInitialized) return;
 
-                        const calendarEl = document.getElementById('calendar');
-                        const calendar = new FullCalendar.Calendar(calendarEl, {
-                            initialView: 'dayGridMonth',
-                            locale: 'fr',
-                            headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,timeGridWeek,listMonth'
-                            },
-                            buttonText: {
-                                today: 'Aujourd\'hui',
-                                month: 'Mois',
-                                week: 'Semaine',
-                                list: 'Planning'
-                            },
-                            events: '{{ route('admin.events.api') }}',
-                            eventClick: function(info) {
-                                if (info.event.url) {
-                                    info.jsEvent.preventDefault();
-                                    window.location.href = info.event.url;
+                            const calendarEl = document.getElementById('calendar');
+                            const calendar = new FullCalendar.Calendar(calendarEl, {
+                                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth',
+                                locale: 'fr',
+                                handleWindowResize: true,
+                                windowResizeDelay: 100,
+                                headerToolbar: window.innerWidth < 768 ? {
+                                    left: 'prev,next',
+                                    center: 'title',
+                                    right: 'listMonth'
+                                } : {
+                                    left: 'prev,next today',
+                                    center: 'title',
+                                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                                },
+                                buttonText: {
+                                    today: 'Aujourd\'hui',
+                                    month: 'Mois',
+                                    week: 'Semaine',
+                                    list: 'Planning'
+                                },
+                                events: '{{ route('admin.events.api') }}',
+                                eventClick: function(info) {
+                                    if (info.event.url) {
+                                        info.jsEvent.preventDefault();
+                                        window.location.href = info.event.url;
+                                    }
+                                },
+                                eventMouseEnter: function(info) {
+                                    info.el.style.cursor = 'pointer';
+                                },
+                                themeSystem: 'standard',
+                                height: 'auto',
+                                firstDay: 1,
+                                direction: 'ltr',
+                                windowResize: function(arg) {
+                                    if (window.innerWidth < 768) {
+                                        calendar.setOption('headerToolbar', {
+                                            left: 'prev,next',
+                                            center: 'title',
+                                            right: 'listMonth'
+                                        });
+                                        if (calendar.view.type !== 'listMonth' && calendar.view.type !== 'timeGridWeek') {
+                                            calendar.changeView('listMonth');
+                                        }
+                                    } else {
+                                        calendar.setOption('headerToolbar', {
+                                            left: 'prev,next today',
+                                            center: 'title',
+                                            right: 'dayGridMonth,timeGridWeek,listMonth'
+                                        });
+                                    }
                                 }
-                            },
-                            eventMouseEnter: function(info) {
-                                info.el.style.cursor = 'pointer';
-                            },
-                            themeSystem: 'standard',
-                            height: 'auto',
-                            firstDay: 1,
-                            direction: 'ltr'
-                        });
+                            });
 
-                        calendar.render();
-                        this.calendarInitialized = true;
-                    }
-                }">
+                            calendar.render();
+                            this.calendarInitialized = true;
+                        }
+                    }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h3 class="text-xl sm:text-2xl font-semibold text-[#444050]">Agenda de la Chorale</h3>
@@ -194,7 +218,8 @@
             @endif
         </div>
         <!-- Calendar View -->
-        <div x-show="view === 'calendar'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+        <div x-show="view === 'calendar'" x-cloak x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
             <!-- Legend -->
             <div class="flex flex-wrap items-center gap-4 mb-4 px-2">
                 <div class="flex items-center gap-2">
@@ -214,7 +239,8 @@
                     <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Concerts / Prest.</span>
                 </div>
             </div>
-            <div class="bg-white rounded-2xl shadow-material-sm border border-slate-100 p-6 overflow-hidden">
+            <div
+                class="bg-white rounded-2xl shadow-material-sm border border-slate-100 p-6 overflow-hidden calendar-container">
                 <div id="calendar"></div>
             </div>
         </div>
@@ -300,6 +326,37 @@
                 font-size: 0.75rem;
                 color: #a5a3ae;
                 text-transform: uppercase;
+            }
+
+            /* Mobile Adjustments */
+            @media (max-width: 767.98px) {
+                .fc .fc-toolbar {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                .fc .fc-toolbar-title {
+                    font-size: 1.1rem;
+                }
+
+                .fc .fc-button-group {
+                    width: 100%;
+                }
+
+                .fc .fc-button {
+                    flex: 1;
+                    padding: 0.4rem 0.5rem !important;
+                    font-size: 0.7rem !important;
+                }
+
+                .fc .fc-daygrid-body,
+                .fc .fc-scrollgrid-sync-table {
+                    width: 100% !important;
+                }
+
+                .calendar-container {
+                    padding: 1rem !important;
+                }
             }
         </style>
     @endpush

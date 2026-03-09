@@ -68,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withAlpha(13),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFC9A84C).withOpacity(0.2)),
+                      border: Border.all(color: const Color(0xFFC9A84C).withAlpha(51)),
                     ),
                     child: const Icon(Icons.music_note, size: 60, color: Color(0xFFC9A84C)),
                   ),
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: "Email",
                     hintStyle: const TextStyle(color: Colors.white30),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.05),
+                    fillColor: Colors.white.withAlpha(13),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: "Mot de passe",
                     hintStyle: const TextStyle(color: Colors.white30),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.05),
+                    fillColor: Colors.white.withAlpha(13),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),

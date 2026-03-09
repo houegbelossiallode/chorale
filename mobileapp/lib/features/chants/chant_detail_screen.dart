@@ -147,7 +147,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7367F0).withOpacity(0.3),
+                color: const Color(0xFF7367F0).withAlpha(77),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -164,7 +164,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
         ),
         Text(
           widget.chant['composer'] ?? 'Compositeur inconnu',
-          style: GoogleFonts.outfit(fontSize: 16, color: Colors.slate.shade400, fontWeight: FontWeight.w500),
+          style: GoogleFonts.outfit(fontSize: 16, color: Colors.blueGrey.shade400, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -179,14 +179,14 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.slate.shade50,
+          color: Colors.blueGrey.shade50,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(
           children: [
-            Icon(Icons.info_outline, color: Colors.slate),
+            Icon(Icons.info_outline, color: Colors.blueGrey),
             SizedBox(width: 10),
-            Text("Aucun fichier audio disponible", style: TextStyle(color: Colors.slate)),
+            Text("Aucun fichier audio disponible", style: TextStyle(color: Colors.blueGrey)),
           ],
         ),
       );
@@ -197,7 +197,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFFAFAFE),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.slate.shade100),
+        border: Border.all(color: Colors.blueGrey.shade100),
       ),
       child: Column(
         children: [
@@ -206,7 +206,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
             max: _duration.inSeconds.toDouble(),
             value: _position.inSeconds.toDouble(),
             activeColor: const Color(0xFF7367F0),
-            inactiveColor: const Color(0xFF7367F0).withOpacity(0.1),
+            inactiveColor: const Color(0xFF7367F0).withAlpha(25),
             onChanged: (value) async {
               final position = Duration(seconds: value.toInt());
               await _audioPlayer.seek(position);
@@ -217,8 +217,8 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(_formatDuration(_position), style: const TextStyle(color: Colors.slate, fontSize: 12)),
-                Text(_formatDuration(_duration), style: const TextStyle(color: Colors.slate, fontSize: 12)),
+                Text(_formatDuration(_position), style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
+                Text(_formatDuration(_duration), style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
               ],
             ),
           ),
@@ -282,9 +282,9 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                           _audioPlayer.stop();
                         }
                       },
-                      selectedColor: const Color(0xFF7367F0).withOpacity(0.1),
+                      selectedColor: const Color(0xFF7367F0).withAlpha(25),
                       labelStyle: TextStyle(
-                        color: isCurrent ? const Color(0xFF7367F0) : Colors.slate,
+                        color: isCurrent ? const Color(0xFF7367F0) : Colors.blueGrey,
                         fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -318,7 +318,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.slate.shade100),
+            border: Border.all(color: Colors.blueGrey.shade100),
           ),
           child: Text(
             lyrics,

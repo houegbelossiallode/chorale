@@ -14,6 +14,8 @@ class _ChantsScreenState extends State<ChantsScreen> {
   final _supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<dynamic> _chants = [];
+  List<dynamic> _filteredChants = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
       if (mounted) {
         setState(() {
           _chants = data;
+          _filteredChants = data;
           _isLoading = false;
         });
       }
@@ -42,6 +45,16 @@ class _ChantsScreenState extends State<ChantsScreen> {
         );
       }
     }
+  }
+
+  void _filterChants(String query) {
+    setState(() {
+      _filteredChants = _chants
+          .where((chant) =>
+              (chant['title']?.toString().toLowerCase() ?? "").contains(query.toLowerCase()) ||
+              (chant['composer']?.toString().toLowerCase() ?? "").contains(query.toLowerCase()))
+          .toList();
+    });
   }
 
   @override
@@ -66,11 +79,22 @@ class _ChantsScreenState extends State<ChantsScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: TextField(
+              controller: _searchController,
+              onChanged: _filterChants,
               decoration: InputDecoration(
                 hintText: "Rechercher un chant...",
-                prefixIcon: const Icon(Icons.search_rounded, color: Colors.slate),
+                prefixIcon: const Icon(Icons.search_rounded, color: Colors.blueGrey),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _filterChants("");
+                        },
+                      )
+                    : null,
                 filled: true,
-                fillColor: Colors.slate.shade50,
+                fillColor: Colors.blueGrey.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
@@ -84,7 +108,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
           const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
           )
-        else if (_chants.isEmpty)
+        else if (_filteredChants.isEmpty)
           const SliverFillRemaining(
             child: Center(child: Text("Aucun chant trouvé")),
           )
@@ -94,10 +118,10 @@ class _ChantsScreenState extends State<ChantsScreen> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final chant = _chants[index];
+                  final chant = _filteredChants[index];
                   return _buildChantCard(chant);
                 },
-                childCount: _chants.length,
+                childCount: _filteredChants.length,
               ),
             ),
           ),
@@ -114,12 +138,12 @@ class _ChantsScreenState extends State<ChantsScreen> {
         ),
       ),
       child: Container(
-        margin: const EdgeInsets.bottom(15),
+        margin: const EdgeInsets.only(bottom: 15.0),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.slate.shade100),
+          border: Border.all(color: Colors.blueGrey.shade100),
         ),
         child: Row(
           children: [
@@ -127,7 +151,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFF7367F0).withOpacity(0.1),
+                color: const Color(0xFF7367F0).withAlpha(25),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: const Icon(Icons.music_note_rounded, color: Color(0xFF7367F0)),
@@ -144,7 +168,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
                   const SizedBox(height: 4),
                   Text(
                     chant['composer'] ?? 'Compositeur inconnu',
-                    style: TextStyle(fontSize: 13, color: Colors.slate.shade400),
+                    style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade400),
                   ),
                 ],
               ),

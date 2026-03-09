@@ -1,0 +1,16 @@
+﻿Analyzing mobileapp...                                          
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\agenda\agenda_screen.dart:68:32 - deprecated_member_use
+warning - Unused import: 'package:google_fonts/google_fonts.dart' - lib\features\auth\auth_wrapper.dart:2:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\login_screen.dart:71:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\login_screen.dart:73:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\login_screen.dart:106:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\login_screen.dart:124:45 - deprecated_member_use
+  error - The class 'EdgeInsets' doesn't have a constant constructor 'bottom' - lib\features\events\events_list_screen.dart:89:32 - const_with_undefined_constructor
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\events\events_list_screen.dart:96:33 - deprecated_member_use
+  error - The class 'EdgeInsets' doesn't have a constant constructor 'bottom' - lib\features\profile\profile_screen.dart:99:32 - const_with_undefined_constructor
+   info - Don't use 'BuildContext's across async gaps - lib\features\recorder\recorder_screen.dart:41:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\recorder\recorder_screen.dart:52:28 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\recorder\recorder_screen.dart:57:28 - use_build_context_synchronously
+  error - The class 'EdgeInsets' doesn't have a constant constructor 'bottom' - lib\features\repetitions\repetitions_list_screen.dart:89:32 - const_with_undefined_constructor
+

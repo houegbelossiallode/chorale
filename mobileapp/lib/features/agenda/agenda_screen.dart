@@ -55,7 +55,7 @@ class AgendaScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.slate.shade100),
+        border: Border.all(color: Colors.blueGrey.shade100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +65,7 @@ class AgendaScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withAlpha(25),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -74,7 +74,7 @@ class AgendaScreen extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.more_horiz, color: Colors.slate),
+              const Icon(Icons.more_horiz, color: Colors.blueGrey),
             ],
           ),
           const SizedBox(height: 15),
@@ -85,17 +85,17 @@ class AgendaScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Icon(Icons.calendar_today_rounded, size: 16, color: Colors.slate.shade400),
+              Icon(Icons.calendar_today_rounded, size: 16, color: Colors.blueGrey.shade400),
               const SizedBox(width: 8),
-              Text(date, style: TextStyle(color: Colors.slate.shade500, fontSize: 14)),
+              Text(date, style: TextStyle(color: Colors.blueGrey.shade500, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 6),
           Row(
             children: [
-              Icon(Icons.location_on_rounded, size: 16, color: Colors.slate.shade400),
+              Icon(Icons.location_on_rounded, size: 16, color: Colors.blueGrey.shade400),
               const SizedBox(width: 8),
-              Text(location, style: TextStyle(color: Colors.slate.shade500, fontSize: 14)),
+              Text(location, style: TextStyle(color: Colors.blueGrey.shade500, fontSize: 14)),
             ],
           ),
           const SizedBox(height: 20),
