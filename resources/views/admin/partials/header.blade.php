@@ -17,7 +17,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <input type="text" placeholder="Rechercher..."
+            <input type="text" id="global-search" placeholder="Rechercher..."
                 class="bg-transparent border-none focus:ring-0 text-[14px] placeholder-slate-400 w-full text-[#444050] truncate">
         </div>
     </div>

@@ -16,7 +16,8 @@
             <p class="text-slate-500 text-sm">Ajustez les détails de la transaction.</p>
         </div>
 
-        <form action="{{ route('admin.finance.transactions.update', $transaction->id) }}" method="POST">
+        <form action="{{ route('admin.finance.transactions.update', $transaction->id) }}" method="POST"
+            enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="bg-white rounded-xl shadow-material overflow-hidden">
@@ -75,14 +76,136 @@
                                 placeholder="Optionnel">
                         </div>
                     </div>
+
+                    <!-- Justificatif -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Justificatif
+                            (PDF, Image)</label>
+
+                        @if($transaction->justificatif_path)
+                            <div id="current-document-info"
+                                class="mb-4 p-4 bg-slate-50 rounded-lg flex items-center justify-between border border-slate-100 transition-opacity duration-300">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-[#7367F0]/10 text-[#7367F0] rounded-lg">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Document actuel</p>
+                                        <a href="{{ route('admin.finance.transactions.download', $transaction->id) }}"
+                                            class="text-xs text-[#7367F0] hover:underline font-medium">Télécharger le
+                                            fichier</a>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-medium italic">Remplacer via le champ
+                                    ci-dessous</span>
+                            </div>
+                        @endif
+
+                        <div class="relative group">
+                            <input type="file" name="justificatif" id="justificatif" class="hidden"
+                                accept=".pdf,.jpg,.jpeg,.png">
+                            <label for="justificatif"
+                                class="flex items-center justify-center gap-3 w-full px-4 py-6 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer group-hover:border-[#7367F0] group-hover:bg-slate-50 transition-all">
+                                <div class="text-center">
+                                    <svg class="w-8 h-8 text-slate-400 mx-auto group-hover:text-[#7367F0] mb-2" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span class="text-xs text-slate-500 font-medium">Cliquez pour modifier le
+                                        justificatif</span>
+                                    <p class="text-[10px] text-slate-400 mt-1" id="file-name">Maximum 5 Mo</p>
+                                </div>
+                            </label>
+                        </div>
+                        @error('justificatif') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+                        <!-- Zone de prévisualisation (Nouveau fichier) -->
+                        <div id="preview-container" class="mt-4 hidden">
+                            <p class="text-[10px] font-bold text-[#7367F0] uppercase tracking-wider mb-2 ml-1">Nouveau
+                                fichier sélectionné</p>
+                            <div class="flex items-center gap-4 p-3 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                                <div id="preview-visual"
+                                    class="w-16 h-16 rounded-lg bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    <!-- Image preview or PDF icon will go here -->
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p id="preview-filename" class="text-sm font-semibold text-slate-700 truncate"></p>
+                                    <p id="preview-filesize" class="text-xs text-slate-400"></p>
+                                </div>
+                                <button type="button" id="remove-file"
+                                    class="p-2 text-red-400 hover:text-red-600 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="p-4 md:p-8 bg-gray-50 border-t border-gray-100 flex flex-col md:flex-row justify-end gap-3">
                     <a href="{{ route('admin.finance.transactions.index') }}"
                         class="order-2 md:order-1 px-6 py-2.5 rounded-lg text-slate-600 font-medium hover:bg-slate-200 text-center transition-all">Annuler</a>
-                    <button type="submit" class="order-1 md:order-2 btn-primary px-10">Mettre à jour l'opération</button>
+                    <button type="submit" class="order-1 md:order-2 btn-primary px-10 w-full md:w-auto">Mettre à jour
+                        l'opération</button>
                 </div>
             </div>
         </form>
     </div>
+
+    @push('scripts')
+        <script>
+            const input = document.getElementById('justificatif');
+            const previewContainer = document.getElementById('preview-container');
+            const previewVisual = document.getElementById('preview-visual');
+            const previewFilename = document.getElementById('preview-filename');
+            const previewFilesize = document.getElementById('preview-filesize');
+            const removeBtn = document.getElementById('remove-file');
+            const currentDoc = document.getElementById('current-document-info');
+
+            input.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    previewContainer.classList.remove('hidden');
+                    previewFilename.textContent = file.name;
+                    previewFilesize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' Mo';
+
+                    if (currentDoc) currentDoc.classList.add('opacity-50');
+
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            previewVisual.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file.type === 'application/pdf') {
+                        previewVisual.innerHTML = `<svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 10.5h1v3h-1z"/><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2.5 11l-1.25 1.5L14.5 13l-1.25 1.5L12 13l-1.25 1.5L9.5 13V9h8v4zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>`;
+                    } else {
+                        previewVisual.innerHTML = `<svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
+                    }
+                } else {
+                    resetPreview();
+                }
+            });
+
+            removeBtn.addEventListener('click', function () {
+                input.value = '';
+                resetPreview();
+            });
+
+            function resetPreview() {
+                previewContainer.classList.add('hidden');
+                previewVisual.innerHTML = '';
+                previewFilename.textContent = '';
+                previewFilesize.textContent = '';
+                if (currentDoc) currentDoc.classList.remove('opacity-50');
+                document.getElementById('file-name').textContent = "Maximum 5 Mo";
+            }
+        </script>
+    @endpush
 @endsection

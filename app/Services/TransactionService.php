@@ -27,6 +27,7 @@ class TransactionService
                 'categorie_id' => $data['categorie_id'],
                 'montant' => $data['montant'],
                 'reference' => $data['reference'] ?? null,
+                'justificatif_path' => $data['justificatif_path'] ?? null,
                 'caisse_id' => $caisse->id,
             ]);
 
@@ -66,7 +67,14 @@ class TransactionService
             }
 
             // 3. Mettre à jour la transaction
-            $transaction->update($data);
+            $transaction->update([
+                'description' => $data['description'],
+                'type' => $data['type'],
+                'categorie_id' => $data['categorie_id'],
+                'montant' => $data['montant'],
+                'reference' => $data['reference'] ?? null,
+                'justificatif_path' => $data['justificatif_path'] ?? $transaction->justificatif_path,
+            ]);
 
             return $transaction;
         });

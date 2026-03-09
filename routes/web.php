@@ -67,6 +67,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::name('finance.')->group(function () {
         Route::resource('finance-categories', \App\Http\Controllers\Admin\FinanceCategoryController::class);
         Route::resource('transactions', \App\Http\Controllers\Admin\TransactionController::class);
+        Route::get('transactions/{transaction}/download', [\App\Http\Controllers\Admin\TransactionController::class, 'downloadJustificatif'])->name('transactions.download');
         Route::get('finance/export-excel', [\App\Http\Controllers\Admin\FinanceReportController::class, 'exportExcel'])->name('export.excel');
         Route::get('finance/report-pdf', [\App\Http\Controllers\Admin\FinanceReportController::class, 'reportPDF'])->name('report.pdf');
     });
