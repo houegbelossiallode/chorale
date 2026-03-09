@@ -25,10 +25,10 @@ class TransactionController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = mb_strtolower($request->search, 'UTF-8');
             $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                    ->orWhere('reference', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(reference) LIKE ?', ["%{$search}%"]);
             });
         }
 

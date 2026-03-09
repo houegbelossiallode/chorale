@@ -10,15 +10,15 @@
             </svg>
         </button>
 
-        <!-- Material Search (Hidden on smaller screens, visible from 'sm') -->
-        <div class="hidden sm:flex items-center gap-3 text-slate-400 group flex-1 max-w-[200px] md:max-w-md">
+        <!-- Material Search (Visible on all screens) -->
+        <div class="flex items-center gap-2 md:gap-3 text-slate-400 group flex-1 w-full md:max-w-md">
             <svg class="w-5 h-5 group-focus-within:text-[#7367F0] transition-colors shrink-0" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input type="text" id="global-search" placeholder="Rechercher..."
-                class="bg-transparent border-none focus:ring-0 text-[14px] placeholder-slate-400 w-full text-[#444050] truncate">
+                class="bg-transparent border-none focus:ring-0 text-[13px] md:text-[14px] placeholder-slate-400 w-full text-[#444050] truncate px-0">
         </div>
     </div>
 
