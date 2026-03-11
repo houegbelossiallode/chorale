@@ -36,7 +36,7 @@ class AuthSyncController extends Controller
         }
 
         $email = $supabaseUser['email'];
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $email)->orWhere('supabase_id', $supabaseUser['id'])->first();
 
         if (!$user) {
             // Si l'utilisateur n'existe pas localement, on le crée
@@ -49,9 +49,13 @@ class AuthSyncController extends Controller
                 'email' => $email,
                 'password' => bcrypt(str()->random(16)),
                 'slug' => str(($metadata['first_name'] ?? '') . ' ' . ($metadata['last_name'] ?? ''))->slug() ?: str($email)->slug(),
+                'supabase_id' => $supabaseUser['id'],
                 'role' => 'choriste',
                 'is_active' => true,
             ]);
+        } elseif (empty($user->supabase_id)) {
+            // Update existing user with supabase_id
+            $user->update(['supabase_id' => $supabaseUser['id']]);
         }
 
         // Connecter l'utilisateur dans la session Laravel
@@ -91,6 +95,7 @@ class AuthSyncController extends Controller
             'email' => $request->email,
             'password' => bcrypt(str()->random(16)), // Laravel a besoin d'un mot de passe technique
             'slug' => str($request->first_name . ' ' . $request->last_name)->slug(),
+            'supabase_id' => $request->supabase_id ?? null,
             'role' => 'choriste', // Par défaut
             'is_active' => true,
         ]);
@@ -98,6 +103,37 @@ class AuthSyncController extends Controller
         Auth::login($user);
 
         return response()->json(['status' => 'success', 'user' => $user]);
+    }
+
+    /**
+     * Synchronise les informations du profil depuis le mobile
+     */
+    public function syncProfile(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        // On ne met à jour que les champs fournis
+        $data = $request->only([
+            'first_name', 
+            'last_name', 
+            'activite', 
+            'hobbie', 
+            'citation', 
+            'love_choir', 
+            'date_naissance', 
+            'photo_url',
+            'pupitre_id'
+        ]);
+
+        $user->update($data);
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user
+        ]);
     }
 
     public function logout()

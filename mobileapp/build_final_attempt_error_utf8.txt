@@ -1,0 +1,85 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter : 
+Au caractère Ligne:1 : 
+1
++ flutter build apk 
+--release > build_final
+_attempt_error.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (:String) [],    
+ RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+A problem was found 
+with the configuration 
+of task 
+':app:packageRelease' 
+(type 
+'PackageApplication').
+  - In plugin 'com.andr
+oid.internal.version-ch
+eck' type 'com.android.
+build.gradle.tasks.Pack
+ageApplication' 
+property 
+'dependencyDataFile' 
+specifies file 
+'C:\Users\HP 450 G7\.ge
+mini\antigravity\scratc
+h\chorale_app\mobileapp
+\build\app\intermediate
+s\sdk_dependency_data\r
+elease\sdkReleaseDepend
+encyData\sdkDependencyD
+ata.pb' which doesn't 
+exist.
+
+    Reason: An input 
+file was expected to 
+be present but it 
+doesn't exist.
+
+    Possible solutions:
+      1. Make sure the 
+file exists before the 
+task is called.
+      2. Make sure 
+that the task which 
+produces the file is 
+declared as an input.
+
+    For more 
+information, please 
+refer to https://docs.g
+radle.org/8.14/userguid
+e/validation_problems.h
+tml#input_file_does_not
+_exist in the Gradle 
+documentation.
+
+* Try:
+> Make sure the file 
+exists before the task 
+is called
+> Make sure that the 
+task which produces 
+the file is declared 
+as an input
+> Run with --scan to 
+get full insights.
+
+BUILD FAILED in 12s
+Running Gradle task 'assembleRelease'...                           13,1s
+Gradle task 
+assembleRelease failed 
+with exit code 1

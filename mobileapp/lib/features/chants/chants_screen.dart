@@ -40,9 +40,6 @@ class _ChantsScreenState extends State<ChantsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur lors de la récupération des chants")),
-        );
       }
     }
   }
@@ -59,129 +56,141 @@ class _ChantsScreenState extends State<ChantsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          expandedHeight: 100,
-          floating: false,
-          pinned: true,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            title: Text(
-              "Bibliothèque",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: const Color(0xFF444050)),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFE),
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(25, 25, 25, 10),
+              child: _buildSearchBar(),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _filterChants,
-              decoration: InputDecoration(
-                hintText: "Rechercher un chant...",
-                prefixIcon: const Icon(Icons.search_rounded, color: Colors.blueGrey),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 20),
-                        onPressed: () {
-                          _searchController.clear();
-                          _filterChants("");
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.blueGrey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 15),
-              ),
-            ),
-          ),
-        ),
-        if (_isLoading)
-          const SliverFillRemaining(
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else if (_filteredChants.isEmpty)
-          const SliverFillRemaining(
-            child: Center(child: Text("Aucun chant trouvé")),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.all(20),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final chant = _filteredChants[index];
-                  return _buildChantCard(chant);
-                },
-                childCount: _filteredChants.length,
-              ),
-            ),
-          ),
+          if (_isLoading)
+            const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
+          else if (_filteredChants.isEmpty)
+            _buildEmptyState()
+          else
+            _buildChantsList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 0,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFF444050),
+      centerTitle: true,
+      title: Text("Bibliothèque Musicale", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+      actions: [
+        IconButton(icon: const Icon(Icons.sort_by_alpha_rounded), onPressed: () {}),
+        const SizedBox(width: 10),
       ],
     );
   }
 
-  Widget _buildChantCard(dynamic chant) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChantDetailScreen(chant: chant),
+  Widget _buildSearchBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 15, offset: const Offset(0, 5))],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _filterChants,
+        style: GoogleFonts.outfit(fontSize: 15, color: const Color(0xFF444050)),
+        decoration: InputDecoration(
+          hintText: "Rechercher une mélodie...",
+          hintStyle: GoogleFonts.outfit(color: Colors.blueGrey[200], fontSize: 15),
+          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7367F0), size: 22),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(icon: const Icon(Icons.close_rounded, size: 18), onPressed: () { _searchController.clear(); _filterChants(""); })
+              : null,
         ),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 15.0),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.blueGrey.shade100),
-        ),
-        child: Row(
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SliverFillRemaining(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF7367F0).withAlpha(25),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Icon(Icons.music_note_rounded, color: Color(0xFF7367F0)),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    chant['title'] ?? 'Sans titre',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF444050)),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    chant['composer'] ?? 'Compositeur inconnu',
-                    style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade400),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF7367F0),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
-            ),
+            Icon(Icons.search_off_rounded, size: 80, color: Colors.blueGrey[100]),
+            const SizedBox(height: 15),
+            Text("Aucun chant n'a été trouvé", style: GoogleFonts.outfit(color: Colors.blueGrey[300], fontSize: 16)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChantsList() {
+    return SliverPadding(
+      padding: const EdgeInsets.all(25),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => _buildPremiumChantCard(_filteredChants[index]),
+          childCount: _filteredChants.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumChantCard(dynamic chant) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 15, offset: const Offset(0, 5))],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChantDetailScreen(chant: chant))),
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF7367F0), Color(0xFF9E95F5)]),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.music_note_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(chant['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF444050), height: 1.2)),
+                      const SizedBox(height: 4),
+                      Text(chant['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 13, color: Colors.blueGrey[300], fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: const Color(0xFF7367F0).withAlpha(15), shape: BoxShape.circle),
+                  child: const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF7367F0), size: 14),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

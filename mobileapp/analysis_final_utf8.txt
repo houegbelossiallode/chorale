@@ -1,0 +1,27 @@
+﻿Analyzing mobileapp...                                          
+
+warning - Unused import: 'package:url_launcher/url_launcher.dart' - lib\features\events\repertoire_screen.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\services\event_service.dart:60:9 - avoid_print
+
+flutter : 2 issues 
+found. (ran in 17.4s)
+Au caractère Ligne:1 : 
+1
++ flutter analyze 
+--no-pub > 
+analysis_final.txt 
+2>&1; powershell 
+-Comma ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (2 issues foun   
+ d. (ran in 17.4s):    
+String) [], Remote    
+Exception
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 

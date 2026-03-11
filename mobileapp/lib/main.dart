@@ -31,12 +31,44 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF7367F0),
           primary: const Color(0xFF7367F0),
-          secondary: const Color(0xFFC9A84C),
+          secondary: const Color(0xFFC9A84C), // Or Premium
+          tertiary: const Color(0xFFEA5455),  // Vin/Rouge
           surface: Colors.white,
         ),
         useMaterial3: true,
-        textTheme: GoogleFonts.outfitTextTheme(),
+        textTheme: GoogleFonts.outfitTextTheme(
+          Theme.of(context).textTheme.apply(
+            bodyColor: const Color(0xFF444050),
+            displayColor: const Color(0xFF444050),
+          ),
+        ),
         scaffoldBackgroundColor: const Color(0xFFFAFAFE),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shadowColor: Colors.black.withAlpha(25),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          color: Colors.white,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF444050),
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.outfit(
+            color: const Color(0xFF444050),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: const IconThemeData(color: Color(0xFF444050)),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 2,
+            shadowColor: const Color(0xFF7367F0).withAlpha(77),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        ),
       ),
       home: const AuthWrapper(),
     );

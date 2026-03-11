@@ -1,0 +1,31 @@
+﻿Analyzing mobileapp...                                          
+
+warning - The declaration '_launchURL' isn't referenced - lib\features\chants\chant_detail_screen.dart:524:16 - unused_element
+  error - The method 'launchUrl' isn't defined for the type '_ChantDetailScreenState' - lib\features\chants\chant_detail_screen.dart:527:18 - undefined_method
+  error - The method 'launchUrl' isn't defined for the type '_ChantDetailScreenState' - lib\features\chants\chant_detail_screen.dart:528:20 - undefined_method
+warning - The declaration '_launchURL' isn't referenced - lib\features\events\repertoire_screen.dart:451:16 - unused_element
+   info - Don't invoke 'print' in production code - lib\services\event_service.dart:60:9 - avoid_print
+warning - Unused import: 'package:google_fonts/google_fonts.dart' - lib\shared\widgets\pdf_viewer_screen.dart:4:8 - unused_import
+
+flutter : 6 issues 
+found. (ran in 16.7s)
+Au caractère Ligne:1 : 
+1
++ flutter analyze 
+--no-pub > 
+analysis_details.txt 
+2>&1; cmd /c type ana 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (6 issues foun   
+ d. (ran in 16.7s):    
+String) [], Remote    
+Exception
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 

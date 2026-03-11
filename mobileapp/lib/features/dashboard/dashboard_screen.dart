@@ -7,6 +7,9 @@ import 'package:chorale_app_mobile/features/repetitions/repetitions_list_screen.
 import 'package:chorale_app_mobile/features/profile/profile_screen.dart';
 import 'package:chorale_app_mobile/features/recorder/recorder_screen.dart';
 import 'package:chorale_app_mobile/features/chants/chant_detail_screen.dart';
+import 'package:chorale_app_mobile/features/notifications/notifications_screen.dart';
+import '../../services/notification_service.dart';
+import '../../services/dashboard_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,40 +32,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFE),
       drawer: _buildDrawer(context),
       body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(13),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              onTap: (index) => setState(() => _selectedIndex = index),
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              selectedItemColor: const Color(0xFF7367F0),
-              unselectedItemColor: Colors.blueGrey.shade300,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Accueil'),
-                BottomNavigationBarItem(icon: Icon(Icons.library_music_rounded), label: 'Chants'),
-                BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: 'Agenda'),
-                BottomNavigationBarItem(icon: Icon(Icons.repeat_rounded), label: 'Répet.'),
-                BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profil'),
-              ],
-            ),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 30,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: const Color(0xFF7367F0),
+            unselectedItemColor: const Color(0xFFB9B9C3),
+            selectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 11),
+            unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 11),
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Accueil'),
+              BottomNavigationBarItem(icon: Icon(Icons.library_music_rounded), label: 'Chants'),
+              BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: 'Agenda'),
+              BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_motion_rounded), label: 'Répét.'),
+              BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profil'),
+            ],
           ),
         ),
       ),
@@ -75,9 +83,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final email = user?.email ?? '';
 
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: [
-          UserAccountsDrawerHeader(
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFF7367F0), Color(0xFF9E95F5)],
@@ -85,169 +95,160 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 end: Alignment.bottomRight,
               ),
             ),
-            accountName: Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            accountEmail: Text(email, style: GoogleFonts.outfit()),
-            currentAccountPicture: const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person_rounded, color: Color(0xFF7367F0), size: 40),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.white,
+                    backgroundImage: AssetImage('assets/logo.png'),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                      Text(email, style: GoogleFonts.outfit(fontSize: 12, color: Colors.white70)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.home_outlined, color: Color(0xFF7367F0)),
-            title: Text("Accueil", style: GoogleFonts.outfit()),
-            onTap: () {
-              setState(() => _selectedIndex = 0);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.library_music_outlined, color: Color(0xFF7367F0)),
-            title: Text("Chants", style: GoogleFonts.outfit()),
-            onTap: () {
-              setState(() => _selectedIndex = 1);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.calendar_today_outlined, color: Color(0xFF7367F0)),
-            title: Text("Agenda", style: GoogleFonts.outfit()),
-            onTap: () {
-              setState(() => _selectedIndex = 2);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.repeat_one_outlined, color: Color(0xFF7367F0)),
-            title: Text("Répétitions", style: GoogleFonts.outfit()),
-            onTap: () {
-              setState(() => _selectedIndex = 3);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person_outline_rounded, color: Color(0xFF7367F0)),
-            title: Text("Profil", style: GoogleFonts.outfit()),
-            onTap: () {
-              setState(() => _selectedIndex = 4);
-              Navigator.pop(context);
-            },
-          ),
+          const SizedBox(height: 20),
+          _buildDrawerItem(Icons.home_rounded, "Tableau de Bord", 0),
+          _buildDrawerItem(Icons.library_music_rounded, "Bibliothèque des Chants", 1),
+          _buildDrawerItem(Icons.calendar_today_rounded, "Agenda & Programme", 2),
+          _buildDrawerItem(Icons.repeat_rounded, "Répétitions", 3),
+          _buildDrawerItem(Icons.person_rounded, "Mon Profil", 4),
           const Spacer(),
-          const Divider(),
+          const Divider(indent: 20, endIndent: 20),
           ListTile(
             leading: const Icon(Icons.logout_rounded, color: Color(0xFFEA5455)),
-            title: Text("Déconnexion", style: GoogleFonts.outfit(color: const Color(0xFFEA5455), fontWeight: FontWeight.w600)),
-            onTap: () {
-              Supabase.instance.client.auth.signOut();
-            },
+            title: Text("Se déconnecter", style: GoogleFonts.outfit(color: const Color(0xFFEA5455), fontWeight: FontWeight.bold)),
+            onTap: () => Supabase.instance.client.auth.signOut(),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
         ],
       ),
     );
   }
+
+  Widget _buildDrawerItem(IconData icon, String title, int index) {
+    final isSelected = _selectedIndex == index;
+    return ListTile(
+      leading: Icon(icon, color: isSelected ? const Color(0xFF7367F0) : const Color(0xFF444050)),
+      title: Text(title, style: GoogleFonts.outfit(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF7367F0) : const Color(0xFF444050))),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        Navigator.pop(context);
+      },
+      selected: isSelected,
+      selectedTileColor: const Color(0xFF7367F0).withAlpha(15),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+    );
+  }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isLoading = true;
+  int _chantsAppris = 0;
+  int _tauxPresence = 0;
+  Map<String, dynamic>? _activiteRecente;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    final stats = await DashboardService().fetchDashboardStats();
+    if (stats != null && mounted) {
+      setState(() {
+        _chantsAppris = stats['chants_appris'] ?? 0;
+        _tauxPresence = stats['taux_presence'] ?? 0;
+        _activiteRecente = stats['activite_recente'];
+        _isLoading = false;
+      });
+    } else if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final name = user?.userMetadata?['first_name'] ?? 'Choriste';
 
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return CustomScrollView(
       slivers: [
-        SliverAppBar(
-          expandedHeight: 180,
-          floating: false,
-          pinned: true,
-          elevation: 0,
-          backgroundColor: const Color(0xFF7367F0),
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF7367F0), Color(0xFF9E95F5)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -20,
-                    bottom: -20,
-                    child: Icon(Icons.music_note_rounded, size: 150, color: Colors.white.withAlpha(25)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20, bottom: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Bonjour,",
-                          style: GoogleFonts.outfit(color: Colors.white70, fontSize: 16),
-                        ),
-                        Text(
-                          name,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search_rounded, color: Colors.white),
-              onPressed: () => showSearch(context: context, delegate: GlobalSearchDelegate()),
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
+        _buildSliverAppBar(context),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 25, 20, 0),
+            padding: const EdgeInsets.all(25),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    _buildStatCard("Chants", "124", Icons.library_music_rounded, const Color(0xFF7367F0)),
-                    const SizedBox(width: 15),
-                    _buildStatCard("Agenda", "12", Icons.calendar_today_rounded, const Color(0xFFEA5455)),
-                  ],
-                ),
+                _buildWelcomeHeader(name),
                 const SizedBox(height: 30),
-                _buildSectionHeader("Prochain Événement"),
-                const SizedBox(height: 15),
-                _buildHighlightsCard(
-                  "Veillée de Prière",
-                  "Ce Samedi • 19:30",
-                  "Cathédrale Saint Paul",
-                  Icons.event_available_rounded,
-                  const Color(0xFF28C76F),
-                ),
-                const SizedBox(height: 30),
-                _buildSectionHeader("Outils Choriste"),
-                const SizedBox(height: 15),
-                _buildToolCard(
+                _buildStatsGrid(),
+                const SizedBox(height: 40),
+                if (_activiteRecente != null) ...[
+                  _buildSectionTitle("Activités Récentes"),
+                  const SizedBox(height: 20),
+                  _buildHighlightsCard(
+                    _activiteRecente!['titre'] ?? "Événement",
+                    _activiteRecente!['jour_heure'] ?? "",
+                    _activiteRecente!['lieu'] ?? "Lieu non défini",
+                    Icons.event_available_rounded,
+                    const Color(0xFFC9A84C), // Dynamique potentiellement
+                  ),
+                  const SizedBox(height: 40),
+                ] else ...[
+                  _buildSectionTitle("Activités Récentes"),
+                  const SizedBox(height: 20),
+                  Center(child: Text("Aucune activité prévue pour le moment.", style: GoogleFonts.outfit(color: Colors.blueGrey[300]))),
+                  const SizedBox(height: 40),
+                ],
+                _buildSectionTitle("Outils Privilégiés"),
+                const SizedBox(height: 20),
+                _buildPremiumToolCard(
                   context,
-                  "Enregistreur Vocal",
-                  "Travaille tes partitions n'importe où",
-                  Icons.mic_none_rounded,
+                  "Enregistreur Magique",
+                  "Enregistre tes meilleures vocalises",
+                  Icons.mic_external_on_rounded,
                   const Color(0xFF7367F0),
                   const RecorderScreen(),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 15),
+                _buildPremiumToolCard(
+                  context,
+                  "Ma Caisse Chorale",
+                  "Gère tes cotisations en un clic",
+                  Icons.account_balance_wallet_rounded,
+                  const Color(0xFF28C76F),
+                  const ChantsScreen(),
+                ),
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -256,42 +257,122 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.outfit(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF2F2B3D),
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 0,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFF444050),
+      leading: IconButton(
+        icon: const Icon(Icons.notes_rounded),
+        onPressed: () => Scaffold.of(context).openDrawer(),
       ),
+      title: Text("Dashboard", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+      centerTitle: true,
+      actions: [
+        StreamBuilder(
+          stream: Stream.periodic(const Duration(seconds: 30)).asyncMap((_) => NotificationService().fetchNotifications()),
+          builder: (context, snapshot) {
+            final notifications = snapshot.data ?? [];
+            final unreadCount = notifications.where((n) => n['read_at'] == null).length;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_none_rounded),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(color: Color(0xFFEA5455), shape: BoxShape.circle),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      child: Text(
+                        unreadCount.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(width: 10),
+      ],
+    );
+  }
+
+  Widget _buildWelcomeHeader(String name) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Bonjour $name,",
+          style: GoogleFonts.outfit(fontSize: 26, fontWeight: FontWeight.bold, color: const Color(0xFF444050)),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          "Prêt pour une nouvelle répétition ?",
+          style: GoogleFonts.outfit(fontSize: 14, color: Colors.blueGrey[300], fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsGrid() {
+    return Row(
+      children: [
+        _buildStatCard("Chants Appris", "$_chantsAppris", Icons.auto_awesome_rounded, const Color(0xFF7367F0)),
+        const SizedBox(width: 20),
+        _buildStatCard("Présences", "$_tauxPresence%", Icons.verified_user_rounded, const Color(0xFF28C76F)),
+      ],
     );
   }
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(25),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: color.withAlpha(20),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: color.withAlpha(15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 15),
-            Text(value, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF2F2B3D))),
-            Text(label, style: GoogleFonts.outfit(fontSize: 14, color: Colors.blueGrey.shade400)),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withAlpha(25), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 20),
+            Text(value, style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF444050))),
+            Text(label, style: GoogleFonts.outfit(fontSize: 12, color: Colors.blueGrey[300], fontWeight: FontWeight.bold)),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF444050))),
+        Text("Voir tout", style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF7367F0), fontWeight: FontWeight.bold)),
+      ],
     );
   }
 
@@ -300,26 +381,35 @@ class HomeScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(color: Colors.blueGrey.shade50),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: color.withAlpha(25), borderRadius: BorderRadius.circular(15)),
-            child: Icon(icon, color: color, size: 28),
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [color, color.withAlpha(150)]),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF2F2B3D))),
-                const SizedBox(height: 4),
-                Text(time, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(location, style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 12)),
+                Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF444050))),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Icon(Icons.access_time_rounded, size: 14, color: color),
+                    const SizedBox(width: 5),
+                    Text(time, style: GoogleFonts.outfit(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Text(location, style: GoogleFonts.outfit(color: Colors.blueGrey[300], fontSize: 12)),
               ],
             ),
           ),
@@ -328,42 +418,48 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolCard(BuildContext context, String title, String subtitle, IconData icon, Color color, Widget screen) {
-    return InkWell(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withAlpha(200), color],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+  Widget _buildPremiumToolCard(BuildContext context, String title, String subtitle, IconData icon, Color color, Widget screen) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: color.withAlpha(40),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: color.withAlpha(80),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.mic_rounded, color: Colors.white, size: 35),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Material(
+          color: Colors.white,
+          child: InkWell(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
+            child: Padding(
+              padding: const EdgeInsets.all(25),
+              child: Row(
                 children: [
-                  Text(title, style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                  Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(color: color.withAlpha(25), borderRadius: BorderRadius.circular(20)),
+                    child: Icon(icon, color: color, size: 30),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 17, color: const Color(0xFF444050))),
+                        Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: Colors.blueGrey[300])),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: Color(0xFFD0D2D6)),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
-          ],
+          ),
         ),
       ),
     );
@@ -427,49 +523,38 @@ class GlobalSearchDelegate extends SearchDelegate {
         }
 
         return ListView(
+          padding: const EdgeInsets.all(20),
           children: [
             if (chants.isNotEmpty) ...[
-              const Padding(
-                padding: EdgeInsets.all(15.0),
-                child: Text("CHANTS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
-              ),
-              ...chants.map((c) => ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7367F0).withAlpha(25),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.music_note_rounded, color: Color(0xFF7367F0), size: 20),
+              Text("CHANTS", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 10),
+              ...chants.map((c) => Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: ListTile(
+                      leading: const Icon(Icons.music_note_rounded, color: Color(0xFF7367F0)),
+                      title: Text(c['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(c['composer'] ?? "Compositeur inconnu"),
+                      onTap: () {
+                        close(context, null);
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => ChantDetailScreen(chant: c)));
+                      },
                     ),
-                    title: Text(c['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(c['composer'] ?? "Compositeur inconnu"),
-                    onTap: () {
-                      close(context, null);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => ChantDetailScreen(chant: c)));
-                    },
                   )),
             ],
             if (events.isNotEmpty) ...[
-              if (chants.isNotEmpty) const Divider(),
-              const Padding(
-                padding: EdgeInsets.all(15.0),
-                child: Text("ÉVÉNEMENTS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
-              ),
-              ...events.map((e) => ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEA5455).withAlpha(25),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.event_rounded, color: Color(0xFFEA5455), size: 20),
+              const SizedBox(height: 20),
+              Text("ÉVÉNEMENTS", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 10),
+              ...events.map((e) => Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: ListTile(
+                      leading: const Icon(Icons.event_rounded, color: Color(0xFFEA5455)),
+                      title: Text(e['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(e['location'] ?? "Lieu non défini"),
+                      onTap: () => close(context, null),
                     ),
-                    title: Text(e['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(e['location'] ?? "Lieu non défini"),
-                    onTap: () {
-                      close(context, null);
-                    },
                   )),
             ],
           ],

@@ -1,0 +1,9 @@
+﻿Analyzing mobileapp...                                          
+
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:210:62 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:211:47 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:222:64 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:225:76 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:228:64 - unchecked_use_of_nullable_value
+  error - The method '[]' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\profile_screen.dart:230:56 - unchecked_use_of_nullable_value
+

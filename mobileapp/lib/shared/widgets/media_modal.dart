@@ -1,0 +1,172 @@
+import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:audioplayers/audioplayers.dart' as ap;
+import 'package:google_fonts/google_fonts.dart';
+
+class MediaModal extends StatefulWidget {
+  final String title;
+  final String url;
+  final String type; // 'youtube', 'video', 'audio'
+
+  const MediaModal({
+    super.key,
+    required this.title,
+    required this.url,
+    required this.type,
+  });
+
+  static void show(BuildContext context, {required String title, required String url, required String type}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MediaModal(title: title, url: url, type: type),
+    );
+  }
+
+  @override
+  State<MediaModal> createState() => _MediaModalState();
+}
+
+class _MediaModalState extends State<MediaModal> {
+  YoutubePlayerController? _ytController;
+  final ap.AudioPlayer _audioPlayer = ap.AudioPlayer();
+  bool _isAudioPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.type == 'youtube' || widget.type == 'lien_youtube') {
+      final videoId = YoutubePlayer.convertUrlToId(widget.url);
+      if (videoId != null) {
+        _ytController = YoutubePlayerController(
+          initialVideoId: videoId,
+          flags: const YoutubePlayerFlags(
+            autoPlay: true,
+            mute: false,
+          ),
+        );
+      }
+    } else if (widget.type == 'audio') {
+      _initAudio();
+    }
+  }
+
+  Future<void> _initAudio() async {
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (mounted) setState(() => _isAudioPlaying = state == ap.PlayerState.playing);
+    });
+    _audioPlayer.onDurationChanged.listen((d) {
+      if (mounted) setState(() => _duration = d);
+    });
+    _audioPlayer.onPositionChanged.listen((p) {
+      if (mounted) setState(() => _position = p);
+    });
+    await _audioPlayer.play(ap.UrlSource(widget.url));
+  }
+
+  @override
+  void dispose() {
+    _ytController?.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 20,
+        top: 20,
+        left: 20,
+        right: 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.title,
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF444050),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (_ytController != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: YoutubePlayer(
+                controller: _ytController!,
+                showVideoProgressIndicator: true,
+                progressIndicatorColor: const Color(0xFF7367F0),
+              ),
+            )
+          else if (widget.type == 'audio')
+            _buildAudioPlayer()
+          else
+            const Center(child: Text("Contenu non supporté en prévisualisation")),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAudioPlayer() {
+    return Column(
+      children: [
+        Slider(
+          value: _position.inSeconds.toDouble().clamp(0, _duration.inSeconds.toDouble() > 0 ? _duration.inSeconds.toDouble() : 1.0),
+          max: _duration.inSeconds.toDouble() > 0 ? _duration.inSeconds.toDouble() : 1.0,
+          onChanged: (val) => _audioPlayer.seek(Duration(seconds: val.toInt())),
+          activeColor: const Color(0xFF7367F0),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: Icon(_isAudioPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled),
+              iconSize: 64,
+              color: const Color(0xFF7367F0),
+              onPressed: () {
+                if (_isAudioPlaying) {
+                  _audioPlayer.pause();
+                } else {
+                  _audioPlayer.resume();
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}

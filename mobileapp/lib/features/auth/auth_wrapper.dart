@@ -3,8 +3,35 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:chorale_app_mobile/features/auth/login_screen.dart';
 import 'package:chorale_app_mobile/features/dashboard/dashboard_screen.dart';
 
-class AuthWrapper extends StatelessWidget {
+import '../../services/laravel_service.dart';
+
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Proactively sync session if already logged in
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      LaravelService().syncSession();
+    }
+    
+    // Listen for auth state changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+      
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        LaravelService().syncSession();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

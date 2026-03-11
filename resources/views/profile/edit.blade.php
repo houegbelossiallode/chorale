@@ -24,10 +24,10 @@
                 @include('profile.partials.update-password-form')
             </div>
 
-            <!-- Delete Account -->
+            <!-- Delete Account
             <div class="card-material p-6 sm:p-8 border border-rose-100 h-full">
                 @include('profile.partials.delete-user-form')
-            </div>
+            </div> -->
         </div>
     </div>
 @endsection
