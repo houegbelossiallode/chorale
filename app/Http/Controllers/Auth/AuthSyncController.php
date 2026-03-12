@@ -117,13 +117,13 @@ class AuthSyncController extends Controller
 
         // On ne met à jour que les champs fournis
         $data = $request->only([
-            'first_name', 
-            'last_name', 
-            'activite', 
-            'hobbie', 
-            'citation', 
-            'love_choir', 
-            'date_naissance', 
+            'first_name',
+            'last_name',
+            'activite',
+            'hobbie',
+            'citation',
+            'love_choir',
+            'date_naissance',
             'photo_url',
             'pupitre_id'
         ]);
@@ -133,6 +133,33 @@ class AuthSyncController extends Controller
         return response()->json([
             'status' => 'success',
             'user' => $user
+        ]);
+    }
+
+    public function getProfile(Request $request)
+    {
+        $user = $request->user()->load('pupitre');
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        $data = [
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'activite' => $user->activite,
+            'hobbie' => $user->hobbie,
+            'citation' => $user->citation,
+            'love_choir' => $user->love_choir,
+            'date_naissance' => $user->date_naissance,
+            'photo_url' => $user->photo_url,
+            'pupitres' => $user->pupitre ? ['name' => $user->pupitre->name] : null,
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $data
         ]);
     }
 

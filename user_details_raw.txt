@@ -1,0 +1,24 @@
+﻿USER FOUND: isgostage@gmail.com
+[id]: 5
+[email]: isgostage@gmail.com
+[email_verified_at]: NULL
+[password]: $2y$12$11sfjGFlcCtj7iaHv8K/U.nzjYn59fGWa4Iyl7iHUk1nPFKfO2QbK
+[remember_token]: YJkI9HO0BRwZWmu051Bg9wtBetzlYfROs65ose5EeuGRUk9kvNAoNfzczZsU
+[created_at]: 2026-02-23 12:24:53
+[updated_at]: 2026-03-11 23:35:47
+[first_name]: Jean 5
+[last_name]: Dupont1
+[slug]: oscar-romero
+[activities]: NULL
+[citation]: 
+[why_choir]: NULL
+[activite]: 
+[hobbie]: 
+[role_id]: 2
+[date_naissance]: NULL
+[pupitre_id]: 2
+[photo_url]: https://lqwesljrejtzrcfjpesv.supabase.co/storage/v1/object/public/imgs/avatars/oscar-romero-1772920713.jpg
+[love_choir]: 
+[must_change_password]: 
+[last_seen_at]: 2026-03-11 23:35:47
+[supabase_id]: 1081e667-937d-4aaa-b454-e63664cc03bb

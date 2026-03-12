@@ -38,6 +38,7 @@ Route::view('/register', 'register')->name('register');
 // Supabase Auth Sync API
 Route::post('/api/supabase-login', [\App\Http\Controllers\Auth\AuthSyncController::class, 'login']);
 Route::post('/api/sync-profile', [\App\Http\Controllers\Auth\AuthSyncController::class, 'syncProfile'])->middleware('auth');
+Route::get('/api/profile', [\App\Http\Controllers\Auth\AuthSyncController::class, 'getProfile'])->middleware('auth');
 Route::get('/api/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'getStats'])->middleware('auth');
 
 // Password reset routes
