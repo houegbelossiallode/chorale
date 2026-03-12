@@ -128,6 +128,15 @@ class AuthSyncController extends Controller
             'pupitre_id'
         ]);
 
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $publicUrl = $this->supabase->uploadFile('imgs', 'avatars/' . $user->id . '_' . $fileName, $file);
+            if ($publicUrl) {
+                $data['photo_url'] = $publicUrl;
+            }
+        }
+
         $user->update($data);
 
         return response()->json([
