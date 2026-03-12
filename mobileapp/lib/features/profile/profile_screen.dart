@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../services/profile_service.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -37,43 +38,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      // Fallback initial values from Auth
-      final metadata = user.userMetadata ?? {};
-      if (mounted) {
-        setState(() {
-          _firstNameController.text = metadata['first_name'] ?? '';
-          _lastNameController.text = metadata['last_name'] ?? '';
-          _emailController.text = user.email ?? '';
-        });
-      }
-    }
-
-    _profileFuture = _profileService.fetchProfile();
+    debugPrint("ProfileScreen: Loading profile...");
+    _profileFuture = _profileService.fetchProfile(forceRefresh: true);
     final profile = await _profileFuture;
-    
+
     if (profile != null && mounted) {
+      debugPrint("ProfileScreen: Profile data received: ${profile['first_name']} ${profile['last_name']}");
       setState(() {
-        _firstNameController.text = profile['first_name'] ?? _firstNameController.text;
-        _lastNameController.text = profile['last_name'] ?? _lastNameController.text;
-        _emailController.text = profile['email'] ?? _emailController.text;
-        _professionController.text = profile['activite'] ?? '';
-        _hobbiesController.text = profile['hobbie'] ?? '';
-        _citationController.text = profile['citation'] ?? '';
-        _loveChoirController.text = profile['love_choir'] ?? '';
-        _photoUrl = profile['photo_url'];
+        _firstNameController.text = profile['first_name']?.toString() ?? '';
+        _lastNameController.text = profile['last_name']?.toString() ?? '';
+        _emailController.text = profile['email']?.toString() ?? '';
+        _professionController.text = profile['activite']?.toString() ?? '';
+        _hobbiesController.text = profile['hobbie']?.toString() ?? '';
+        _citationController.text = profile['citation']?.toString() ?? '';
+        _loveChoirController.text = profile['love_choir']?.toString() ?? '';
         
-        if (profile['date_naissance'] != null) {
-          final date = DateTime.parse(profile['date_naissance']);
-          _dateNaissanceController.text = DateFormat('yyyy-MM-dd').format(date);
+        String? rawPhoto = profile['photo_url']?.toString();
+        if (rawPhoto != null && rawPhoto.isNotEmpty) {
+          if (!rawPhoto.startsWith('http')) {
+            final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+            _photoUrl = "$baseUrl$rawPhoto";
+          } else {
+            _photoUrl = rawPhoto;
+          }
+        } else {
+          _photoUrl = null;
         }
 
-        // Pupitre info
-        if (profile['pupitres'] != null) {
-          _pupitreName = profile['pupitres']['name'];
+        if (profile['date_naissance'] != null && profile['date_naissance'].toString().isNotEmpty) {
+          try {
+            final date = DateTime.parse(profile['date_naissance'].toString());
+            _dateNaissanceController.text = DateFormat('yyyy-MM-dd').format(date);
+          } catch (e) {
+            _dateNaissanceController.text = profile['date_naissance'].toString();
+          }
+        }
+
+        if (profile['pupitres'] != null && profile['pupitres'] is Map) {
+          _pupitreName = profile['pupitres']['name']?.toString();
+        } else if (profile['pupitre'] != null && profile['pupitre'] is Map) {
+          _pupitreName = profile['pupitre']['name']?.toString();
         }
       });
+    } else {
+      debugPrint("ProfileScreen: Profile fetch returned null or empty");
     }
   }
 
@@ -130,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       try {
         final String? newPhotoUrl = await _profileService.uploadProfilePhoto(File(image.path));
         if (newPhotoUrl != null) {
-          await _profileService.updateProfile({'photo_url': newPhotoUrl});
+          // No need to call updateProfile manually here as uploadProfilePhoto already does it
           setState(() {
             _photoUrl = newPhotoUrl;
           });
@@ -175,6 +183,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting && !_isEditing) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+             return Center(
+               child: Padding(
+                 padding: const EdgeInsets.all(25.0),
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     const Icon(Icons.error_outline, color: Colors.red, size: 50),
+                     const SizedBox(height: 15),
+                     Text(
+                       "Impossible de charger le profil.", 
+                       style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                       textAlign: TextAlign.center
+                     ),
+                     const SizedBox(height: 10),
+                     Text(
+                       snapshot.error.toString(), 
+                       style: GoogleFonts.outfit(color: Colors.grey[700]),
+                       textAlign: TextAlign.center
+                     ),
+                     const SizedBox(height: 20),
+                     ElevatedButton(
+                       onPressed: _loadProfile,
+                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7367F0)),
+                       child: const Text("Réessayer", style: TextStyle(color: Colors.white)),
+                     )
+                   ]
+                 ),
+               )
+             );
           }
 
           return SingleChildScrollView(
@@ -289,7 +328,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         if (_citationController.text.isNotEmpty) _buildCitationCard(_citationController.text),
         _buildSectionTitle("Vie & Activités"),
-        _buildProfileItem(Icons.calendar_today_rounded, "Date de naissance", _dateNaissanceController.text.isNotEmpty ? DateFormat('dd/MM/yyyy').format(DateTime.parse(_dateNaissanceController.text)) : "Non renseignée"),
+        _buildProfileItem(
+          Icons.calendar_today_rounded, 
+          "Date de naissance", 
+          _formatDisplayDate(_dateNaissanceController.text)
+        ),
         _buildProfileItem(Icons.work_outline_rounded, "Profession", _professionController.text.isNotEmpty ? _professionController.text : "Non renseignée"),
         _buildProfileItem(Icons.palette_outlined, "Loisirs", _hobbiesController.text.isNotEmpty ? _hobbiesController.text : "Non renseignés"),
         _buildProfileItem(Icons.mic_external_on_rounded, "Pupitre", _pupitreName ?? "Non renseigné"),
@@ -479,5 +522,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  String _formatDisplayDate(String dateStr) {
+    if (dateStr.isEmpty) return "Non renseignée";
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd/MM/yyyy').format(date);
+    } catch (e) {
+      return dateStr;
+    }
   }
 }

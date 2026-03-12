@@ -5,11 +5,11 @@ import 'package:chorale_app_mobile/features/chants/chants_screen.dart';
 import 'package:chorale_app_mobile/features/events/events_list_screen.dart';
 import 'package:chorale_app_mobile/features/repetitions/repetitions_list_screen.dart';
 import 'package:chorale_app_mobile/features/profile/profile_screen.dart';
-import 'package:chorale_app_mobile/features/recorder/recorder_screen.dart';
 import 'package:chorale_app_mobile/features/chants/chant_detail_screen.dart';
 import 'package:chorale_app_mobile/features/notifications/notifications_screen.dart';
 import '../../services/notification_service.dart';
 import '../../services/dashboard_service.dart';
+import '../../services/profile_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,14 +20,43 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+  final _profileService = ProfileService();
+  Map<String, dynamic>? _profile;
+  bool _isLoadingProfile = true;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const ChantsScreen(),
-    const EventsListScreen(),
-    const RepetitionsListScreen(),
-    const ProfileScreen(),
-  ];
+  void _onNavigate(int index) {
+    if (mounted) {
+      setState(() => _selectedIndex = index);
+    }
+  }
+
+  late List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+    _screens = [
+      HomeScreen(onNavigate: _onNavigate, profile: _profile),
+      const ChantsScreen(),
+      const EventsListScreen(),
+      const RepetitionsListScreen(),
+      const ProfileScreen(),
+    ];
+  }
+
+  Future<void> _loadProfile() async {
+    if (mounted) setState(() => _isLoadingProfile = true);
+    final profile = await _profileService.fetchProfile(forceRefresh: true);
+    if (mounted) {
+      setState(() {
+        _profile = profile;
+        _isLoadingProfile = false;
+        // Update screens with new profile data
+        _screens[0] = HomeScreen(onNavigate: _onNavigate, profile: _profile);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: BottomNavigationBar(
             currentIndex: _selectedIndex,
-            onTap: (index) => setState(() => _selectedIndex = index),
+            onTap: _updateIndex,
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -68,7 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Accueil'),
               BottomNavigationBarItem(icon: Icon(Icons.library_music_rounded), label: 'Chants'),
               BottomNavigationBarItem(icon: Icon(Icons.calendar_today_rounded), label: 'Agenda'),
-              BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_motion_rounded), label: 'Répét.'),
+               BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_motion_rounded), label: 'Répét.'),
               BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profil'),
             ],
           ),
@@ -77,10 +106,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  void _updateIndex(int index) async {
+    if (index == _selectedIndex) return;
+    
+    // If moving AWAY from profile, or returning TO something else, 
+    // we might want to refresh if we suspect changes.
+    // Specifically, if we were on Profile screen (index 4) and now moving away
+    if (index == 4) {
+      // Recreate ProfileScreen to force initState and refresh data
+      _screens[4] = const ProfileScreen();
+    }
+    
+    setState(() => _selectedIndex = index);
+  }
+   Widget _buildDrawer(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
-    final name = user?.userMetadata?['first_name'] ?? 'Choriste';
-    final email = user?.email ?? '';
+    final name = _profile != null 
+        ? "${_profile!['first_name'] ?? ''} ${_profile!['last_name'] ?? ''}".trim()
+        : (user?.userMetadata?['first_name'] ?? 'Choriste');
+    final email = _profile?['email'] ?? user?.email ?? '';
+    final photoUrl = _profile?['photo_url'];
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -100,10 +145,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(2),
                   decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 32,
                     backgroundColor: Colors.white,
-                    backgroundImage: AssetImage('assets/logo.png'),
+                    backgroundImage: photoUrl != null && photoUrl.toString().isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : const AssetImage('assets/logo.png') as ImageProvider,
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -111,7 +158,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
+                      Text(
+                        name.isEmpty ? 'Choriste' : name, 
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       Text(email, style: GoogleFonts.outfit(fontSize: 12, color: Colors.white70)),
                     ],
                   ),
@@ -119,6 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
+
           const SizedBox(height: 20),
           _buildDrawerItem(Icons.home_rounded, "Tableau de Bord", 0),
           _buildDrawerItem(Icons.library_music_rounded, "Bibliothèque des Chants", 1),
@@ -138,13 +191,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, int index) {
+   Widget _buildDrawerItem(IconData icon, String title, int index) {
     final isSelected = _selectedIndex == index;
     return ListTile(
       leading: Icon(icon, color: isSelected ? const Color(0xFF7367F0) : const Color(0xFF444050)),
       title: Text(title, style: GoogleFonts.outfit(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? const Color(0xFF7367F0) : const Color(0xFF444050))),
       onTap: () {
-        setState(() => _selectedIndex = index);
+        _updateIndex(index);
         Navigator.pop(context);
       },
       selected: isSelected,
@@ -156,7 +209,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function(int) onNavigate;
+  final Map<String, dynamic>? profile;
+  const HomeScreen({super.key, required this.onNavigate, this.profile});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -167,6 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _chantsAppris = 0;
   int _tauxPresence = 0;
   Map<String, dynamic>? _activiteRecente;
+  Map<String, dynamic>? _chantDuMoment;
+  List<dynamic> _derniersChants = [];
 
   @override
   void initState() {
@@ -181,6 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
         _chantsAppris = stats['chants_appris'] ?? 0;
         _tauxPresence = stats['taux_presence'] ?? 0;
         _activiteRecente = stats['activite_recente'];
+        _chantDuMoment = stats['chant_du_moment'];
+        _derniersChants = stats['derniers_chants'] ?? [];
         _isLoading = false;
       });
     } else if (mounted) {
@@ -193,7 +252,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
-    final name = user?.userMetadata?['first_name'] ?? 'Choriste';
+    final name = widget.profile != null 
+        ? widget.profile!['first_name'] ?? 'Choriste' 
+        : (user?.userMetadata?['first_name'] ?? 'Choriste');
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -204,56 +265,145 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildSliverAppBar(context),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(25),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildWelcomeHeader(name),
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
                 _buildStatsGrid(),
-                const SizedBox(height: 40),
-                if (_activiteRecente != null) ...[
-                  _buildSectionTitle("Activités Récentes"),
-                  const SizedBox(height: 20),
+                const SizedBox(height: 35),
+                
+                if (_chantDuMoment != null)
+                  _buildSectionTitle("Recommandation du jour", null),
+                if (_chantDuMoment != null)
+                  const SizedBox(height: 15),
+                if (_chantDuMoment != null)
+                  _buildChantDuMomentCard(_chantDuMoment!),
+                if (_chantDuMoment != null)
+                  const SizedBox(height: 35),
+
+                _buildSectionTitle("Prochain Événement", () => widget.onNavigate(2)),
+                const SizedBox(height: 15),
+                if (_activiteRecente != null)
                   _buildHighlightsCard(
                     _activiteRecente!['titre'] ?? "Événement",
                     _activiteRecente!['jour_heure'] ?? "",
                     _activiteRecente!['lieu'] ?? "Lieu non défini",
-                    Icons.event_available_rounded,
-                    const Color(0xFFC9A84C), // Dynamique potentiellement
-                  ),
-                  const SizedBox(height: 40),
-                ] else ...[
-                  _buildSectionTitle("Activités Récentes"),
+                    Icons.calendar_today_rounded,
+                    const Color(0xFF7367F0),
+                  )
+                else
+                  _buildEmptyState("Aucun événement prévu pour le moment."),
+                
+                const SizedBox(height: 35),
+                
+                if (_derniersChants.isNotEmpty)
+                  _buildSectionTitle("Derniers Chants Ajoutés", () => widget.onNavigate(1)),
+                if (_derniersChants.isNotEmpty)
+                  const SizedBox(height: 15),
+                if (_derniersChants.isNotEmpty)
+                  ..._derniersChants.map((c) => _buildMiniChantCard(c)).toList(),
+                if (_derniersChants.isNotEmpty)
                   const SizedBox(height: 20),
-                  Center(child: Text("Aucune activité prévue pour le moment.", style: GoogleFonts.outfit(color: Colors.blueGrey[300]))),
-                  const SizedBox(height: 40),
-                ],
-                _buildSectionTitle("Outils Privilégiés"),
-                const SizedBox(height: 20),
-                _buildPremiumToolCard(
-                  context,
-                  "Enregistreur Magique",
-                  "Enregistre tes meilleures vocalises",
-                  Icons.mic_external_on_rounded,
-                  const Color(0xFF7367F0),
-                  const RecorderScreen(),
-                ),
-                const SizedBox(height: 15),
-                _buildPremiumToolCard(
-                  context,
-                  "Ma Caisse Chorale",
-                  "Gère tes cotisations en un clic",
-                  Icons.account_balance_wallet_rounded,
-                  const Color(0xFF28C76F),
-                  const ChantsScreen(),
-                ),
-                const SizedBox(height: 100),
+                
+                const SizedBox(height: 80),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.blueGrey.shade50),
+      ),
+      child: Center(
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(color: Colors.blueGrey[300], fontSize: 13),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChantDuMomentCard(Map<String, dynamic> chant) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7367F0), Color(0xFF9E95F5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF7367F0).withAlpha(60), blurRadius: 15, offset: const Offset(0, 10))
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChantDetailScreen(chant: chant))),
+          child: Padding(
+            padding: const EdgeInsets.all(25),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: Colors.white.withAlpha(50), shape: BoxShape.circle),
+                  child: const Icon(Icons.music_note_rounded, color: Colors.white, size: 28),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("COUP DE CŒUR", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                      const SizedBox(height: 4),
+                      Text(chant['title'] ?? "Titre", style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(chant['composer'] ?? "Compositeur", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniChantCard(Map<String, dynamic> chant) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.blueGrey.shade50),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: const Color(0xFF7367F0).withAlpha(15), borderRadius: BorderRadius.circular(12)),
+          child: const Icon(Icons.library_music_rounded, color: Color(0xFF7367F0), size: 20),
+        ),
+        title: Text(chant['title'] ?? "", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF444050))),
+        subtitle: Text(chant['composer'] ?? "Inconnu", style: GoogleFonts.outfit(fontSize: 12, color: Colors.blueGrey[300])),
+        trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFD0D2D6)),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ChantDetailScreen(chant: chant))),
+      ),
     );
   }
 
@@ -366,12 +516,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, VoidCallback? onTap) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF444050))),
-        Text("Voir tout", style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF7367F0), fontWeight: FontWeight.bold)),
+        if (onTap != null)
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Text("Voir tout", style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF7367F0), fontWeight: FontWeight.bold)),
+            ),
+          ),
       ],
     );
   }
@@ -417,53 +575,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Widget _buildPremiumToolCard(BuildContext context, String title, String subtitle, IconData icon, Color color, Widget screen) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: color.withAlpha(40),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Material(
-          color: Colors.white,
-          child: InkWell(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
-            child: Padding(
-              padding: const EdgeInsets.all(25),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(color: color.withAlpha(25), borderRadius: BorderRadius.circular(20)),
-                    child: Icon(icon, color: color, size: 30),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 17, color: const Color(0xFF444050))),
-                        Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: Colors.blueGrey[300])),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: Color(0xFFD0D2D6)),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class GlobalSearchDelegate extends SearchDelegate {
@@ -489,7 +600,7 @@ class GlobalSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return _buildSearchResults();
+    return _buildSearchResults(context);
   }
 
   @override
@@ -497,10 +608,10 @@ class GlobalSearchDelegate extends SearchDelegate {
     if (query.isEmpty) {
       return const Center(child: Text("Entrez un terme pour rechercher..."));
     }
-    return _buildSearchResults();
+    return _buildSearchResults(context);
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(BuildContext context) {
     return FutureBuilder(
       future: Future.wait([
         _supabase.from('chants').select('id, title, composer, parole').ilike('title', '%$query%'),

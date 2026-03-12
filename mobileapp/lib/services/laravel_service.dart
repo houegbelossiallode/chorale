@@ -11,6 +11,32 @@ class LaravelService {
 
   final String _baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://chorale.onrender.com';
   String? _cookies;
+  String? _csrfToken;
+
+  /// Extract and store cookies from a set-cookie header string
+  void _parseCookies(String? rawCookie) {
+    if (rawCookie == null) return;
+    final cookies = <String>[];
+    final parts = rawCookie.split(',');
+    for (var part in parts) {
+      final subParts = part.split(';');
+      final cookiePart = subParts[0].trim();
+      final name = cookiePart.toLowerCase();
+      if (cookiePart.contains('=') &&
+          !name.startsWith('expires=') &&
+          !name.startsWith('path=') &&
+          !name.startsWith('max-age=') &&
+          !name.startsWith('domain=') &&
+          !name.startsWith('samesite=')) {
+        cookies.add(cookiePart);
+        // Extract XSRF-TOKEN for CSRF protection
+        if (name.startsWith('xsrf-token=')) {
+          _csrfToken = Uri.decodeComponent(cookiePart.substring('XSRF-TOKEN='.length));
+        }
+      }
+    }
+    _cookies = cookies.join('; ');
+  }
 
   Future<bool> syncSession() async {
     final session = Supabase.instance.client.auth.currentSession;
@@ -27,8 +53,8 @@ class LaravelService {
       );
 
       if (response.statusCode == 200) {
-        _cookies = response.headers['set-cookie'];
-        debugPrint("LaravelService: Session synced successfully");
+        _parseCookies(response.headers['set-cookie']);
+        debugPrint("LaravelService: Session synced, cookies: $_cookies, csrf: $_csrfToken");
         return true;
       } else {
         debugPrint("LaravelService: Sync failed with status ${response.statusCode}");
@@ -63,11 +89,26 @@ class LaravelService {
       await syncSession();
     }
 
+    // If still no CSRF token, fetch it from the CSRF cookie endpoint
+    if (_csrfToken == null) {
+      try {
+        final csrfResponse = await http.get(
+          Uri.parse('$_baseUrl/sanctum/csrf-cookie'),
+          headers: {'cookie': _cookies ?? '', 'Accept': 'application/json'},
+        );
+        _parseCookies(csrfResponse.headers['set-cookie']);
+        debugPrint("LaravelService: CSRF fetched: $_csrfToken");
+      } catch (e) {
+        debugPrint("LaravelService: CSRF fetch error: $e");
+      }
+    }
+
     var request = http.MultipartRequest('POST', Uri.parse('$_baseUrl/choriste/enregistrements'));
     request.headers.addAll({
       'cookie': _cookies ?? '',
       'Accept': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
+      if (_csrfToken != null) 'X-XSRF-TOKEN': _csrfToken!,
     });
 
     request.fields['chant_id'] = chantId;
@@ -90,6 +131,7 @@ class LaravelService {
       headers: {
         'cookie': _cookies ?? '',
         'Accept': 'application/json',
+        if (_csrfToken != null) 'X-XSRF-TOKEN': _csrfToken!,
       },
       body: data.map((key, value) => MapEntry(key, value?.toString() ?? '')),
     );

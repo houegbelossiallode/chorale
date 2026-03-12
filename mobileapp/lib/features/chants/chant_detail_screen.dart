@@ -4,6 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:chorale_app_mobile/shared/widgets/media_modal.dart';
 import 'package:chorale_app_mobile/shared/widgets/pdf_viewer_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart' as ja;
+import 'dart:async';
+import '../../services/recording_service.dart';
+import '../../services/profile_service.dart';
 
 class ChantDetailScreen extends StatefulWidget {
   final dynamic chant;
@@ -24,6 +29,13 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
   List<dynamic> _videos = [];
   String? _currentAudioUrl;
   String? _activePartitionId;
+
+  // Personal recordings
+  final _jaPlayer = ja.AudioPlayer();
+  final _recordingService = RecordingService();
+  List<dynamic> _personalRecordings = [];
+  String? _playingRecordingId;
+  bool _isLoadingRecordings = false;
 
   @override
   void initState() {
@@ -46,10 +58,12 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _jaPlayer.dispose();
     super.dispose();
   }
 
   Future<void> _fetchResources() async {
+    _fetchPersonalRecordings();
     try {
       final data = await _supabase
           .from('fichier_chants')
@@ -97,6 +111,38 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
     }
   }
 
+  Future<void> _fetchPersonalRecordings() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+    
+    if (mounted) setState(() => _isLoadingRecordings = true);
+    try {
+      final profileService = ProfileService();
+      final internalUserId = await profileService.getIntegerUserId();
+
+      if (internalUserId == null) {
+        if (mounted) setState(() => _isLoadingRecordings = false);
+        return;
+      }
+
+      final data = await _supabase
+          .from('enregistrements')
+          .select()
+          .eq('chant_id', widget.chant['id'])
+          .eq('user_id', internalUserId);
+          
+      if (mounted) {
+        setState(() {
+          _personalRecordings = data;
+          _isLoadingRecordings = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("ChantDetail: Error fetching recordings: $e");
+      if (mounted) setState(() => _isLoadingRecordings = false);
+    }
+  }
+
   String _cleanHtml(String text) {
     return text.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
   }
@@ -136,7 +182,9 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                   const SizedBox(height: 30),
                   if (_partitions.isNotEmpty) _buildPartitionSection(),
                   const SizedBox(height: 40),
-                  if (_audioFiles.isNotEmpty) _buildPremiumPlayer(),
+                   if (_audioFiles.isNotEmpty) _buildPremiumPlayer(),
+                  const SizedBox(height: 30),
+                  _buildPersonalRecordingsSection(),
                   const SizedBox(height: 40),
                   if (_videos.isNotEmpty) _buildVideoSection(),
                   const SizedBox(height: 40),
@@ -481,45 +529,199 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
           ],
         ),
         const SizedBox(height: 15),
-    Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(35),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF7367F0).withAlpha(8),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(35),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7367F0).withAlpha(8),
+                blurRadius: 30,
+                offset: const Offset(0, 15),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 2,
+                color: const Color(0xFF7367F0).withAlpha(50),
+              ),
+              const SizedBox(height: 30),
+              Text(
+                _cleanHtml(lyrics),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 17,
+                  color: const Color(0xFF444050),
+                  height: 2.0,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonalRecordingsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.mic_rounded, color: Color(0xFF444050), size: 20),
+                const SizedBox(width: 8),
+                Text("Mes Voix Déposées", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF444050))),
+              ],
+            ),
+            if (_isLoadingRecordings) 
+              const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7367F0))),
+          ],
+        ),
+        const SizedBox(height: 15),
+        if (_personalRecordings.isEmpty && !_isLoadingRecordings)
           Container(
-            width: 40,
-            height: 2,
-            color: const Color(0xFF7367F0).withAlpha(50),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F7FA),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded, color: Colors.blueGrey[300], size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Vous n'avez pas encore déposé de voix pour ce chant.",
+                    style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ..._personalRecordings.map((rec) => _buildRecordingItem(rec)),
+      ],
+    );
+  }
+
+  Widget _buildRecordingItem(Map<String, dynamic> rec) {
+    final String recId = rec['id'].toString();
+    final String? filePath = rec['file_path'];
+    final bool isPlaying = _playingRecordingId == recId;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7367F0).withAlpha(10),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color(0xFF7367F0).withAlpha(20)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.audiotrack_rounded, color: Color(0xFF7367F0), size: 18),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "Enregistrement du ${rec['created_at'] != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(rec['created_at'])) : 'récent'}",
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050)),
+            ),
           ),
-          const SizedBox(height: 30),
-          Text(
-            _cleanHtml(lyrics),
-            textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              fontSize: 17,
-              color: const Color(0xFF444050),
-              height: 2.0,
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.w400,
+          GestureDetector(
+            onTap: () async {
+              if (filePath == null) return;
+              if (isPlaying) {
+                await _jaPlayer.stop();
+                setState(() => _playingRecordingId = null);
+              } else {
+                await _audioPlayer.stop(); // Stop main player
+                setState(() => _playingRecordingId = recId);
+                try {
+                  await _jaPlayer.setUrl(filePath);
+                  await _jaPlayer.play();
+                  _jaPlayer.playerStateStream.listen((state) {
+                    if (state.processingState == ja.ProcessingState.completed && mounted) {
+                      setState(() => _playingRecordingId = null);
+                    }
+                  });
+                } catch (e) {
+                  if (mounted) setState(() => _playingRecordingId = null);
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isPlaying ? const Color(0xFFEA5455) : const Color(0xFF7367F0),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded, color: Colors.white, size: 16),
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () => _confirmDeleteRecording(rec),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEA5455).withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEA5455), size: 16),
             ),
           ),
         ],
       ),
-    ),
-  ],
-);
-}
+    );
+  }
 
+  void _confirmDeleteRecording(Map<String, dynamic> rec) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text("Supprimer la voix ?", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text("Cette action est irréversible.", style: GoogleFonts.outfit()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Annuler", style: GoogleFonts.outfit(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEA5455), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              if (mounted) setState(() => _isLoadingRecordings = true);
+              try {
+                await _supabase.from('enregistrements').delete().eq('id', rec['id']);
+                _fetchPersonalRecordings();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Supprimé", style: GoogleFonts.outfit(color: Colors.white)), backgroundColor: const Color(0xFFEA5455), behavior: SnackBarBehavior.floating),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  setState(() => _isLoadingRecordings = false);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red));
+                }
+              }
+            },
+            child: Text("Supprimer", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 

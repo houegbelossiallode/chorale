@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/repetition_service.dart';
 import '../../models/repetition.dart';
 import 'package:intl/intl.dart';
-import '../events/repertoire_screen.dart';
+import 'carnet_de_chants_screen.dart';
 
 class RepetitionsListScreen extends StatefulWidget {
   const RepetitionsListScreen({super.key});
@@ -54,12 +54,38 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                   return SliverFillRemaining(child: Center(child: Text("Aucune répétition enregistrée.")));
                 }
 
-                final repetitions = snapshot.data!;
+                final allRepetitions = snapshot.data!;
+                final now = DateTime.now();
+                
+                // Today and future
+                final upcoming = allRepetitions.where((r) => 
+                  r.date.isAfter(now.subtract(const Duration(hours: 12)))
+                ).toList();
+                
+                // Past
+                final past = allRepetitions.where((r) => 
+                  r.date.isBefore(now.subtract(const Duration(hours: 12)))
+                ).toList();
+
+                // Sort upcoming by nearest first
+                upcoming.sort((a, b) => a.date.compareTo(b.date));
+                
+                // Sort past by most recent first
+                past.sort((a, b) => b.date.compareTo(a.date));
+
                 return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildPremiumRepetitionCard(repetitions[index]),
-                    childCount: repetitions.length,
-                  ),
+                  delegate: SliverChildListDelegate([
+                    if (upcoming.isNotEmpty) ...[
+                      _buildSectionHeader("À VENIR"),
+                      ...upcoming.map((r) => _buildPremiumRepetitionCard(r)),
+                    ],
+                    if (past.isNotEmpty) ...[
+                      const SizedBox(height: 30),
+                      _buildSectionHeader("PASSÉES"),
+                      ...past.map((r) => _buildPremiumRepetitionCard(r, isPast: true)),
+                    ],
+                    const SizedBox(height: 50),
+                  ]),
                 );
               },
             ),
@@ -69,8 +95,37 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
     );
   }
 
-  Widget _buildPremiumRepetitionCard(Repetition repetition) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15, top: 10),
+      child: Row(
+        children: [
+          Container(
+            height: 4,
+            width: 30,
+            decoration: BoxDecoration(
+              color: const Color(0xFF7367F0),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF444050),
+              letterSpacing: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumRepetitionCard(Repetition repetition, {bool isPast = false}) {
     final dateStr = DateFormat('EEEE dd MMMM • HH:mm', 'fr_FR').format(repetition.date);
+    final accentColor = isPast ? Colors.blueGrey : const Color(0xFF7367F0);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -79,21 +134,23 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF28C76F).withAlpha(10),
+            color: accentColor.withAlpha(10),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Material(
+      child: Opacity(
+        opacity: isPast ? 0.75 : 1.0,
+        child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RepertoireScreen(
+              builder: (context) => CarnetDeChantsScreen(
                 repetitionId: repetition.id,
-                title: repetition.title ?? 'Répétition',
+                repetitionTitle: repetition.title ?? 'Répétition',
               ),
             ),
           ),
@@ -109,13 +166,13 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF28C76F).withAlpha(15),
+                        color: accentColor.withAlpha(15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        "RÉPÉTITION",
+                        isPast ? "PASSÉE" : "RÉPÉTITION",
                         style: GoogleFonts.outfit(
-                          color: const Color(0xFF28C76F),
+                          color: accentColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.1,
@@ -141,7 +198,7 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.access_time_filled_rounded, size: 16, color: Color(0xFF28C76F)),
+                      child: Icon(Icons.access_time_filled_rounded, size: 16, color: accentColor),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -157,11 +214,11 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF28C76F),
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF28C76F).withAlpha(60),
+                        color: accentColor.withAlpha(60),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -179,6 +236,7 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

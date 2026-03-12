@@ -1,41 +1,118 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'laravel_service.dart';
 
 class ProfileService {
+  static final ProfileService _instance = ProfileService._internal();
+  factory ProfileService() => _instance;
+  ProfileService._internal();
+
   final SupabaseClient _client = Supabase.instance.client;
+  final _baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
 
-  Future<Map<String, dynamic>?> fetchProfile() async {
+  // Cache to store the profile data including the integer ID
+  static Map<String, dynamic>? _cachedProfile;
+
+  Future<Map<String, dynamic>?> fetchProfile({bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedProfile != null) {
+      return _cachedProfile;
+    }
+
     final user = _client.auth.currentUser;
-    if (user == null || user.email == null) return null;
-
-    try {
-      final Map<String, dynamic> data = await _client
-          .from('users')
-          .select('id, first_name, last_name, email, activite, hobbie, citation, love_choir, date_naissance, photo_url, pupitre_id, pupitres(name)')
-          .eq('email', user.email!)
-          .single();
-      
-      return data;
-    } catch (e) {
+    if (user == null) {
+      debugPrint("ProfileService: No Supabase user found.");
       return null;
     }
+
+    if (forceRefresh) {
+      _cachedProfile = null;
+      debugPrint("ProfileService: Forcing refresh of profile data...");
+    }
+
+    Map<String, dynamic>? profileData;
+
+    // 1. Attempt Laravel API
+    try {
+      debugPrint("ProfileService: Syncing and fetching from Laravel...");
+      bool synced = await LaravelService().syncSession();
+      if (!synced) {
+        throw Exception("Échec de synchronisation de la session (Vérifiez les logs réseau ou CORS)");
+      }
+
+      final response = await LaravelService().get('$_baseUrl/api/profile');
+      
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['status'] == 'success' && decoded['user'] != null) {
+          profileData = Map<String, dynamic>.from(decoded['user']);
+          debugPrint("ProfileService: Laravel RAW user data: ${jsonEncode(profileData)}");
+        } else {
+          throw Exception("Serveur: JSON invalide ou inattendu -> ${response.body}");
+        }
+      } else {
+        throw Exception("Erreur de récupération Laravel (Code ${response.statusCode}) -> ${response.body}");
+      }
+    } catch (e) {
+      debugPrint("ProfileService: Laravel fetch error: $e");
+      throw Exception("Défaut bloquant connexion Web/Base : $e");
+    }
+
+    if (profileData != null && profileData!.isNotEmpty) {
+      _cachedProfile = profileData;
+      return _cachedProfile;
+    }
+
+    throw Exception("Données utilisateur introuvables sur le serveur principal.");
+  }
+
+  /// Helper to get only the integer ID of the current user
+  Future<int?> getIntegerUserId() async {
+    final profile = await fetchProfile();
+    if (profile != null && profile['id'] != null) {
+      return int.tryParse(profile['id'].toString());
+    }
+    return null;
   }
 
   Future<void> updateProfile(Map<String, dynamic> updates) async {
     final user = _client.auth.currentUser;
-    if (user == null || user.email == null) return;
+    if (user == null) throw Exception("Utilisateur non connecté");
 
-    await _client
-        .from('users')
-        .update(updates)
-        .eq('email', user.email!);
-
-    // Sync with Laravel
+    // 1. Sync to Laravel FIRST
     try {
-      await LaravelService().updateProfile(updates);
+      debugPrint("ProfileService: Updating Laravel profile...");
+      final response = await LaravelService().updateProfile(updates);
+      
+      // If LaravelService.updateProfile doesn't throw but returns a response, 
+      // we check for success if applicable. (Assuming it throws on 4xx/5xx)
+      
+      // Invalidate cache to force reload on next fetch
+      _cachedProfile = null;
     } catch (e) {
-      // Ignorer l'erreur de sync si Supabase a réussi
+      debugPrint("ProfileService: updateProfile Laravel error: $e");
+      throw Exception("Échec de la mise à jour sur le serveur principal (Laravel).");
+    }
+
+    // 2. ONLY if Laravel succeeded, update Supabase directly as backup
+    try {
+      debugPrint("ProfileService: Updating Supabase backup...");
+      final response = await _client
+          .from('users')
+          .update(updates)
+          .eq('email', user.email!)
+          .select();
+          
+      if (response == null || (response is List && response.isEmpty)) {
+        debugPrint("ProfileService: Supabase update returned no data (possibly no row matched)");
+      }
+    } catch (e) {
+      debugPrint("ProfileService: updateProfile Supabase error: $e");
+      // We don't necessarily throw here if Laravel succeeded, 
+      // but the user wants "REAL" updates, so let's be strict.
+      throw Exception("Échec de la synchronisation de secours (Supabase).");
     }
   }
 
@@ -44,14 +121,23 @@ class ProfileService {
     if (user == null) return null;
 
     try {
+      debugPrint("ProfileService: Uploading photo to Supabase storage...");
       final fileName = "${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg";
       final path = "profiles/$fileName";
       
+      // Upload
       await _client.storage.from('imgs').upload(path, imageFile);
       
-      final String publicUrl = _client.storage.from('imgs').getPublicUrl(path);
+      // Get Public URL
+      final publicUrl = _client.storage.from('imgs').getPublicUrl(path);
+      debugPrint("ProfileService: Photo uploaded successfully. URL: $publicUrl");
+      
+      // Update profile with new photo URL in both systems
+      await updateProfile({'photo_url': publicUrl});
+      
       return publicUrl;
     } catch (e) {
+      debugPrint("ProfileService: photo upload error: $e");
       return null;
     }
   }

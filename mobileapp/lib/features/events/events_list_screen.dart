@@ -54,12 +54,38 @@ class _EventsListScreenState extends State<EventsListScreen> {
                   return SliverFillRemaining(child: Center(child: Text("Aucun événement prévu.")));
                 }
 
-                final events = snapshot.data!;
+                final allEvents = snapshot.data!;
+                final now = DateTime.now();
+                
+                // Today and future
+                final upcomingEvents = allEvents.where((e) => 
+                  e.startDate.isAfter(now.subtract(const Duration(hours: 12))) // Keep today's events visible
+                ).toList();
+                
+                // Past
+                final pastEvents = allEvents.where((e) => 
+                  e.startDate.isBefore(now.subtract(const Duration(hours: 12)))
+                ).toList();
+
+                // Sort upcoming by nearest first
+                upcomingEvents.sort((a, b) => a.startDate.compareTo(b.startDate));
+                
+                // Sort past by most recent first
+                pastEvents.sort((a, b) => b.startDate.compareTo(a.startDate));
+
                 return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildPremiumEventCard(events[index]),
-                    childCount: events.length,
-                  ),
+                  delegate: SliverChildListDelegate([
+                    if (upcomingEvents.isNotEmpty) ...[
+                      _buildSectionHeader("À VENIR"),
+                      ...upcomingEvents.map((e) => _buildPremiumEventCard(e)),
+                    ],
+                    if (pastEvents.isNotEmpty) ...[
+                      const SizedBox(height: 30),
+                      _buildSectionHeader("PASSÉS"),
+                      ...pastEvents.map((e) => _buildPremiumEventCard(e, isPast: true)),
+                    ],
+                    const SizedBox(height: 50),
+                  ]),
                 );
               },
             ),
@@ -69,8 +95,37 @@ class _EventsListScreenState extends State<EventsListScreen> {
     );
   }
 
-  Widget _buildPremiumEventCard(Event event) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15, top: 10),
+      child: Row(
+        children: [
+          Container(
+            height: 4,
+            width: 30,
+            decoration: BoxDecoration(
+              color: const Color(0xFF7367F0),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF444050),
+              letterSpacing: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumEventCard(Event event, {bool isPast = false}) {
     final dateStr = DateFormat('EEEE dd MMMM • HH:mm', 'fr_FR').format(event.startDate);
+    final accentColor = isPast ? Colors.blueGrey : const Color(0xFF7367F0);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -79,13 +134,15 @@ class _EventsListScreenState extends State<EventsListScreen> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7367F0).withAlpha(10),
+            color: accentColor.withAlpha(10),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Material(
+      child: Opacity(
+        opacity: isPast ? 0.75 : 1.0,
+        child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => Navigator.push(
@@ -109,13 +166,13 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7367F0).withAlpha(15),
+                        color: accentColor.withAlpha(15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        "ÉVÉNEMENT",
+                        isPast ? "PASSÉ" : "ÉVÉNEMENT",
                         style: GoogleFonts.outfit(
-                          color: const Color(0xFF7367F0),
+                          color: accentColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.1,
@@ -141,7 +198,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.calendar_today_rounded, size: 16, color: Color(0xFF7367F0)),
+                      child: Icon(Icons.calendar_today_rounded, size: 16, color: accentColor),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -176,11 +233,11 @@ class _EventsListScreenState extends State<EventsListScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7367F0),
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7367F0).withAlpha(60),
+                        color: accentColor.withAlpha(60),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -198,6 +255,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

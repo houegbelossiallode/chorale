@@ -1,0 +1,7 @@
+﻿Analyzing mobileapp...                                          
+
+   info - Unnecessary use of 'toList' in a spread - lib\features\dashboard\dashboard_screen.dart:257:73 - unnecessary_to_list_in_spreads
+warning - Unused import: 'package:http/http.dart' - lib\services\dashboard_service.dart:2:8 - unused_import
+   info - Use the null-aware marker '?' rather than a null check via an 'if' - lib\services\laravel_service.dart:111:7 - use_null_aware_elements
+   info - Use the null-aware marker '?' rather than a null check via an 'if' - lib\services\laravel_service.dart:134:9 - use_null_aware_elements
+
