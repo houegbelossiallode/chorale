@@ -121,24 +121,33 @@ class ProfileService {
     if (user == null) return null;
 
     try {
-      debugPrint("ProfileService: Uploading photo to Supabase storage...");
-      final fileName = "${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg";
-      final path = "profiles/$fileName";
+      debugPrint("ProfileService: Uploading photo via Laravel API...");
       
-      // Upload
-      await _client.storage.from('imgs').upload(path, imageFile);
+      final response = await LaravelService().updateProfile({}, photoFile: imageFile);
       
-      // Get Public URL
-      final publicUrl = _client.storage.from('imgs').getPublicUrl(path);
-      debugPrint("ProfileService: Photo uploaded successfully. URL: $publicUrl");
-      
-      // Update profile with new photo URL in both systems
-      await updateProfile({'photo_url': publicUrl});
-      
-      return publicUrl;
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['status'] == 'success' && decoded['user'] != null) {
+          final publicUrl = decoded['user']['photo_url']?.toString();
+          if (publicUrl != null) {
+            debugPrint("ProfileService: Photo uploaded successfully. URL: $publicUrl");
+            
+            // Update Supabase backup directly and invalidate cache
+            try {
+              await _client.from('users').update({'photo_url': publicUrl}).eq('email', user.email!);
+            } catch (_) {}
+            
+            _cachedProfile = null;
+            return publicUrl;
+          }
+        }
+        throw Exception("Serveur: JSON invalide ou URL photo manquante.");
+      } else {
+        throw Exception("Erreur Serveur (Code ${response.statusCode})");
+      }
     } catch (e) {
       debugPrint("ProfileService: photo upload error: $e");
-      return null;
+      throw Exception("Impossible d'uploader la photo : $e");
     }
   }
 }

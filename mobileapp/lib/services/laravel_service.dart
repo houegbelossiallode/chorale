@@ -121,19 +121,43 @@ class LaravelService {
     return request.send();
   }
 
-  Future<http.Response> updateProfile(Map<String, dynamic> data) async {
+  Future<http.Response> updateProfile(Map<String, dynamic> data, {File? photoFile}) async {
     if (_cookies == null) {
       await syncSession();
     }
 
-    return http.post(
-      Uri.parse('$_baseUrl/api/sync-profile'),
-      headers: {
+    if (photoFile != null) {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$_baseUrl/api/sync-profile'),
+      );
+
+      request.headers.addAll({
         'cookie': _cookies ?? '',
         'Accept': 'application/json',
         if (_csrfToken != null) 'X-XSRF-TOKEN': _csrfToken!,
-      },
-      body: data.map((key, value) => MapEntry(key, value?.toString() ?? '')),
-    );
+      });
+
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      request.files.add(await http.MultipartFile.fromPath('photo', photoFile.path));
+
+      final streamedResponse = await request.send();
+      return await http.Response.fromStream(streamedResponse);
+    } else {
+      return http.post(
+        Uri.parse('$_baseUrl/api/sync-profile'),
+        headers: {
+          'cookie': _cookies ?? '',
+          'Accept': 'application/json',
+          if (_csrfToken != null) 'X-XSRF-TOKEN': _csrfToken!,
+        },
+        body: data.map((key, value) => MapEntry(key, value?.toString() ?? '')),
+      );
+    }
   }
 }
