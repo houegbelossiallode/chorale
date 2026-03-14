@@ -1,19 +1,42 @@
 // lib/services/repetition_service.dart
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/repetition.dart';
 import 'package:flutter/foundation.dart';
 import 'profile_service.dart';
+import 'laravel_service.dart';
 
 class RepetitionService {
   final SupabaseClient _client = Supabase.instance.client;
+  final LaravelService _laravelService = LaravelService();
 
   Future<List<Repetition>> fetchRepetitions() async {
     final List<dynamic> data = await _client
         .from('repetitions')
-        .select()
+        .select('*, sondages(choix)')
         .order('start_time', ascending: false);
     
-    return data.map((e) => Repetition.fromJson(e)).toList();
+    return data.map((e) {
+      final List<dynamic> sondages = e['sondages'] ?? [];
+      final userChoice = sondages.isNotEmpty ? sondages.first['choix'] : null;
+      
+      final Map<String, dynamic> repData = Map<String, dynamic>.from(e);
+      repData['user_choice'] = userChoice;
+      
+      return Repetition.fromJson(repData);
+    }).toList();
+  }
+
+  Future<void> updateSondage(String repetitionId, String choice) async {
+    final response = await _laravelService.post(
+      '${_laravelService.baseUrl}/api/sondages',
+      {
+        'repetition_id': repetitionId,
+        'choix': choice,
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Erreur lors de la mise à jour du sondage: ${response.body}");
+    }
   }
 
   Future<Repetition> fetchRepetitionById(String id) async {
@@ -53,6 +76,13 @@ class RepetitionService {
           )
         ''')
         .inFilter('id', repertoireIds);
+
+    // Sort by partie_events.ordre
+    data.sort((a, b) {
+      final orderA = a['partie_events']?['ordre'] ?? 999;
+      final orderB = b['partie_events']?['ordre'] ?? 999;
+      return orderA.compareTo(orderB);
+    });
 
     // Fetch user recordings separately using the Laravel integer ID
     final profileService = ProfileService();
@@ -113,6 +143,13 @@ class RepetitionService {
           )
         ''')
         .inFilter('id', repertoireIds);
+
+    // Sort by partie_events.ordre
+    data.sort((a, b) {
+      final orderA = a['partie_events']?['ordre'] ?? 999;
+      final orderB = b['partie_events']?['ordre'] ?? 999;
+      return orderA.compareTo(orderB);
+    });
 
     // Fetch user recordings using the Laravel integer ID
     final profileService = ProfileService();

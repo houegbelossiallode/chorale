@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:audioplayers/audioplayers.dart' as ap;
+import 'package:just_audio/just_audio.dart' as ja;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -33,7 +33,7 @@ class MediaModal extends StatefulWidget {
 
 class _MediaModalState extends State<MediaModal> {
   YoutubePlayerController? _ytController;
-  final ap.AudioPlayer _audioPlayer = ap.AudioPlayer();
+  final ja.AudioPlayer _audioPlayer = ja.AudioPlayer();
   bool _isAudioPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -58,16 +58,21 @@ class _MediaModalState extends State<MediaModal> {
   }
 
   Future<void> _initAudio() async {
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _isAudioPlaying = state == ap.PlayerState.playing);
+    _audioPlayer.playerStateStream.listen((state) {
+      if (mounted) setState(() => _isAudioPlaying = state.playing);
     });
-    _audioPlayer.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _duration = d);
+    _audioPlayer.durationStream.listen((d) {
+      if (mounted) setState(() => _duration = d ?? Duration.zero);
     });
-    _audioPlayer.onPositionChanged.listen((p) {
+    _audioPlayer.positionStream.listen((p) {
       if (mounted) setState(() => _position = p);
     });
-    await _audioPlayer.play(ap.UrlSource(widget.url));
+    try {
+      await _audioPlayer.setUrl(widget.url);
+      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint("MediaModal: Audio error: $e");
+    }
   }
 
   @override
@@ -201,7 +206,7 @@ class _MediaModalState extends State<MediaModal> {
                 if (_isAudioPlaying) {
                   _audioPlayer.pause();
                 } else {
-                  _audioPlayer.resume();
+                  _audioPlayer.play();
                 }
               },
             ),

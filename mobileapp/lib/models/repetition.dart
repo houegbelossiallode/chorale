@@ -3,12 +3,14 @@ class Repetition {
   final String? title;
   final DateTime date;
   final String? location;
+  final String? userChoice;
 
   Repetition({
     required this.id,
     this.title,
     required this.date,
     this.location,
+    this.userChoice,
   });
 
   factory Repetition.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class Repetition {
       title: json['titre'] ?? json['title'],
       date: DateTime.parse(json['start_time']),
       location: json['lieu'] ?? json['location'],
+      userChoice: json['user_choice'],
     );
   }
 }

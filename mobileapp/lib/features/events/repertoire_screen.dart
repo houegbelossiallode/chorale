@@ -10,6 +10,8 @@ import '../../services/audio_recorder_service.dart';
 import '../../services/recording_service.dart';
 import '../chants/chant_detail_screen.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RepertoireScreen extends StatefulWidget {
   final String? eventId;
@@ -42,6 +44,10 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
   String? _currentRepertoireItemId;
   Timer? _timer;
 
+  // État de la lecture
+  AudioPlayer? _audioPlayer;
+  String? _playingRecordingId;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +58,7 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
   void dispose() {
     _timer?.cancel();
     _recorderService.dispose();
+    _audioPlayer?.dispose();
     super.dispose();
   }
 
@@ -137,7 +144,24 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                   chantId: chantId,
                   repertoireId: repertoireId,
                 );
-                if (mounted) _fetchData();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle_rounded, color: Colors.white),
+                          const SizedBox(width: 10),
+                          Text("Voix sauvegardée avec succès !", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      backgroundColor: const Color(0xFF28C76F),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                  _fetchData();
+                }
               } catch (e) {
                 if (mounted) {
                   setState(() => _isLoading = false);
@@ -181,7 +205,7 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
         titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
         title: Text(
           widget.title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF444050)),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 10, color: const Color(0xFF444050)),
         ),
         background: Container(
           decoration: BoxDecoration(
@@ -234,12 +258,20 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
       grouped[partie]!.add(item);
     }
 
+    // Sort parts by the 'ordre' of the first item in each group
+    var sortedKeys = grouped.keys.toList();
+    sortedKeys.sort((a, b) {
+      final orderA = grouped[a]![0]['partie_events']?['ordre'] ?? 999;
+      final orderB = grouped[b]![0]['partie_events']?['ordre'] ?? 999;
+      return orderA.compareTo(orderB);
+    });
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            String partie = grouped.keys.elementAt(index);
+            String partie = sortedKeys[index];
             List<Map<String, dynamic>> items = grouped[partie]!;
 
             return Column(
@@ -317,12 +349,17 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                     ),
                     if (isRecorded)
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(color: Color(0xFF28C76F), shape: BoxShape.circle),
-                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
+                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 12),
                       ),
                   ],
                 ),
+                // Show existing recordings with play/delete
+                if (isRecorded) ...[
+                  const SizedBox(height: 10),
+                  ...enregistrements.map((rec) => _buildRecordingBar(rec)),
+                ],
                 const SizedBox(height: 18),
                 Row(
                   children: [
@@ -345,8 +382,8 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    _buildRecordButton(item['id'].toString(), chant['id'].toString(), isRecordingThis),
+                    if (!isRecorded || isRecordingThis)
+                      _buildRecordButton(item['id'].toString(), chant['id'].toString(), isRecordingThis),
                   ],
                 ),
               ],
@@ -393,6 +430,133 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlayButton(String filePath) {
+    return GestureDetector(
+      onTap: () {
+        MediaModal.show(
+          context,
+          title: "Mon Enregistrement",
+          url: filePath,
+          type: 'audio',
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF7367F0).withAlpha(25),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.play_arrow_rounded, color: Color(0xFF7367F0), size: 20),
+      ),
+    );
+  }
+
+  Widget _buildRecordingBar(Map<String, dynamic> rec) {
+    final String recId = rec['id'].toString();
+    final String? filePath = rec['file_path'];
+    final bool isPlaying = _playingRecordingId == recId;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7367F0).withAlpha(12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF7367F0).withAlpha(30)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.mic_rounded, size: 16, color: Color(0xFF7367F0)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text("Ma voix déposée", style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF7367F0))),
+          ),
+          // Play/Stop button
+          GestureDetector(
+            onTap: () async {
+              if (filePath == null) return;
+              if (isPlaying) {
+                await _audioPlayer?.stop();
+                setState(() => _playingRecordingId = null);
+              } else {
+                _audioPlayer ??= AudioPlayer();
+                await _audioPlayer?.stop();
+                setState(() => _playingRecordingId = recId);
+                try {
+                  await _audioPlayer!.setUrl(filePath);
+                  await _audioPlayer!.play();
+                  _audioPlayer!.playerStateStream.listen((state) {
+                    if (state.processingState == ProcessingState.completed && mounted) {
+                      setState(() => _playingRecordingId = null);
+                    }
+                  });
+                } catch (e) {
+                  if (mounted) setState(() => _playingRecordingId = null);
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isPlaying ? const Color(0xFFEA5455) : const Color(0xFF7367F0),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(isPlaying ? Icons.stop_rounded : Icons.play_arrow_rounded, color: Colors.white, size: 14),
+            ),
+          ),
+          const SizedBox(width: 6),
+          // Delete button
+          GestureDetector(
+            onTap: () => _confirmDeleteRecording(rec),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEA5455).withAlpha(20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEA5455), size: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteRecording(Map<String, dynamic> rec) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text("Supprimer la voix ?", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: Text("Cette action est irréversible.", style: GoogleFonts.outfit()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Annuler", style: GoogleFonts.outfit(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEA5455), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await Supabase.instance.client.from('enregistrements').delete().eq('id', rec['id']);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Enregistrement supprimé", style: GoogleFonts.outfit(color: Colors.white)), backgroundColor: const Color(0xFFEA5455), behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  );
+                  _fetchData();
+                }
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red));
+              }
+            },
+            child: Text("Supprimer", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

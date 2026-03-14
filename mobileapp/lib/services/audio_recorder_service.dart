@@ -10,7 +10,13 @@ class AudioRecorderService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<bool> hasPermission() async {
-    final status = await Permission.microphone.request();
+    var status = await Permission.microphone.status;
+    if (status.isPermanentlyDenied) {
+      await openAppSettings();
+      return false;
+    }
+    
+    status = await Permission.microphone.request();
     return status.isGranted;
   }
 
@@ -21,7 +27,14 @@ class AudioRecorderService {
     final directory = await getTemporaryDirectory();
     final path = '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
     
-    await _recorder.start(const RecordConfig(), path: path);
+    await _recorder.start(
+      const RecordConfig(
+        encoder: AudioEncoder.aacLc,
+        bitRate: 128000,
+        sampleRate: 44100,
+      ), 
+      path: path,
+    );
   }
 
   Future<String?> stopRecording() async {
@@ -36,7 +49,7 @@ class AudioRecorderService {
     final file = File(localPath);
     final fileName = 'recordings/${user.id}/${DateTime.now().millisecondsSinceEpoch}.m4a';
     
-    await _supabase.storage.from('chorale_assets').upload(
+    await _supabase.storage.from('imgs').upload(
       fileName,
       file,
       fileOptions: const FileOptions(cacheControl: '3600', upsert: false),

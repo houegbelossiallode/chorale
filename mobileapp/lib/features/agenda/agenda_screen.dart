@@ -18,7 +18,7 @@ class AgendaScreen extends StatelessWidget {
             titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             title: Text(
               "Agenda",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: const Color(0xFF444050)),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 10, color: const Color(0xFF444050)),
             ),
           ),
         ),
@@ -33,6 +33,7 @@ class AgendaScreen extends StatelessWidget {
                   "Samedi 15 Mars • 16:00",
                   "Paroisse St Michel",
                   const Color(0xFF7367F0),
+                  isPast: false,
                 ),
                 const SizedBox(height: 15),
                 _buildAgendaItem(
@@ -40,6 +41,15 @@ class AgendaScreen extends StatelessWidget {
                   "Dimanche 31 Mars • 09:00",
                   "Cathédrale",
                   const Color(0xFFEA5455),
+                  isPast: false,
+                ),
+                const SizedBox(height: 15),
+                _buildAgendaItem(
+                  "Concert de Noël",
+                  "Mercredi 25 Décembre • 19:00",
+                  "St Joseph",
+                  Colors.blueGrey,
+                  isPast: true,
                 ),
               ],
             ),
@@ -49,7 +59,7 @@ class AgendaScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAgendaItem(String title, String date, String location, Color color) {
+  Widget _buildAgendaItem(String title, String date, String location, Color color, {bool isPast = false}) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -62,17 +72,6 @@ class AgendaScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: color.withAlpha(25),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Événement",
-                  style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ),
               const Spacer(),
               const Icon(Icons.more_horiz, color: Colors.blueGrey),
             ],
@@ -80,7 +79,7 @@ class AgendaScreen extends StatelessWidget {
           const SizedBox(height: 15),
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF444050)),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF444050)),
           ),
           const SizedBox(height: 10),
           Row(
@@ -98,22 +97,60 @@ class AgendaScreen extends StatelessWidget {
               Text(location, style: TextStyle(color: Colors.blueGrey.shade500, fontSize: 14)),
             ],
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text("Voir le programme", style: TextStyle(fontWeight: FontWeight.bold)),
+          if (!isPast) ...[
+            const SizedBox(height: 10),
+            const Divider(height: 1),
+            const SizedBox(height: 15),
+            Text(
+              "Seriez-vous présent ?",
+              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600),
             ),
-          ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _buildPresenceChip("Oui", Colors.green),
+                const SizedBox(width: 8),
+                _buildPresenceChip("Non", Colors.red),
+                const SizedBox(width: 8),
+                _buildPresenceChip("Peut-être", Colors.orange),
+              ],
+            ),
+          ],
+          const SizedBox(height: 20),
+          if (!isPast)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text("Voir le programme", style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPresenceChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(50)),
+        boxShadow: [
+          BoxShadow(color: color.withAlpha(15), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: color),
       ),
     );
   }

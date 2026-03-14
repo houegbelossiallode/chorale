@@ -33,7 +33,7 @@ class RecordingService {
   Future<void> deleteRecording(String id, String filePath) async {
     // 1. Delete from Storage
     try {
-      await _client.storage.from('chorale_assets').remove([filePath]);
+      await _client.storage.from('imgs').remove([filePath]);
     } catch (e) {
       // Ignorer si déjà supprimé du storage
     }

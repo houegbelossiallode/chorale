@@ -9,6 +9,7 @@ import '../../services/recording_service.dart';
 import '../../services/audio_recorder_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
 class CarnetDeChantsScreen extends StatefulWidget {
@@ -102,7 +103,17 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Micro error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Micro error: $e"),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: "Paramètres",
+              textColor: Colors.white,
+              onPressed: () => openAppSettings(),
+            ),
+          ),
+        );
       }
     }
   }
@@ -185,7 +196,7 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
               titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
               title: Text(
                 widget.repetitionTitle,
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050)),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 10, color: const Color(0xFF444050)),
               ),
               background: Container(
                 decoration: BoxDecoration(
@@ -313,7 +324,17 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(chant?['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050))),
-                          Text(chant?['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500])),
+                          Row(
+                            children: [
+                              Text(chant?['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500])),
+                              if (item['partie_events']?['titre'] != null) ...[
+                                const SizedBox(width: 8),
+                                Text("•", style: TextStyle(color: Colors.grey[300], fontSize: 11)),
+                                const SizedBox(width: 8),
+                                Text(item['partie_events']['titre'], style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF7367F0), fontWeight: FontWeight.bold)),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -353,25 +374,26 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () => _toggleRecording(chant['id'].toString(), item['id'].toString()),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isRecordingThis ? const Color(0xFFEA5455) : const Color(0xFF7367F0).withAlpha(25),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(isRecordingThis ? Icons.stop_rounded : Icons.mic_rounded, size: 16, color: isRecordingThis ? Colors.white : const Color(0xFF7367F0)),
-                            if (isRecordingThis) ...[
-                              const SizedBox(width: 5),
-                              Text("${_recordingSeconds}s", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    if (!isRecorded || isRecordingThis)
+                      GestureDetector(
+                        onTap: () => _toggleRecording(chant['id'].toString(), item['id'].toString()),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isRecordingThis ? const Color(0xFFEA5455) : const Color(0xFF7367F0).withAlpha(25),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(isRecordingThis ? Icons.stop_rounded : Icons.mic_rounded, size: 16, color: isRecordingThis ? Colors.white : const Color(0xFF7367F0)),
+                              if (isRecordingThis) ...[
+                                const SizedBox(width: 5),
+                                Text("${_recordingSeconds}s", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ],

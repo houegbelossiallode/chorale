@@ -4,6 +4,8 @@ class Event {
   final DateTime startDate;
   final String? location;
   final String? description;
+  final String? userChoice;
+  final String? typeName;
 
   Event({
     required this.id,
@@ -11,6 +13,8 @@ class Event {
     required this.startDate,
     this.location,
     this.description,
+    this.userChoice,
+    this.typeName,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class Event {
       startDate: DateTime.parse(json['start_at']),
       location: json['location'],
       description: json['description'],
+      userChoice: json['user_choice'],
+      typeName: json['types'] != null ? json['types']['libelle'] : null,
     );
   }
 

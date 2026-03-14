@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,6 +13,8 @@ class LaravelService {
   final String _baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://chorale.onrender.com';
   String? _cookies;
   String? _csrfToken;
+
+  String get baseUrl => _baseUrl;
 
   /// Extract and store cookies from a set-cookie header string
   void _parseCookies(String? rawCookie) {
@@ -77,6 +80,23 @@ class LaravelService {
         'cookie': _cookies ?? '',
         'Accept': 'application/json',
       },
+    );
+  }
+
+  Future<http.Response> post(String url, Map<String, dynamic> data) async {
+    if (_cookies == null) {
+      await syncSession();
+    }
+
+    return http.post(
+      Uri.parse(url),
+      headers: {
+        'cookie': _cookies ?? '',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        if (_csrfToken != null) 'X-XSRF-TOKEN': _csrfToken!,
+      },
+      body: jsonEncode(data),
     );
   }
 

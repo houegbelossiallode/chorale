@@ -38,7 +38,7 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
             centerTitle: true,
             title: Text(
               "Répétitions",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12),
             ),
           ),
           SliverPadding(
@@ -163,23 +163,23 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: accentColor.withAlpha(15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        isPast ? "PASSÉE" : "RÉPÉTITION",
-                        style: GoogleFonts.outfit(
-                          color: accentColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
+                    if (isPast)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: accentColor.withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          "PASSÉE",
+                          style: GoogleFonts.outfit(
+                            color: accentColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFD0D2D6), size: 14),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -187,7 +187,7 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                   repetition.title ?? 'Répétition sans titre',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 14,
                     color: const Color(0xFF444050),
                     height: 1.2,
                   ),
@@ -209,6 +209,25 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 15),
+                if (!isPast) ...[
+                  const Divider(height: 1),
+                  const SizedBox(height: 15),
+                  Text(
+                    "Seriez-vous présent ?",
+                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _buildPresenceChip(repetition, "Oui", "oui", Colors.green),
+                      const SizedBox(width: 8),
+                      _buildPresenceChip(repetition, "Non", "non", Colors.red),
+                      const SizedBox(width: 8),
+                      _buildPresenceChip(repetition, "Peut-être", "peut-etre", Colors.orange),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 25),
                 Container(
                   width: double.infinity,
@@ -239,4 +258,61 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
     ),
   );
 }
+
+  Widget _buildPresenceChip(Repetition repetition, String label, String value, Color color) {
+    final bool isSelected = repetition.userChoice == value;
+    
+    return GestureDetector(
+      onTap: () async {
+        if (isSelected) return;
+        
+        try {
+          await _repetitionService.updateSondage(repetition.id, value);
+          
+          setState(() {
+            _repetitionsFuture = _repetitionService.fetchRepetitions();
+          });
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Choix enregistré : $label"),
+                backgroundColor: color,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 1),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red),
+            );
+          }
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? color : color.withAlpha(50)),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(color: color.withAlpha(60), blurRadius: 8, offset: const Offset(0, 4))
+            else
+              BoxShadow(color: color.withAlpha(15), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 11, 
+            fontWeight: FontWeight.bold, 
+            color: isSelected ? Colors.white : color,
+          ),
+        ),
+      ),
+    );
+  }
 }

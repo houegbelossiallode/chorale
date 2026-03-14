@@ -38,7 +38,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
             centerTitle: true,
             title: Text(
               "Agenda & Événements",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18),
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 11),
             ),
           ),
           SliverPadding(
@@ -163,23 +163,40 @@ class _EventsListScreenState extends State<EventsListScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: accentColor.withAlpha(15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        isPast ? "PASSÉ" : "ÉVÉNEMENT",
-                        style: GoogleFonts.outfit(
-                          color: accentColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
+                    if (event.typeName != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7367F0).withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          event.typeName!.toUpperCase(),
+                          style: GoogleFonts.outfit(
+                            color: const Color(0xFF7367F0),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                      )
+                    else if (isPast)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: accentColor.withAlpha(15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          "PASSÉ",
+                          style: GoogleFonts.outfit(
+                            color: accentColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFD0D2D6), size: 14),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -187,7 +204,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
                   event.title,
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    fontSize: 14,
                     color: const Color(0xFF444050),
                     height: 1.2,
                   ),
@@ -228,6 +245,25 @@ class _EventsListScreenState extends State<EventsListScreen> {
                     ],
                   ),
                 ],
+                if (!isPast) ...[
+                  const SizedBox(height: 15),
+                  const Divider(height: 1),
+                  const SizedBox(height: 15),
+                  Text(
+                    "Seriez-vous présent ?",
+                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _buildPresenceChip(event, "Oui", "oui", Colors.green),
+                      const SizedBox(width: 8),
+                      _buildPresenceChip(event, "Non", "non", Colors.red),
+                      const SizedBox(width: 8),
+                      _buildPresenceChip(event, "Peut-être", "peut-etre", Colors.orange),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 25),
                 Container(
                   width: double.infinity,
@@ -257,5 +293,83 @@ class _EventsListScreenState extends State<EventsListScreen> {
       ),
     ),
   );
-}
+  }
+
+  Widget _buildPresenceChip(Event event, String label, String value, Color color) {
+    final bool isSelected = event.userChoice == value;
+    
+    return GestureDetector(
+      onTap: () async {
+        if (isSelected) return;
+        
+        try {
+          // Optimistic UI update
+          final Map<String, dynamic> eventJson = event.toJson();
+          // Adjust for model field name vs JSON field name if necessary
+          // Note: event.toJson uses 'start_date' but Event.fromJson uses 'start_at'
+          // Let's just create a new Event object with the updated choice
+          final updatedEvent = Event(
+            id: event.id,
+            title: event.title,
+            startDate: event.startDate,
+            location: event.location,
+            description: event.description,
+            userChoice: value,
+          );
+          
+          setState(() {
+            // We need to update the event in the list if we want to see the change
+            // Since we're using a FutureBuilder, we might need a local copy of the list
+            // For now, let's just trigger the service call
+          });
+          
+          await _eventService.updateSondage(event.id, value);
+          
+          // Refresh the list to get new data and confirm state
+          setState(() {
+            _eventsFuture = _eventService.fetchEvents();
+          });
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Choix enregistré : $label"),
+                backgroundColor: color,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 1),
+              ),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red),
+            );
+          }
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? color : color.withAlpha(50)),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(color: color.withAlpha(60), blurRadius: 8, offset: const Offset(0, 4))
+            else
+              BoxShadow(color: color.withAlpha(15), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 11, 
+            fontWeight: FontWeight.bold, 
+            color: isSelected ? Colors.white : color,
+          ),
+        ),
+      ),
+    );
+  }
 }

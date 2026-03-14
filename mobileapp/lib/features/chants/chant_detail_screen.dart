@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:choralia/shared/widgets/media_modal.dart';
 import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
 import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
@@ -22,7 +21,7 @@ class ChantDetailScreen extends StatefulWidget {
 
 class _ChantDetailScreenState extends State<ChantDetailScreen> {
   final _supabase = Supabase.instance.client;
-  final _audioPlayer = ap.AudioPlayer();
+  final _audioPlayer = ja.AudioPlayer();
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -44,15 +43,13 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
     super.initState();
     _fetchResources();
 
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _isPlaying = state == ap.PlayerState.playing);
+    _audioPlayer.playerStateStream.listen((state) {
+      if (mounted) setState(() => _isPlaying = state.playing);
     });
-
-    _audioPlayer.onDurationChanged.listen((newDuration) {
-      if (mounted) setState(() => _duration = newDuration);
+    _audioPlayer.durationStream.listen((newDuration) {
+      if (mounted) setState(() => _duration = newDuration ?? Duration.zero);
     });
-
-    _audioPlayer.onPositionChanged.listen((newPosition) {
+    _audioPlayer.positionStream.listen((newPosition) {
       if (mounted) setState(() => _position = newPosition);
     });
   }
@@ -150,10 +147,17 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
     if (_isPlaying) {
       await _audioPlayer.pause();
     } else {
-      String fullUrl = _currentAudioUrl!;
-      // Supabase storage URLs are usually full URLs if retrieved via getPublicUrl or in database.
-      // If it's a relative path, we should handle it (though usually it's full in this app's DB)
-      await _audioPlayer.play(ap.UrlSource(fullUrl));
+      try {
+        await _jaPlayer.stop(); // Stop potential personal recording
+        setState(() => _playingRecordingId = null);
+        
+        // Use setUrl if URL changed, otherwise just play
+        // For simplicity, we can always setUrl if it's the first time or if it changed
+        await _audioPlayer.setUrl(_currentAudioUrl!);
+        await _audioPlayer.play();
+      } catch (e) {
+        debugPrint("ChantDetail: Error playing audio: $e");
+      }
     }
   }
 
@@ -482,12 +486,12 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                 final isCurrent = _currentAudioUrl == a['file_path'];
                 final String pupitreName = a['pupitres']?['name'] ?? "Tutti";
                 return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _currentAudioUrl = a['file_path'];
-                      _audioPlayer.stop();
-                    });
-                  },
+                    onTap: () async {
+                      setState(() {
+                        _currentAudioUrl = a['file_path'];
+                      });
+                      await _audioPlayer.stop();
+                    },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
