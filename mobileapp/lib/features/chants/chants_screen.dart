@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:chorale_app_mobile/features/chants/chant_detail_screen.dart';
+import 'package:choralia/features/chants/chant_detail_screen.dart';
 
 class ChantsScreen extends StatefulWidget {
   const ChantsScreen({super.key});

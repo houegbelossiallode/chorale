@@ -1,11 +1,11 @@
 // lib/core/router.dart
 import 'package:flutter/material.dart';
-import 'package:chorale_app_mobile/features/chants/chants_screen.dart';
-import 'package:chorale_app_mobile/features/events/events_list_screen.dart';
-import 'package:chorale_app_mobile/features/repetitions/repetitions_list_screen.dart';
-import 'package:chorale_app_mobile/features/profile/profile_screen.dart';
-import 'package:chorale_app_mobile/features/recorder/recorder_screen.dart';
-import 'package:chorale_app_mobile/features/dashboard/dashboard_screen.dart';
+import 'package:choralia/features/chants/chants_screen.dart';
+import 'package:choralia/features/events/events_list_screen.dart';
+import 'package:choralia/features/repetitions/repetitions_list_screen.dart';
+import 'package:choralia/features/profile/profile_screen.dart';
+import 'package:choralia/features/recorder/recorder_screen.dart';
+import 'package:choralia/features/dashboard/dashboard_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {

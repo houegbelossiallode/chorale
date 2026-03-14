@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:chorale_app_mobile/features/chants/chants_screen.dart';
-import 'package:chorale_app_mobile/features/events/events_list_screen.dart';
-import 'package:chorale_app_mobile/features/repetitions/repetitions_list_screen.dart';
-import 'package:chorale_app_mobile/features/profile/profile_screen.dart';
-import 'package:chorale_app_mobile/features/chants/chant_detail_screen.dart';
-import 'package:chorale_app_mobile/features/notifications/notifications_screen.dart';
+import 'package:choralia/features/chants/chants_screen.dart';
+import 'package:choralia/features/events/events_list_screen.dart';
+import 'package:choralia/features/repetitions/repetitions_list_screen.dart';
+import 'package:choralia/features/profile/profile_screen.dart';
+import 'package:choralia/features/chants/chant_detail_screen.dart';
+import 'package:choralia/features/notifications/notifications_screen.dart';
 import '../../services/notification_service.dart';
 import '../../services/dashboard_service.dart';
 import '../../services/profile_service.dart';
@@ -221,7 +221,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   int _chantsAppris = 0;
   int _tauxPresence = 0;
-  Map<String, dynamic>? _activiteRecente;
+  Map<String, dynamic>? _prochainEvenement;
+  Map<String, dynamic>? _prochaineRepetition;
   Map<String, dynamic>? _chantDuMoment;
   List<dynamic> _derniersChants = [];
 
@@ -237,7 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _chantsAppris = stats['chants_appris'] ?? 0;
         _tauxPresence = stats['taux_presence'] ?? 0;
-        _activiteRecente = stats['activite_recente'];
+        _prochainEvenement = stats['prochain_evenement'];
+        _prochaineRepetition = stats['prochaine_repetition'];
         _chantDuMoment = stats['chant_du_moment'];
         _derniersChants = stats['derniers_chants'] ?? [];
         _isLoading = false;
@@ -256,63 +258,89 @@ class _HomeScreenState extends State<HomeScreen> {
         ? widget.profile!['first_name'] ?? 'Choriste' 
         : (user?.userMetadata?['first_name'] ?? 'Choriste');
 
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    return RefreshIndicator(
+      onRefresh: _loadDashboardData,
+      color: const Color(0xFF7367F0),
+      child: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(context),
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator(color: Color(0xFF7367F0))),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWelcomeHeader(name),
+                    const SizedBox(height: 25),
 
-    return CustomScrollView(
-      slivers: [
-        _buildSliverAppBar(context),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildWelcomeHeader(name),
-                const SizedBox(height: 25),
-                _buildStatsGrid(),
-                const SizedBox(height: 35),
-                
-                if (_chantDuMoment != null)
-                  _buildSectionTitle("Recommandation du jour", null),
-                if (_chantDuMoment != null)
-                  const SizedBox(height: 15),
-                if (_chantDuMoment != null)
-                  _buildChantDuMomentCard(_chantDuMoment!),
-                if (_chantDuMoment != null)
-                  const SizedBox(height: 35),
+                    // 1. Prochaine répétition
+                    _buildSectionTitle("Prochaine Répétition", () => widget.onNavigate(3)),
+                    const SizedBox(height: 15),
+                    if (_prochaineRepetition != null)
+                      _buildHighlightsCard(
+                        _prochaineRepetition!['titre'] ?? "Répétition",
+                        _prochaineRepetition!['jour_heure'] ?? "",
+                        _prochaineRepetition!['lieu'] ?? "Lieu non défini",
+                        Icons.auto_awesome_motion_rounded,
+                        const Color(0xFF00CFE8),
+                      )
+                    else
+                      _buildEmptyState("Aucune répétition prévue pour le moment."),
+                    const SizedBox(height: 35),
+                    
+                    // 2. Recommandation (Chant du moment)
+                    if (_chantDuMoment != null)
+                      _buildSectionTitle("Recommandation du jour", null),
+                    if (_chantDuMoment != null)
+                      const SizedBox(height: 15),
+                    if (_chantDuMoment != null)
+                      _buildChantDuMomentCard(_chantDuMoment!),
+                    if (_chantDuMoment != null)
+                      const SizedBox(height: 35),
 
-                _buildSectionTitle("Prochain Événement", () => widget.onNavigate(2)),
-                const SizedBox(height: 15),
-                if (_activiteRecente != null)
-                  _buildHighlightsCard(
-                    _activiteRecente!['titre'] ?? "Événement",
-                    _activiteRecente!['jour_heure'] ?? "",
-                    _activiteRecente!['lieu'] ?? "Lieu non défini",
-                    Icons.calendar_today_rounded,
-                    const Color(0xFF7367F0),
-                  )
-                else
-                  _buildEmptyState("Aucun événement prévu pour le moment."),
-                
-                const SizedBox(height: 35),
-                
-                if (_derniersChants.isNotEmpty)
-                  _buildSectionTitle("Derniers Chants Ajoutés", () => widget.onNavigate(1)),
-                if (_derniersChants.isNotEmpty)
-                  const SizedBox(height: 15),
-                if (_derniersChants.isNotEmpty)
-                  ..._derniersChants.map((c) => _buildMiniChantCard(c)).toList(),
-                if (_derniersChants.isNotEmpty)
-                  const SizedBox(height: 20),
-                
-                const SizedBox(height: 80),
-              ],
+                    // 3. Prochains événements
+                    _buildSectionTitle("Prochain Événement", () => widget.onNavigate(2)),
+                    const SizedBox(height: 15),
+                    if (_prochainEvenement != null)
+                      _buildHighlightsCard(
+                        _prochainEvenement!['titre'] ?? "Événement",
+                        _prochainEvenement!['jour_heure'] ?? "",
+                        _prochainEvenement!['lieu'] ?? "Lieu non défini",
+                        Icons.calendar_today_rounded,
+                        const Color(0xFFEA5455),
+                      )
+                    else
+                      _buildEmptyState("Aucun événement prévu pour le moment."),
+                    const SizedBox(height: 35),
+                    
+                    // 4. Statistiques (chants et présence)
+                    _buildSectionTitle("Statistiques d'engagement", null),
+                    const SizedBox(height: 15),
+                    _buildStatsGrid(),
+                    const SizedBox(height: 35),
+
+                    // 5. Le reste (Derniers chants ajoutés)
+                    if (_derniersChants.isNotEmpty)
+                      _buildSectionTitle("Derniers Chants Ajoutés", () => widget.onNavigate(1)),
+                    if (_derniersChants.isNotEmpty)
+                      const SizedBox(height: 15),
+                    if (_derniersChants.isNotEmpty)
+                      ..._derniersChants.map((c) => _buildMiniChantCard(c)).toList(),
+                    if (_derniersChants.isNotEmpty)
+                      const SizedBox(height: 20),
+                    
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

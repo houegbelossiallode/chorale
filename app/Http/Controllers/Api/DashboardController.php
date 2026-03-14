@@ -27,16 +27,27 @@ class DashboardController extends Controller
             : 100;
 
         // Activité récente (Prochain événement)
-        $nextEvent = \App\Models\Event::where('start_at', '>=', now())
+        $currentDate = date('Y-m-d H:i:s');
+        $nextEvent = \App\Models\Event::where('start_at', '>=', $currentDate)
             ->orderBy('start_at')
             ->first();
 
-        // Chant du moment (aléatoire ou dernier ajouté)
-        $chantDuMoment = \App\Models\Chant::inRandomOrder()->first();
+        // Prochaine répétition
+        $nextRepetition = \App\Models\Repetition::where('start_time', '>=', $currentDate)
+            ->orderBy('start_time')
+            ->first();
+
+        // Chant du moment (recommandation du jour, change chaque jour)
+        $count = \App\Models\Chant::count();
+        $chantDuMoment = null;
+        if ($count > 0) {
+            $dayOfYear = date('z'); // 0 to 365
+            $chantDuMoment = \App\Models\Chant::orderBy('id')->skip($dayOfYear % $count)->first();
+        }
 
         // Derniers chants ajoutés
-        $derniersChants = \App\Models\Chant::orderBy('created_at', 'desc')
-            ->take(3)
+        $derniersChants = \App\Models\Chant::orderBy('created_at','desc')
+            ->take(5)
             ->get()
             ->map(function($chant) {
                 return [
@@ -51,11 +62,17 @@ class DashboardController extends Controller
             'data' => [
                 'chants_appris' => $chantsAppris,
                 'taux_presence' => $tauxPresence,
-                'activite_recente' => $nextEvent ? [
+                'prochain_evenement' => $nextEvent ? [
                     'titre' => $nextEvent->title,
                     'jour_heure' => \Carbon\Carbon::parse($nextEvent->start_at)->translatedFormat('l d F \• H:i'),
                     'lieu' => $nextEvent->location ?? 'Non défini',
-                    'couleur' => '#7367F0' 
+                    'couleur' => '#EA5455' 
+                ] : null,
+                'prochaine_repetition' => $nextRepetition ? [
+                    'titre' => $nextRepetition->titre,
+                    'jour_heure' => \Carbon\Carbon::parse($nextRepetition->start_time)->translatedFormat('l d F \• H:i'),
+                    'lieu' => $nextRepetition->lieu ?? 'Non défini',
+                    'couleur' => '#00CFE8' 
                 ] : null,
                 'chant_du_moment' => $chantDuMoment ? [
                     'id' => $chantDuMoment->id,

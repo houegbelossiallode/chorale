@@ -1,6 +1,6 @@
 {
-    "name": "chorale_app_mobile",
-    "short_name": "chorale_app_mobile",
+    "name": "choralia",
+    "short_name": "choralia",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

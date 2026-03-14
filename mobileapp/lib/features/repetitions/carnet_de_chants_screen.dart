@@ -3,11 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../chants/chant_detail_screen.dart';
 import '../../services/repetition_service.dart';
-import 'package:chorale_app_mobile/shared/widgets/media_modal.dart';
-import 'package:chorale_app_mobile/shared/widgets/pdf_viewer_screen.dart';
+import 'package:choralia/shared/widgets/media_modal.dart';
+import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
 import '../../services/recording_service.dart';
 import '../../services/audio_recorder_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'dart:async';
 
 class CarnetDeChantsScreen extends StatefulWidget {
@@ -73,11 +74,6 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
       }
     }
   }
-
-  String _cleanHtml(String html) {
-    return html.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
-  }
-
   Future<void> _toggleRecording(String chantId, String repertoireId) async {
     try {
       if (_isRecording) {
@@ -189,7 +185,7 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
               titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
               title: Text(
                 widget.repetitionTitle,
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF444050)),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF444050)),
               ),
               background: Container(
                 decoration: BoxDecoration(
@@ -316,8 +312,8 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(chant?['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF444050))),
-                          Text(chant?['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[500])),
+                          Text(chant?['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050))),
+                          Text(chant?['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500])),
                         ],
                       ),
                     ),
@@ -344,11 +340,13 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                           children: [
                             if (chant?['parole'] != null)
                               _buildPill(Icons.article_outlined, "Paroles", const Color(0xFF7367F0), () => _showLyrics(chant['title'], chant['parole'])),
+                            if (chant?['file_path'] != null)
+                              _buildPill(Icons.picture_as_pdf_outlined, "Partition", const Color(0xFFEA5455), () => _launchResource({'type': 'partition', 'file_path': chant['file_path'], 'label': 'Partition Principale'})),
                             ...ressources.map((r) => _buildPill(
                               r['type'] == 'audio' ? Icons.headset_rounded : r['type'] == 'youtube' ? Icons.play_circle_fill : Icons.description_outlined,
                               "${r['type'].toString().toUpperCase()}${r['pupitres']?['name'] != null ? ' (${r['pupitres']['name']})' : ''}",
                               r['type'] == 'youtube' ? const Color(0xFFEA5455) : const Color(0xFF444050),
-                              () => _launchResource(r),
+                              () => _launchResource(r, chant?['parole']),
                             )),
                           ],
                         ),
@@ -528,18 +526,34 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
               ],
             ),
             const Divider(),
-            Expanded(child: SingleChildScrollView(child: Text(_cleanHtml(lyrics), style: GoogleFonts.outfit(fontSize: 15, height: 1.6, color: const Color(0xFF444050))))),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Html(
+                  data: lyrics,
+                  style: {
+                    "body": Style(
+                      fontSize: FontSize(15.0),
+                      color: const Color(0xFF444050),
+                      lineHeight: LineHeight.number(1.6),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _launchResource(Map<String, dynamic> res) {
+  void _launchResource(Map<String, dynamic> res, [String? rawLyrics]) {
+    String? lyrics = rawLyrics;
     if (res['type'] == 'partition') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => PdfViewerScreen(title: res['label'] ?? "Partition", url: res['file_path'])));
     } else {
-      MediaModal.show(context, title: res['label'] ?? "Média", url: res['file_path'], type: res['type'] ?? 'video');
+      MediaModal.show(context, title: res['label'] ?? "Média", url: res['file_path'], type: res['type'] ?? 'video', lyrics: lyrics);
     }
   }
 }

@@ -2,25 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class MediaModal extends StatefulWidget {
   final String title;
   final String url;
   final String type; // 'youtube', 'video', 'audio'
+  final String? lyrics;
 
   const MediaModal({
     super.key,
     required this.title,
     required this.url,
     required this.type,
+    this.lyrics,
   });
 
-  static void show(BuildContext context, {required String title, required String url, required String type}) {
+  static void show(BuildContext context, {required String title, required String url, required String type, String? lyrics}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => MediaModal(title: title, url: url, type: type),
+      builder: (context) => MediaModal(title: title, url: url, type: type, lyrics: lyrics),
     );
   }
 
@@ -77,6 +80,9 @@ class _MediaModalState extends State<MediaModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -121,6 +127,33 @@ class _MediaModalState extends State<MediaModal> {
             ],
           ),
           const SizedBox(height: 20),
+          if (widget.lyrics != null && widget.lyrics!.isNotEmpty)
+            Flexible(
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: SingleChildScrollView(
+                  child: Html(
+                    data: widget.lyrics!,
+                    style: {
+                      "body": Style(
+                        fontSize: FontSize(14.0),
+                        color: const Color(0xFF444050),
+                        lineHeight: LineHeight.number(1.3),
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                      ),
+                    },
+                  ),
+                ),
+              ),
+            ),
           if (_ytController != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(20),

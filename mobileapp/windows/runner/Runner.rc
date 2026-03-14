@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.chorale.romero" "\0"
-            VALUE "FileDescription", "chorale_app_mobile" "\0"
+            VALUE "FileDescription", "choralia" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "chorale_app_mobile" "\0"
+            VALUE "InternalName", "choralia" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.chorale.romero. All rights reserved." "\0"
-            VALUE "OriginalFilename", "chorale_app_mobile.exe" "\0"
-            VALUE "ProductName", "chorale_app_mobile" "\0"
+            VALUE "OriginalFilename", "choralia.exe" "\0"
+            VALUE "ProductName", "choralia" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

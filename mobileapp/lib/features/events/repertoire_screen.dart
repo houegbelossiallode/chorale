@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:chorale_app_mobile/shared/widgets/media_modal.dart';
-import 'package:chorale_app_mobile/shared/widgets/pdf_viewer_screen.dart';
+import 'package:choralia/shared/widgets/media_modal.dart';
+import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
 import 'dart:async';
 import '../../services/event_service.dart';
 import '../../services/repetition_service.dart';
 import '../../services/audio_recorder_service.dart';
 import '../../services/recording_service.dart';
 import '../chants/chant_detail_screen.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class RepertoireScreen extends StatefulWidget {
   final String? eventId;
@@ -80,11 +81,6 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
       }
     }
   }
-
-  String _cleanHtml(String json) {
-    return json.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
-  }
-
   Future<void> _toggleRecording(String chantId, String repertoireId) async {
     try {
       if (_isRecording) {
@@ -314,8 +310,8 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(chant['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF444050))),
-                          Text(chant['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[500])),
+                          Text(chant['title'] ?? 'Sans titre', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050))),
+                          Text(chant['composer'] ?? 'Compositeur inconnu', style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500])),
                         ],
                       ),
                     ),
@@ -337,11 +333,13 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                           children: [
                             if (chant['parole'] != null)
                               _buildResourcePill(Icons.article_outlined, "Paroles", const Color(0xFF7367F0), () => _showLyrics(chant['title'], chant['parole'])),
+                            if (chant['file_path'] != null)
+                              _buildResourcePill(Icons.picture_as_pdf_outlined, "Partition", const Color(0xFFEA5455), () => _launchResource({'type': 'partition', 'file_path': chant['file_path'], 'label': 'Partition Principale'})),
                             ...ressources.map((r) => _buildResourcePill(
                                   r['type'] == 'audio' ? Icons.headset_rounded : r['type'] == 'youtube' ? Icons.play_circle_fill : Icons.description_outlined,
                                   "${r['type'].toString().toUpperCase()} ${r['pupitres']?['name'] != null ? '(${r['pupitres']['name']})' : ''}",
                                   r['type'] == 'youtube' ? const Color(0xFFEA5455) : const Color(0xFF444050),
-                                  () => _launchResource(r),
+                                  () => _launchResource(r, chant['parole']),
                                 )),
                           ],
                         ),
@@ -419,14 +417,30 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
               ],
             ),
             const Divider(),
-            Expanded(child: SingleChildScrollView(child: Text(_cleanHtml(lyrics), style: GoogleFonts.outfit(fontSize: 15, height: 1.6, color: const Color(0xFF444050))))),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Html(
+                  data: lyrics,
+                  style: {
+                    "body": Style(
+                      fontSize: FontSize(15.0),
+                      color: const Color(0xFF444050),
+                      lineHeight: LineHeight.number(1.6),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _launchResource(Map<String, dynamic> res) {
+  void _launchResource(Map<String, dynamic> res, [String? rawLyrics]) {
+    String? lyrics = rawLyrics;
     if (res['type'] == 'partition') {
       Navigator.push(
         context,
@@ -443,6 +457,7 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
         title: res['label'] ?? "Média",
         url: res['file_path'],
         type: res['type'] ?? 'video',
+        lyrics: lyrics,
       );
     }
   }

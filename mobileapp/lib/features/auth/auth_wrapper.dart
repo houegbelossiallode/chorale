@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:chorale_app_mobile/features/auth/login_screen.dart';
-import 'package:chorale_app_mobile/features/dashboard/dashboard_screen.dart';
+import 'package:choralia/features/auth/login_screen.dart';
+import 'package:choralia/features/dashboard/dashboard_screen.dart';
 
 import '../../services/laravel_service.dart';
 

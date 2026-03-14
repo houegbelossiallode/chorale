@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:audioplayers/audioplayers.dart' as ap;
-import 'package:chorale_app_mobile/shared/widgets/media_modal.dart';
-import 'package:chorale_app_mobile/shared/widgets/pdf_viewer_screen.dart';
+import 'package:choralia/shared/widgets/media_modal.dart';
+import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
+import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart' as ja;
+import 'package:flutter_html/flutter_html.dart';
 import 'dart:async';
 import '../../services/recording_service.dart';
 import '../../services/profile_service.dart';
@@ -141,10 +143,6 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
       debugPrint("ChantDetail: Error fetching recordings: $e");
       if (mounted) setState(() => _isLoadingRecordings = false);
     }
-  }
-
-  String _cleanHtml(String text) {
-    return text.replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
   Future<void> _togglePlay() async {
@@ -398,6 +396,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                   title: '${v['pupitres']?['name'] ?? "Général"} - ${isYoutube ? "YouTube" : "Vidéo"}',
                   url: v['file_path'],
                   type: isYoutube ? 'youtube' : 'video',
+                  lyrics: widget.chant['parole'], // Raw HTML
                 );
               },
             ),
@@ -551,16 +550,16 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                 color: const Color(0xFF7367F0).withAlpha(50),
               ),
               const SizedBox(height: 30),
-              Text(
-                _cleanHtml(lyrics),
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 17,
-                  color: const Color(0xFF444050),
-                  height: 2.0,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w400,
-                ),
+              Html(
+                data: lyrics,
+                style: {
+                  "body": Style(
+                    fontSize: FontSize(16.0),
+                    color: const Color(0xFF444050),
+                    lineHeight: LineHeight.number(1.3),
+                    fontStyle: FontStyle.italic,
+                  ),
+                },
               ),
             ],
           ),

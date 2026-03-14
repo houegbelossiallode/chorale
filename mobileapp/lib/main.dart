@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:chorale_app_mobile/features/auth/auth_wrapper.dart';
+import 'package:choralia/features/auth/auth_wrapper.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {

@@ -1,4 +1,4 @@
-package com.chorale.romero.chorale_app_mobile
+package com.choralia.romero
 
 import io.flutter.embedding.android.FlutterActivity
 
