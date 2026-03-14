@@ -209,6 +209,25 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
                     ),
                   ],
                 ),
+                if (repetition.location != null) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
+                        child: Icon(Icons.location_on_rounded, size: 16, color: accentColor),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          repetition.location!,
+                          style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 15),
                 if (!isPast) ...[
                   const Divider(height: 1),

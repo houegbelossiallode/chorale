@@ -17,14 +17,14 @@ class SondageController extends Controller
             'choix' => 'required|in:oui,non,peut-etre',
         ]);
 
-        if (!$validated['event_id'] && !$validated['repetition_id']) {
+        if (!($validated['event_id'] ?? null) && !($validated['repetition_id'] ?? null)) {
             return response()->json(['message' => 'Un identifiant d\'événement ou de répétition est requis'], 422);
         }
 
         $userId = Auth::id();
 
         $match = ['user_id' => $userId];
-        if ($validated['event_id']) {
+        if ($validated['event_id'] ?? null) {
             $match['event_id'] = $validated['event_id'];
         }
         else {

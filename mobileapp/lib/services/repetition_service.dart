@@ -1,4 +1,5 @@
 // lib/services/repetition_service.dart
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/repetition.dart';
 import 'package:flutter/foundation.dart';
 import 'profile_service.dart';
