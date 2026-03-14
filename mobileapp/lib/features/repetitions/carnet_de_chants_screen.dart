@@ -185,7 +185,7 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
               titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
               title: Text(
                 widget.repetitionTitle,
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14, color: const Color(0xFF444050)),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13, color: const Color(0xFF444050)),
               ),
               background: Container(
                 decoration: BoxDecoration(
@@ -535,6 +535,14 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                       fontSize: FontSize(15.0),
                       color: const Color(0xFF444050),
                       lineHeight: LineHeight.number(1.6),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    "p": Style(
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    "div": Style(
                       margin: Margins.zero,
                       padding: HtmlPaddings.zero,
                     ),

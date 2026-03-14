@@ -149,6 +149,14 @@ class _MediaModalState extends State<MediaModal> {
                         margin: Margins.zero,
                         padding: HtmlPaddings.zero,
                       ),
+                      "p": Style(
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                      ),
+                      "div": Style(
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                      ),
                     },
                   ),
                 ),

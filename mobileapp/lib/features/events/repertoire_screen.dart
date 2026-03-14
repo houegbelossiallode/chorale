@@ -181,7 +181,7 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
         titlePadding: const EdgeInsets.only(left: 60, bottom: 16),
         title: Text(
           widget.title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: const Color(0xFF444050)),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF444050)),
         ),
         background: Container(
           decoration: BoxDecoration(
@@ -426,6 +426,14 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                       fontSize: FontSize(15.0),
                       color: const Color(0xFF444050),
                       lineHeight: LineHeight.number(1.6),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    "p": Style(
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    "div": Style(
                       margin: Margins.zero,
                       padding: HtmlPaddings.zero,
                     ),
