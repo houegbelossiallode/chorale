@@ -48,6 +48,7 @@ class RepetitionService {
             title,
             composer,
             parole,
+            file_path,
             fichier_chants (id, type, file_path, pupitre_id, pupitres(name))
           )
         ''')
@@ -107,6 +108,7 @@ class RepetitionService {
             title,
             composer,
             parole,
+            file_path,
             fichier_chants (id, type, file_path, pupitre_id, pupitres(name))
           )
         ''')
