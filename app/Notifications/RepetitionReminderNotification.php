@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Notifications;
 
@@ -26,7 +26,22 @@ class RepetitionReminderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database','fcm'];
+        return ['mail', 'database', \App\Channels\FcmChannel::class];
+    }
+
+    /**
+     * Get the FCM representation of the notification.
+     */
+    public function toFcm(object $notifiable): array
+    {
+        return [
+            'title' => 'Rappel de répétition 🎶',
+            'body' => 'Nous avons une répétition prévue le ' . \Carbon\Carbon::parse($this->repetition->start_time)->translatedFormat('d F Y') . ' à ' . \Carbon\Carbon::parse($this->repetition->start_time)->format('H:i') . ' au ' . $this->repetition->lieu,
+            'data' => [
+                'type' => 'repetition_reminder',
+                'repetition_id' => (string)$this->repetition->id,
+            ],
+        ];
     }
 
     /**
