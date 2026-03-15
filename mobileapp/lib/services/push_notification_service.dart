@@ -23,7 +23,8 @@ class PushNotificationService {
       String? token = await _fcm.getToken();
       if (token != null) {
         debugPrint("FCM Token: $token");
-        await _updateTokenOnServer(token);
+        // We wait for Laravel session sync to update the token on server
+        // await _updateTokenOnServer(token);
       }
     } else {
       debugPrint('User declined or has not accepted permission');
@@ -45,6 +46,14 @@ class PushNotificationService {
     });
   }
 
+  Future<void> syncToken() async {
+    String? token = await _fcm.getToken();
+    if (token != null) {
+      debugPrint("PushNotificationService: Manual sync for token: $token");
+      await _updateTokenOnServer(token);
+    }
+  }
+
   Future<void> _updateTokenOnServer(String token) async {
     try {
       final response = await _laravelService.post(
@@ -52,12 +61,12 @@ class PushNotificationService {
         {'fcm_token': token},
       );
       if (response.statusCode == 200) {
-        debugPrint("FCM token successfully synced with backend");
+        debugPrint("PushNotificationService: FCM token successfully synced with backend");
       } else {
-        debugPrint("Failed to sync FCM token: ${response.body}");
+        debugPrint("PushNotificationService: Failed to sync FCM token: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
-      debugPrint("Error syncing FCM token: $e");
+      debugPrint("PushNotificationService: Error syncing FCM token: $e");
     }
   }
 }

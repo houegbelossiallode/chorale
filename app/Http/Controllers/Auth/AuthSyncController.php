@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\SupabaseService;
+use Illuminate\Support\Facades\Log;
 
 class AuthSyncController extends Controller
 {
@@ -182,6 +183,11 @@ class AuthSyncController extends Controller
 
     public function updateFcmToken(Request $request)
     {
+        \Log::info('FCM Token update attempt', [
+            'user_id' => Auth::id(),
+            'token_received' => (bool)$request->fcm_token
+        ]);
+
         $request->validate([
             'fcm_token' => 'required|string',
         ]);
@@ -189,6 +195,8 @@ class AuthSyncController extends Controller
         Auth::user()->update([
             'fcm_token' => $request->fcm_token
         ]);
+
+        \Log::info('FCM Token updated successfully for user ' . Auth::id());
 
         return response()->json([
             'status' => 'success',

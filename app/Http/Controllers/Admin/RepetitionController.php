@@ -164,9 +164,7 @@ class RepetitionController extends Controller
     public function sendReminder(Repetition $repetition)
     {
         // Récupérer tous les choristes actifs (ceux qui ont un rôle choriste)
-        $choristes = User::whereHas('role', function ($query) {
-            $query->where('libelle', 'like', '%choriste%');
-        })->get();
+        $choristes = User::all();
 
         if ($choristes->isEmpty()) {
             return back()->with('error', 'Aucun choriste actif trouvé pour recevoir la relance.');
@@ -175,15 +173,15 @@ class RepetitionController extends Controller
         // Charger les relations nécessaires pour l'email
         $repetition->load(['repertoires.chant', 'repertoires.partieEvent']);
 
-        //try {
+        try {
             // Envoi des notifications (E-mail + Base de données)
             foreach ($choristes as $choriste) {
                 /** @var \App\Models\User $choriste */
                 $choriste->notify(new \App\Notifications\RepetitionReminderNotification($repetition));
             }
             return back()->with('success', 'Relance envoyée avec succès à ' . $choristes->count() . ' chorist(e)s via e-mail et cloche de notification.');
-        // } catch (\Exception $e) {
-        //     return back()->with('error', 'Erreur lors de l\'envoi de la relance : ' . $e->getMessage());
-        // }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de l\'envoi de la relance : ' . $e->getMessage());
+        }
     }
 }
