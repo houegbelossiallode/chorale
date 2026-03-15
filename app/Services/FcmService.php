@@ -40,7 +40,10 @@ class FcmService
         ]);
 
         if (!$response->successful()) {
-            Log::error('FCM v1 Error: ' . $response->body());
+            Log::error('FCM v1 Error: ' . $response->status() . ' - ' . $response->body());
+        }
+        else {
+            Log::info('FCM v1 Success: Notification sent successfully to ' . substr($to, 0, 10) . '...');
         }
 
         return $response->successful();
