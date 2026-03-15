@@ -5,9 +5,20 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'laravel_service.dart';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final LaravelService _laravelService = LaravelService();
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+
+  // Create a high importance channel for Android
+  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description: 'This channel is used for important notifications.', // description
+    importance: Importance.max,
+  );
 
   Future<void> initialize() async {
     // Request permissions
@@ -24,12 +35,24 @@ class PushNotificationService {
       String? token = await _fcm.getToken();
       if (token != null) {
         debugPrint("FCM Token: $token");
-        // We wait for Laravel session sync to update the token on server
-        // await _updateTokenOnServer(token);
       }
-    } else {
-      debugPrint('User declined or has not accepted permission');
     }
+
+    // Initialize local notifications
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+    
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: DarwinInitializationSettings(),
+    );
+
+    await _localNotifications.initialize(initializationSettings);
+
+    // Create the channel on Android
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(_channel);
 
     // Handle token refresh
     _fcm.onTokenRefresh.listen((newToken) async {
@@ -39,10 +62,27 @@ class PushNotificationService {
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
-      debugPrint('Message data: ${message.data}');
+      
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
 
-      if (message.notification != null) {
-        debugPrint('Message also contained a notification: ${message.notification}');
+      if (notification != null && android != null && !kIsWeb) {
+        _localNotifications.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              _channel.id,
+              _channel.name,
+              channelDescription: _channel.description,
+              icon: android.smallIcon,
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
+          ),
+          payload: jsonEncode(message.data),
+        );
       }
     });
   }

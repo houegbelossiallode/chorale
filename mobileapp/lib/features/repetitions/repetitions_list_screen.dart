@@ -16,11 +16,23 @@ class RepetitionsListScreen extends StatefulWidget {
 class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
   final RepetitionService _repetitionService = RepetitionService();
   late Future<List<Repetition>> _repetitionsFuture;
+  List<Repetition>? _allRepetitions;
 
   @override
   void initState() {
     super.initState();
-    _repetitionsFuture = _repetitionService.fetchRepetitions();
+    _loadRepetitions();
+  }
+
+  void _loadRepetitions() {
+    setState(() {
+      _repetitionsFuture = _repetitionService.fetchRepetitions().then((reps) {
+        setState(() {
+          _allRepetitions = reps;
+        });
+        return reps;
+      });
+    });
   }
 
   @override
@@ -46,24 +58,24 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
             sliver: FutureBuilder<List<Repetition>>(
               future: _repetitionsFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting && _allRepetitions == null) {
                   return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
-                } else if (snapshot.hasError) {
+                } else if (snapshot.hasError && _allRepetitions == null) {
                   return SliverFillRemaining(child: Center(child: Text("Erreur: ${snapshot.error}")));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                } else if ((!snapshot.hasData || snapshot.data!.isEmpty) && _allRepetitions == null) {
                   return SliverFillRemaining(child: Center(child: Text("Aucune répétition enregistrée.")));
                 }
 
-                final allRepetitions = snapshot.data!;
+                final repetitions = _allRepetitions ?? snapshot.data!;
                 final now = DateTime.now();
                 
                 // Today and future
-                final upcoming = allRepetitions.where((r) => 
+                final upcoming = repetitions.where((r) => 
                   r.date.isAfter(now.subtract(const Duration(hours: 12)))
                 ).toList();
                 
                 // Past
-                final past = allRepetitions.where((r) => 
+                final past = repetitions.where((r) => 
                   r.date.isBefore(now.subtract(const Duration(hours: 12)))
                 ).toList();
 
@@ -142,141 +154,164 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
       ),
       child: Opacity(
         opacity: isPast ? 0.75 : 1.0,
-        child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CarnetDeChantsScreen(
-                repetitionId: repetition.id,
-                repetitionTitle: repetition.title ?? 'Répétition',
+        child: Column(
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CarnetDeChantsScreen(
+                      repetitionId: repetition.id,
+                      repetitionTitle: repetition.title ?? 'Répétition',
+                    ),
+                  ),
+                ),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(25, 25, 25, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (isPast)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: accentColor.withAlpha(15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                "PASSÉE",
+                                style: GoogleFonts.outfit(
+                                  color: accentColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        repetition.title ?? 'Répétition sans titre',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: const Color(0xFF444050),
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
+                            child: Icon(Icons.access_time_filled_rounded, size: 16, color: accentColor),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              dateStr,
+                              style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (repetition.location != null) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
+                              child: Icon(Icons.location_on_rounded, size: 16, color: accentColor),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                repetition.location!,
+                                style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-          borderRadius: BorderRadius.circular(30),
-          child: Padding(
-            padding: const EdgeInsets.all(25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    if (isPast)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: accentColor.withAlpha(15),
-                          borderRadius: BorderRadius.circular(10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 25, 25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isPast) ...[
+                    const SizedBox(height: 15),
+                    const Divider(height: 1),
+                    const SizedBox(height: 15),
+                    Text(
+                      "Seriez-vous présent ?",
+                      style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _buildPresenceChip(repetition, "Oui", "oui", Colors.green),
+                        const SizedBox(width: 8),
+                        _buildPresenceChip(repetition, "Non", "non", Colors.red),
+                        const SizedBox(width: 8),
+                        _buildPresenceChip(repetition, "Peut-être", "peut-etre", Colors.orange),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 25),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CarnetDeChantsScreen(
+                          repetitionId: repetition.id,
+                          repetitionTitle: repetition.title ?? 'Répétition',
                         ),
-                        child: Text(
-                          "PASSÉE",
-                          style: GoogleFonts.outfit(
-                            color: accentColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.1,
+                      ),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withAlpha(60),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
+                        ],
                       ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  repetition.title ?? 'Répétition sans titre',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: const Color(0xFF444050),
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
-                      child: Icon(Icons.access_time_filled_rounded, size: 16, color: accentColor),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        dateStr,
-                        style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-                ),
-                if (repetition.location != null) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: const Color(0xFFF8F7FA), borderRadius: BorderRadius.circular(10)),
-                        child: Icon(Icons.location_on_rounded, size: 16, color: accentColor),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
+                      child: Center(
                         child: Text(
-                          repetition.location!,
-                          style: GoogleFonts.outfit(color: Colors.blueGrey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                          "Ouvrir le carnet de chants",
+                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 15),
-                if (!isPast) ...[
-                  const Divider(height: 1),
-                  const SizedBox(height: 15),
-                  Text(
-                    "Seriez-vous présent ?",
-                    style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade600),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _buildPresenceChip(repetition, "Oui", "oui", Colors.green),
-                      const SizedBox(width: 8),
-                      _buildPresenceChip(repetition, "Non", "non", Colors.red),
-                      const SizedBox(width: 8),
-                      _buildPresenceChip(repetition, "Peut-être", "peut-etre", Colors.orange),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 25),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accentColor.withAlpha(60),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Ouvrir le carnet de chants",
-                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildPresenceChip(Repetition repetition, String label, String value, Color color) {
     final bool isSelected = repetition.userChoice == value;
@@ -285,12 +320,26 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
       onTap: () async {
         if (isSelected) return;
         
+        final String? oldChoice = repetition.userChoice;
+
         try {
-          await _repetitionService.updateSondage(repetition.id, value);
-          
+          // Optimistic UI update
           setState(() {
-            _repetitionsFuture = _repetitionService.fetchRepetitions();
+            if (_allRepetitions != null) {
+              final index = _allRepetitions!.indexWhere((r) => r.id == repetition.id);
+              if (index != -1) {
+                _allRepetitions![index] = Repetition(
+                  id: repetition.id,
+                  title: repetition.title,
+                  date: repetition.date,
+                  location: repetition.location,
+                  userChoice: value,
+                );
+              }
+            }
           });
+
+          await _repetitionService.updateSondage(repetition.id, value);
           
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -303,6 +352,22 @@ class _RepetitionsListScreenState extends State<RepetitionsListScreen> {
             );
           }
         } catch (e) {
+          // Rollback on error
+          setState(() {
+            if (_allRepetitions != null) {
+              final index = _allRepetitions!.indexWhere((r) => r.id == repetition.id);
+              if (index != -1) {
+                _allRepetitions![index] = Repetition(
+                  id: repetition.id,
+                  title: repetition.title,
+                  date: repetition.date,
+                  location: repetition.location,
+                  userChoice: oldChoice,
+                );
+              }
+            }
+          });
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red),
