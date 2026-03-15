@@ -51,9 +51,20 @@ class FcmService
 
     private static function getAuthConfig()
     {
+        // Option 1: Read from environment variable (for Render and other cloud platforms)
+        $envJson = env('FIREBASE_AUTH_JSON');
+        if ($envJson) {
+            $config = json_decode($envJson, true);
+            if ($config) {
+                return $config;
+            }
+            Log::warning('FCM: FIREBASE_AUTH_JSON env variable is set but contains invalid JSON.');
+        }
+
+        // Option 2: Read from file (for local development)
         $path = storage_path('app/firebase-auth.json');
         if (!file_exists($path)) {
-            Log::warning('FCM: firebase-auth.json missing at ' . $path);
+            Log::warning('FCM: firebase-auth.json missing at ' . $path . ' and FIREBASE_AUTH_JSON env var not set.');
             return null;
         }
         return json_decode(file_get_contents($path), true);
