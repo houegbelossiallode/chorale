@@ -183,8 +183,25 @@ class AuthSyncController extends Controller
 
     public function updateFcmToken(Request $request)
     {
+        $user = Auth::user();
+
+        // If not authenticated via session, try finding user by email or supabase_id
+        if (!$user && ($request->has('email') || $request->has('supabase_id'))) {
+            $user = User::where('email', $request->email)
+                ->orWhere('supabase_id', $request->supabase_id)
+                ->first();
+        }
+
+        if (!$user) {
+            \Log::warning('FCM Token update: User not found/authenticated', [
+                'email' => $request->email,
+                'supabase_id' => $request->supabase_id
+            ]);
+            return response()->json(['message' => 'Utilisateur non identifié'], 401);
+        }
+
         \Log::info('FCM Token update attempt', [
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'token_received' => (bool)$request->fcm_token
         ]);
 
@@ -192,11 +209,11 @@ class AuthSyncController extends Controller
             'fcm_token' => 'required|string',
         ]);
 
-        Auth::user()->update([
+        $user->update([
             'fcm_token' => $request->fcm_token
         ]);
 
-        \Log::info('FCM Token updated successfully for user ' . Auth::id());
+        \Log::info('FCM Token updated successfully for user ' . $user->id);
 
         return response()->json([
             'status' => 'success',

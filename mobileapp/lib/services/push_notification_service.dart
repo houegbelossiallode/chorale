@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -56,9 +57,14 @@ class PushNotificationService {
 
   Future<void> _updateTokenOnServer(String token) async {
     try {
+      final user = Supabase.instance.client.auth.currentUser;
       final response = await _laravelService.post(
         '${_laravelService.baseUrl}/api/user/fcm-token',
-        {'fcm_token': token},
+        {
+          'fcm_token': token,
+          if (user?.email != null) 'email': user!.email,
+          if (user?.id != null) 'supabase_id': user!.id,
+        },
       );
       if (response.statusCode == 200) {
         debugPrint("PushNotificationService: FCM token successfully synced with backend");

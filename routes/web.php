@@ -41,7 +41,7 @@ Route::post('/api/sync-profile', [\App\Http\Controllers\Auth\AuthSyncController:
 Route::get('/api/profile', [\App\Http\Controllers\Auth\AuthSyncController::class , 'getProfile'])->middleware('auth');
 Route::get('/api/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class , 'getStats'])->middleware('auth');
 Route::post('/api/sondages', [\App\Http\Controllers\Api\SondageController::class , 'update'])->middleware('auth');
-Route::post('/api/user/fcm-token', [\App\Http\Controllers\Auth\AuthSyncController::class , 'updateFcmToken'])->middleware('auth');
+Route::post('/api/user/fcm-token', [\App\Http\Controllers\Auth\AuthSyncController::class , 'updateFcmToken']);
 
 // Password reset routes
 Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class , 'showRequestForm'])->name('password.request');
