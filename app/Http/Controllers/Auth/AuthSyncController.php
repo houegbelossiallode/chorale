@@ -29,7 +29,7 @@ class AuthSyncController extends Controller
 
         // On peut vérifier le token auprès de Supabase si on veut une sécurité maximale
         $supabaseUser = $this->supabase->getUser($request->access_token);
-        \Log::info('Supabase user result', ['found' => (bool) $supabaseUser]);
+        \Log::info('Supabase user result', ['found' => (bool)$supabaseUser]);
 
         if (!$supabaseUser) {
             return response()->json(['message' => 'Token invalide'], 401);
@@ -53,7 +53,8 @@ class AuthSyncController extends Controller
                 'role' => 'choriste',
                 'is_active' => true,
             ]);
-        } elseif (empty($user->supabase_id)) {
+        }
+        elseif (empty($user->supabase_id)) {
             // Update existing user with supabase_id
             $user->update(['supabase_id' => $supabaseUser['id']]);
         }
@@ -65,7 +66,8 @@ class AuthSyncController extends Controller
 
         if ($user->must_change_password) {
             $redirect = route('password.change');
-        } else {
+        }
+        else {
             $redirect = str_contains($role, 'admin') || str_contains($role, 'administrateur')
                 ? route('admin.dashboard')
                 : route('choriste.dashboard');
@@ -176,5 +178,21 @@ class AuthSyncController extends Controller
     {
         Auth::logout();
         return redirect('/');
+    }
+
+    public function updateFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        Auth::user()->update([
+            'fcm_token' => $request->fcm_token
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'FCM token updated successfully'
+        ]);
     }
 }

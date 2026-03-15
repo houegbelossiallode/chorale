@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "563099795585",
+    "project_id": "mon-app-v180ho",
+    "storage_bucket": "mon-app-v180ho.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563099795585:android:ee2d2f0bb4015355228d80",
+        "android_client_info": {
+          "package_name": "com.choralia.romero"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563099795585-gf5btkim4l1u6ob9uoieb56p44ttask2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwpO1ZefbxNNL-SXIhw_Fs762DaSrWsNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563099795585-f9pr51ihtuvcv8s4n23cpcr2r9m80msf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "563099795585-pq7jlttgu4sd70lvg1hfg1hmhi751ksd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.monapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:563099795585:android:135659d218b1890b228d80",
+        "android_client_info": {
+          "package_name": "com.mycompany.monapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "563099795585-gf5btkim4l1u6ob9uoieb56p44ttask2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwpO1ZefbxNNL-SXIhw_Fs762DaSrWsNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "563099795585-f9pr51ihtuvcv8s4n23cpcr2r9m80msf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "563099795585-pq7jlttgu4sd70lvg1hfg1hmhi751ksd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.monapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

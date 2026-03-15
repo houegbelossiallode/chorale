@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
 }
 
 def keystoreProperties = new Properties()
@@ -31,7 +32,7 @@ android {
 
         applicationId "com.choralia.romero"
 
-        minSdk flutter.minSdkVersion
+        minSdkVersion flutter.minSdkVersion
         targetSdk flutter.targetSdkVersion
 
         versionCode flutter.versionCode

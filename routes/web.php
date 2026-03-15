@@ -41,6 +41,7 @@ Route::post('/api/sync-profile', [\App\Http\Controllers\Auth\AuthSyncController:
 Route::get('/api/profile', [\App\Http\Controllers\Auth\AuthSyncController::class , 'getProfile'])->middleware('auth');
 Route::get('/api/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class , 'getStats'])->middleware('auth');
 Route::post('/api/sondages', [\App\Http\Controllers\Api\SondageController::class , 'update'])->middleware('auth');
+Route::post('/api/user/fcm-token', [\App\Http\Controllers\Auth\AuthSyncController::class , 'updateFcmToken'])->middleware('auth');
 
 // Password reset routes
 Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class , 'showRequestForm'])->name('password.request');
@@ -114,7 +115,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('fichier-chants', [\App\Http\Controllers\Admin\FichierChantController::class , 'store'])->name('fichier-chants.store');
         Route::post('chants/{chant}/record', [\App\Http\Controllers\Admin\FichierChantController::class , 'record'])->name('chants.record');
         Route::get('fichier-chants/{fichierChant}/download', [\App\Http\Controllers\Admin\FichierChantController::class , 'download'])->name('fichier-chants.download');
-        Route::delete('fichier-chants/{fichierChant}', [\App\Http\Controllers\Admin\FichierChantController::class , 'destroy'])->name('fichier-chants.destroy');    });
+        Route::delete('fichier-chants/{fichierChant}', [\App\Http\Controllers\Admin\FichierChantController::class , 'destroy'])->name('fichier-chants.destroy');
+    });
 
 // Choriste specific routes
 Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(function () {
@@ -155,6 +157,7 @@ Route::middleware('auth')->group(function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
         }
-        )->name('notifications.markAllAsRead');    });
+        )->name('notifications.markAllAsRead');
+    });
 
 // require __DIR__.'/auth.php';
