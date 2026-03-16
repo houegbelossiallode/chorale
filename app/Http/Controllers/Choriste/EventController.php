@@ -15,7 +15,7 @@ class EventController extends Controller
     {
         // On affiche les événements publics futurs
         $events = Event::where('is_public', DB::raw('true'))
-            ->where('start_at', '>=', now()->subDays(7))
+            //->where('start_at', '>=', now()->subDays(7))
             ->orderBy('start_at', 'asc')
             ->get();
 

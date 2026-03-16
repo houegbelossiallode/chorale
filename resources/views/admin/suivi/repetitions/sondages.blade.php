@@ -41,7 +41,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    @forelse($sondages as $sondage)
+                    @foreach ($sondages as $sondage)
                         <tr class="hover:bg-slate-50/50 transition-colors group">
                             <td class="px-8 py-5">
                                 <div class="flex items-center gap-3">
@@ -72,13 +72,14 @@
                                 <span class="text-xs text-slate-400 font-medium"> {{ $sondage->updated_at->format('d/m/Y H:i') }}</span>
                             </td>
                         </tr>
-                    @empty
+                    @endforeach
+                    @if ($sondages->isEmpty())
                         <tr>
                             <td colspan="4" class="px-8 py-20 text-center text-slate-400 italic">
                                 Aucun choriste n'a encore répondu à ce sondage.
                             </td>
                         </tr>
-                    @endforelse
+                    @endif
                 </tbody>
             </table>
         </div>
