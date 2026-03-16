@@ -26,12 +26,12 @@ class Event extends Model
 
     public function repertoire()
     {
-        return $this->belongsToMany(Chant::class, 'repertoire')->withPivot('id', 'partie_event_id')->withTimestamps();
+        return $this->belongsToMany(Chant::class , 'repertoire')->withPivot('id', 'partie_event_id')->withTimestamps();
     }
 
     public function repertoireEntries()
     {
-        return $this->hasMany(Repertoire::class, 'event_id');
+        return $this->hasMany(Repertoire::class , 'event_id');
     }
 
     protected $casts = [
@@ -47,7 +47,8 @@ class Event extends Model
         $image = null;
         if ($this->relationLoaded('images') && $this->images->count() > 0) {
             $image = $this->images->firstWhere('is_principal', true) ?? $this->images->first();
-        } else {
+        }
+        else {
             $image = $this->principalImage ?? $this->images()->first();
         }
 
@@ -70,5 +71,10 @@ class Event extends Model
 
         // 3. Fallback générique
         return 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=2070&auto=format&fit=crop';
+    }
+
+    public function sondages()
+    {
+        return $this->hasMany(Sondage::class);
     }
 }

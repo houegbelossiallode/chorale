@@ -15,7 +15,11 @@ class Repetition extends Model
 
     public function repertoires()
     {
-        return $this->belongsToMany(Repertoire::class, 'repertoire_repetition');
+        return $this->belongsToMany(Repertoire::class , 'repertoire_repetition');
     }
 
+    public function sondages()
+    {
+        return $this->hasMany(Sondage::class);
+    }
 }
