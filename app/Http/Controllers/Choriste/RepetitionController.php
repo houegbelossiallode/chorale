@@ -36,8 +36,8 @@ class RepetitionController extends Controller
             'chant.fichiers',
             'partieEvent',
             'enregistrements' => function ($q) {
-                $q->where('user_id', Auth::id());
-            }
+            $q->where('user_id', Auth::id());
+        }
         ])
             ->get();
 
@@ -51,15 +51,21 @@ class RepetitionController extends Controller
                     $isFullyRecorded = false;
                     break;
                 }
-            } else {
-                // If a chant has no files, it's considered "fully recorded" for this check
-                // Or if the repertoire item doesn't have a chant, it's not relevant for recording status
+            }
+            else {
+            // If a chant has no files, it's considered "fully recorded" for this check
+            // Or if the repertoire item doesn't have a chant, it's not relevant for recording status
             }
         }
 
         // Fetch pupitres for the chorale composition section
         $pupitres = Pupitre::with('users')->get();
 
-        return view('choriste.repetitions.repertoire', compact('repetition', 'repertoire', 'isFullyRecorded', 'pupitres'));
+        // Get current user's poll choice
+        $userSondage = \App\Models\Sondage::where('user_id', Auth::id())
+            ->where('repetition_id', $repetition->id)
+            ->first();
+
+        return view('choriste.repetitions.repertoire', compact('repetition', 'repertoire', 'isFullyRecorded', 'pupitres', 'userSondage'));
     }
 }

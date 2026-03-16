@@ -50,6 +50,8 @@
             </div>
         </div>
 
+        @include('choriste.partials.sondage_section')
+
         <!-- Repertoire Table -->
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
             <div class="overflow-x-auto">

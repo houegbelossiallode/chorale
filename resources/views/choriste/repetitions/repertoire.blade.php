@@ -54,6 +54,8 @@
             </div>
         </div>
 
+        @include('choriste.partials.sondage_section')
+
         @if($repertoire->groupBy('event_id')->count() > 0)
             <div class="space-y-12">
                 @foreach($repertoire->groupBy('event_id') as $eventId => $items)

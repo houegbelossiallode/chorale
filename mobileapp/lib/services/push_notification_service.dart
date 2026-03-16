@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'laravel_service.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -21,23 +22,6 @@ class PushNotificationService {
   );
 
   Future<void> initialize() async {
-    // Request permissions
-    NotificationSettings settings = await _fcm.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint('User granted permission');
-      
-      // Get token
-      String? token = await _fcm.getToken();
-      if (token != null) {
-        debugPrint("FCM Token: $token");
-      }
-    }
-
     // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
@@ -85,6 +69,37 @@ class PushNotificationService {
         );
       }
     });
+  }
+
+  Future<void> requestPermissions() async {
+    debugPrint('PushNotificationService: Explicitly requesting permissions...');
+    
+    // Request permissions (Firebase Messaging)
+    NotificationSettings settings = await _fcm.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Explicitly request using permission_handler for Android 13+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      PermissionStatus status = await Permission.notification.status;
+      if (status.isDenied || status.isPermanentlyDenied) {
+        debugPrint('PushNotificationService: Notification permission is ${status.name}, requesting via permission_handler...');
+        status = await Permission.notification.request();
+        debugPrint('PushNotificationService: New status from permission_handler: ${status.name}');
+      }
+    }
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      debugPrint('User granted permission');
+      
+      // Get token
+      String? token = await _fcm.getToken();
+      if (token != null) {
+        debugPrint("FCM Token: $token");
+      }
+    }
   }
 
   Future<void> syncToken() async {

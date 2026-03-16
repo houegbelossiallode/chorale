@@ -164,6 +164,14 @@
                                                 d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                                         </svg>
                                     </a>
+                                    <a href="{{ route('admin.events.sondages', $event) }}"
+                                        class="p-2 text-slate-400 hover:text-[#28C76F] hover:bg-[#28C76F]/5 rounded-lg transition-all"
+                                        title="Sondage de présence">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('admin.events.show', $event) }}"
                                         class="p-2 text-slate-400 hover:text-[#7367F0] hover:bg-[#7367F0]/5 rounded-lg transition-all"
                                         title="Détails">

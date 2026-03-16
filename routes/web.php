@@ -80,6 +80,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('projets', \App\Http\Controllers\Admin\ProjectController::class);
         Route::resource('donations', \App\Http\Controllers\Admin\DonationController::class);
         Route::resource('repetitions', \App\Http\Controllers\Admin\RepetitionController::class);
+        Route::get('repetitions/{repetition}/sondages', [\App\Http\Controllers\Admin\RepetitionController::class , 'sondages'])->name('repetitions.sondages');
         Route::get('/repetitions/automate', [RepetitionController::class , 'automate'])->name('repetitions.automate'); // Pas utilisé mais au cas où
         Route::post('/repetitions/automate', [RepetitionController::class , 'automate'])->name('repetitions.automate');
         Route::post('/repetitions/{repetition}/reminder', [RepetitionController::class , 'sendReminder'])->name('repetitions.reminder');
@@ -97,6 +98,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // Programme des événements
         Route::get('events/{event}/program', [EventProgramController::class , 'index'])->name('events.program.index');
+        Route::get('events/{event}/sondages', [\App\Http\Controllers\Admin\EventController::class , 'sondages'])->name('events.sondages');
         Route::get('events/{event}/repertoire/pdf', [EventProgramController::class , 'downloadPdf'])->name('events.repertoire.pdf');
         Route::post('events/{event}/repertoire', [EventProgramController::class , 'storeRepertoire'])->name('events.repertoire.store');
         Route::post('events/{event}/program/toggle-visibility', [EventProgramController::class , 'toggleVisibility'])->name('events.program.toggle-visibility');
@@ -134,6 +136,9 @@ Route::middleware(['auth'])->prefix('choriste')->name('choriste.')->group(functi
     // Répétitions
     Route::get('/repetitions', [\App\Http\Controllers\Choriste\RepetitionController::class , 'index'])->name('repetitions.index');
     Route::get('/repetitions/{repetition}/repertoire', [\App\Http\Controllers\Choriste\RepetitionController::class , 'repertoire'])->name('repetitions.repertoire');
+
+    // Sondages (Polls)
+    Route::post('/sondages/vote', [\App\Http\Controllers\Choriste\SondageController::class , 'vote'])->name('sondages.vote');
 
     // Enregistrements
     Route::post('/enregistrements', [\App\Http\Controllers\Choriste\EnregistrementController::class , 'store'])->name('enregistrements.store');

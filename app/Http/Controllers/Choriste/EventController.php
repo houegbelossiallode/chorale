@@ -28,8 +28,8 @@ class EventController extends Controller
             'chant.fichiers',
             'partieEvent',
             'enregistrements' => function ($q) {
-                $q->where('user_id', Auth::id());
-            }
+            $q->where('user_id', Auth::id());
+        }
         ])
             ->where('repertoire.event_id', $event->id)
             ->leftJoin('partie_events', 'repertoire.partie_event_id', '=', 'partie_events.id')
@@ -39,6 +39,11 @@ class EventController extends Controller
 
         $pupitres = \App\Models\Pupitre::with('users')->get();
 
-        return view('choriste.events.repertoire', compact('event', 'repertoire', 'pupitres'));
+        // Get current user's poll choice
+        $userSondage = \App\Models\Sondage::where('user_id', Auth::id())
+            ->where('event_id', $event->id)
+            ->first();
+
+        return view('choriste.events.repertoire', compact('event', 'repertoire', 'pupitres', 'userSondage'));
     }
 }

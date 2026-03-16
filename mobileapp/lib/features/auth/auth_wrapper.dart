@@ -25,6 +25,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
         }
       });
     }
+
+    // Request notification permissions after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PushNotificationService().requestPermissions();
+    });
     
     // Listen for auth state changes
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {

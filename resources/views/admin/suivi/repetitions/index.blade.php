@@ -228,6 +228,18 @@
                                                                             Programme
                                                                         </a>
 
+                                                                        <!-- Sondage -->
+                                                                        <a href="{{ route('admin.repetitions.sondages', $rep->id) }}"
+                                                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-[#28C76F] hover:bg-[#28C76F]/5 rounded-xl transition-all uppercase tracking-widest">
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                                viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                                            </svg>
+                                                                            Sondage
+                                                                        </a>
+
                                                                         <!-- Modifier -->
                                                                         <button @click="open = false; openModal({{ json_encode($rep) }})"
                                                                             class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-all uppercase tracking-widest text-left">

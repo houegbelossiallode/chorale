@@ -37,24 +37,26 @@ class EventController extends Controller
             $type = strtolower($event->type->libelle ?? '');
             if (str_contains($type, 'concert') || str_contains($type, 'prestation')) {
                 $color = '#28C76F'; // Success (Green)
-            } elseif (str_contains($type, 'répétition') || str_contains($type, 'repetition')) {
+            }
+            elseif (str_contains($type, 'répétition') || str_contains($type, 'repetition')) {
                 $color = '#FF9F43'; // Warning (Orange)
-            } elseif (str_contains($type, 'messe')) {
+            }
+            elseif (str_contains($type, 'messe')) {
                 $color = '#00CFE8'; // Info (Cyan)
             }
 
             return [
-                'id' => $event->id,
-                'title' => $event->title,
-                'start' => $event->start_at->toIso8601String(),
-                'end' => $event->end_at ? $event->end_at->toIso8601String() : $event->start_at->addHours(2)->toIso8601String(),
-                'url' => route('admin.events.show', $event),
-                'backgroundColor' => $color,
-                'borderColor' => $color,
-                'extendedProps' => [
-                    'location' => $event->location,
-                    'type' => $event->type->libelle ?? 'N/A'
-                ]
+            'id' => $event->id,
+            'title' => $event->title,
+            'start' => $event->start_at->toIso8601String(),
+            'end' => $event->end_at ? $event->end_at->toIso8601String() : $event->start_at->addHours(2)->toIso8601String(),
+            'url' => route('admin.events.show', $event),
+            'backgroundColor' => $color,
+            'borderColor' => $color,
+            'extendedProps' => [
+            'location' => $event->location,
+            'type' => $event->type->libelle ?? 'N/A'
+            ]
             ];
         });
 
@@ -103,14 +105,16 @@ class EventController extends Controller
                     EventImage::create([
                         'event_id' => $event->id,
                         'image_path' => $imageUrl,
-                        'is_principal' => ($request->principal_image_index == $index || (!$request->has('principal_image_index') && $index === 0)) ? \Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
+                        'is_principal' => ($request->principal_image_index == $index || (!$request->has('principal_image_index') && $index === 0)) ?\Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
                     ]);
                     Log::info("Image #{$index} enregistrée avec succès: {$imageUrl}");
-                } else {
+                }
+                else {
                     Log::error("Image #{$index} upload échoué pour le chemin: {$path}");
                 }
             }
-        } else {
+        }
+        else {
             Log::warning('Aucun fichier image reçu dans la requête');
         }
 
@@ -165,10 +169,11 @@ class EventController extends Controller
                     EventImage::create([
                         'event_id' => $event->id,
                         'image_path' => $imageUrl,
-                        'is_principal' => ($request->principal_image_index == $index) ? \Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
+                        'is_principal' => ($request->principal_image_index == $index) ?\Illuminate\Support\Facades\DB::raw('true') : \Illuminate\Support\Facades\DB::raw('false'),
                     ]);
                     Log::info("Image #{$index} enregistrée: {$imageUrl}");
-                } else {
+                }
+                else {
                     Log::error("Échec upload image #{$index} pour Event #{$event->id}");
                 }
             }
@@ -189,5 +194,12 @@ class EventController extends Controller
     {
         $image->delete();
         return back()->with('success', 'Image supprimée de la galerie.');
+    }
+
+    public function sondages(Event $event)
+    {
+        $event->load(['sondages.user']);
+        $sondages = $event->sondages;
+        return view('admin.events.sondages', compact('event', 'sondages'));
     }
 }

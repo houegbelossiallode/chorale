@@ -31,6 +31,10 @@ void main() async {
   // Initialize Push Notifications
   final pushService = PushNotificationService();
   await pushService.initialize();
+  
+  // Request permissions immediately on startup (for first launch after install)
+  // We don't await this to avoid blocking the initial UI frame (prevents white screen)
+  pushService.requestPermissions();
 
   runApp(const MyApp());
 }
