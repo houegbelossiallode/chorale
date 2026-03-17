@@ -7,7 +7,7 @@ import 'package:choralia/shared/widgets/pdf_viewer_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:flutter_html/flutter_html.dart';
-import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../services/recording_service.dart';
 import '../../services/profile_service.dart';
 
@@ -144,6 +144,14 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
 
   Future<void> _togglePlay() async {
     if (_currentAudioUrl == null) return;
+    
+    // Ensure absolute URL
+    String finalUrl = _currentAudioUrl!;
+    if (!finalUrl.startsWith('http')) {
+      final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+      finalUrl = "$baseUrl/$finalUrl";
+    }
+
     if (_isPlaying) {
       await _audioPlayer.pause();
     } else {
@@ -151,9 +159,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
         await _jaPlayer.stop(); // Stop potential personal recording
         setState(() => _playingRecordingId = null);
         
-        // Use setUrl if URL changed, otherwise just play
-        // For simplicity, we can always setUrl if it's the first time or if it changed
-        await _audioPlayer.setUrl(_currentAudioUrl!);
+        await _audioPlayer.setUrl(finalUrl);
         await _audioPlayer.play();
       } catch (e) {
         debugPrint("ChantDetail: Error playing audio: $e");
@@ -653,6 +659,14 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
           GestureDetector(
             onTap: () async {
               if (filePath == null) return;
+              
+              // Ensure absolute URL
+              String finalUrl = filePath;
+              if (!finalUrl.startsWith('http')) {
+                final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+                finalUrl = "$baseUrl/$finalUrl";
+              }
+
               if (isPlaying) {
                 await _jaPlayer.stop();
                 setState(() => _playingRecordingId = null);
@@ -660,7 +674,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                 await _audioPlayer.stop(); // Stop main player
                 setState(() => _playingRecordingId = recId);
                 try {
-                  await _jaPlayer.setUrl(filePath);
+                  await _jaPlayer.setUrl(finalUrl);
                   await _jaPlayer.play();
                   _jaPlayer.playerStateStream.listen((state) {
                     if (state.processingState == ja.ProcessingState.completed && mounted) {

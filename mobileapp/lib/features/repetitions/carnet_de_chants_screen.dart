@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../chants/chant_detail_screen.dart';
 import '../../services/repetition_service.dart';
 import 'package:choralia/shared/widgets/media_modal.dart';
@@ -436,7 +437,12 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                 await _audioPlayer?.stop();
                 setState(() => _playingRecordingId = recId);
                 try {
-                  await _audioPlayer!.setUrl(filePath);
+                  String finalUrl = filePath;
+                  if (!finalUrl.startsWith('http')) {
+                    final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+                    finalUrl = "$baseUrl/$finalUrl";
+                  }
+                  await _audioPlayer!.setUrl(finalUrl);
                   await _audioPlayer!.play();
                   _audioPlayer!.playerStateStream.listen((state) {
                     if (state.processingState == ProcessingState.completed && mounted) {
@@ -581,7 +587,12 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
   void _launchResource(Map<String, dynamic> res, [String? rawLyrics]) {
     String? lyrics = rawLyrics;
     if (res['type'] == 'partition') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => PdfViewerScreen(title: res['label'] ?? "Partition", url: res['file_path'])));
+      String finalUrl = res['file_path'];
+      if (!finalUrl.startsWith('http')) {
+        final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+        finalUrl = "$baseUrl/$finalUrl";
+      }
+      Navigator.push(context, MaterialPageRoute(builder: (_) => PdfViewerScreen(title: res['label'] ?? "Partition", url: finalUrl)));
     } else {
       MediaModal.show(context, title: res['label'] ?? "Média", url: res['file_path'], type: res['type'] ?? 'video', lyrics: lyrics);
     }

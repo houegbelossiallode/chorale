@@ -487,7 +487,12 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
                 await _audioPlayer?.stop();
                 setState(() => _playingRecordingId = recId);
                 try {
-                  await _audioPlayer!.setUrl(filePath);
+                  String finalUrl = filePath;
+                  if (!finalUrl.startsWith('http')) {
+                    final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://romero-38dc.onrender.com";
+                    finalUrl = "$baseUrl/$finalUrl";
+                  }
+                  await _audioPlayer!.setUrl(finalUrl);
                   await _audioPlayer!.play();
                   _audioPlayer!.playerStateStream.listen((state) {
                     if (state.processingState == ProcessingState.completed && mounted) {
@@ -614,12 +619,17 @@ class _RepertoireScreenState extends State<RepertoireScreen> {
   void _launchResource(Map<String, dynamic> res, [String? rawLyrics]) {
     String? lyrics = rawLyrics;
     if (res['type'] == 'partition') {
+      String finalUrl = res['file_path'];
+      if (!finalUrl.startsWith('http')) {
+        final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+        finalUrl = "$baseUrl/$finalUrl";
+      }
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PdfViewerScreen(
             title: res['label'] ?? "Partition",
-            url: res['file_path'],
+            url: finalUrl,
           ),
         ),
       );

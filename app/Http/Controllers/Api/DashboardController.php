@@ -18,13 +18,13 @@ class DashboardController extends Controller
         // Chants appris
         $chantsAppris = \App\Models\Chant::count();
 
-        // Taux de présence
-        $totalPresences = $user->presences()->count();
+        // Taux de présence : (Nombre de fois présent / Nombre total de répétitions) * 100
+        $totalRepetitions = \App\Models\Repetition::count();
         $presencesPresentes = $user->presences()->where('status', 'present')->count();
 
-        $tauxPresence = $totalPresences > 0
-            ? round(($presencesPresentes / $totalPresences) * 100)
-            : 100;
+        $tauxPresence = $totalRepetitions > 0
+            ? round(($presencesPresentes / $totalRepetitions) * 100)
+            : 0; // S'il n'y a aucune répétition, le taux est de 0% (ou 100% selon la politique, mais 0% est plus rigoureux)
 
         // Activité récente (Prochain événement)
         $currentDate = date('Y-m-d H:i:s');

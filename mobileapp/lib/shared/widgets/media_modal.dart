@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_html/flutter_html.dart';
 
 class MediaModal extends StatefulWidget {
@@ -68,7 +69,12 @@ class _MediaModalState extends State<MediaModal> {
       if (mounted) setState(() => _position = p);
     });
     try {
-      await _audioPlayer.setUrl(widget.url);
+      String finalUrl = widget.url;
+      if (!finalUrl.startsWith('http') && !finalUrl.startsWith('https') && !finalUrl.startsWith('asset')) {
+        final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+        finalUrl = "$baseUrl/$finalUrl";
+      }
+      await _audioPlayer.setUrl(finalUrl);
       await _audioPlayer.play();
     } catch (e) {
       debugPrint("MediaModal: Audio error: $e");
