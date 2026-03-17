@@ -49,8 +49,8 @@ class _EventsListScreenState extends State<EventsListScreen> {
             elevation: 0,
             centerTitle: true,
             title: Text(
-              "Agenda & Événements",
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 11),
+              "Agenda",
+              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ),
           SliverPadding(

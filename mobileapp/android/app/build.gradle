@@ -14,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
 
-    namespace "com.choralia.romero"
+    namespace "com.chorale.romero.choralia"
 
     compileSdk flutter.compileSdkVersion
     ndkVersion "27.0.12077973"
@@ -31,7 +31,7 @@ android {
 
     defaultConfig {
 
-        applicationId "com.choralia.romero"
+        applicationId "com.chorale.romero.choralia"
 
         minSdkVersion flutter.minSdkVersion
         targetSdk 34

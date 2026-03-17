@@ -12,7 +12,6 @@ class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final LaravelService _laravelService = LaravelService();
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
-
   // Create a high importance channel for Android
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'high_importance_channel', // id
@@ -22,6 +21,12 @@ class PushNotificationService {
   );
 
   Future<void> initialize() async {
+    // Set foreground notification presentation options for iOS
+    await _fcm.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
     // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
