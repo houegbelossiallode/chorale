@@ -53,24 +53,33 @@ class MobilePasswordResetController extends Controller
         $newPassword = Str::random(10);
 
         // 2. Mettre à jour Supabase via l'API Admin
-        if ($user->supabase_id) {
-            // Si on a le supabase_id stocké
-            $targetId = $user->supabase_id;
-        }
-        else {
-            // Sinon, on doit trouver l'ID via l'API Supabase ou on essaie avec l'email...
-            // Mais l'API d'update user `auth/v1/admin/users/{uid}` nécessite l'UID.
-            // Faisons une requête pour récupérer l'uid par email d'abord (nécessite de scanner les users ou si on a stocké l'id)
-            // Dans ce projet, il semble y avoir une migration `add_supabase_id_to_users_table`.
-            if (!$user->supabase_id) {
-                Log::error('MobilePasswordReset: User has no supabase_id in local DB.', ['user_id' => $user->id]);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Erreur de synchronisation avec le service d\'authentification.'
-                ], 500);
+        if (!$user->supabase_id) {
+            $listResponse = Http::withHeaders([
+                'apikey' => $this->serviceKey,
+                'Authorization' => 'Bearer ' . $this->serviceKey,
+            ])->get($this->supabaseUrl . '/auth/v1/admin/users', [
+                'email' => $user->email
+            ]);
+
+            if ($listResponse->successful()) {
+                $users = $listResponse->json('users') ?? $listResponse->json();
+                $targetUser = collect($users)->firstWhere('email', $user->email);
+                if ($targetUser) {
+                    $user->supabase_id = $targetUser['id'];
+                    $user->save(); // Save locally so we don't need to fetch again next time
+                }
             }
-            $targetId = $user->supabase_id;
+
+            // if (!$user->supabase_id) {
+            //     Log::error('MobilePasswordReset: User has no supabase_id in local DB and not found in Supabase.', ['email' => $user->email]);
+            //     return response()->json([
+            //         'status' => 'error',
+            //         'message' => 'Erreur de synchronisation avec le service d\'authentification.'
+            //     ], 500);
+            // }
         }
+
+        $targetId = $user->supabase_id;
 
         /** @var \Illuminate\Http\Client\Response $response */
         $response = Http::withHeaders([
@@ -94,7 +103,7 @@ class MobilePasswordResetController extends Controller
 
         // 3. Mettre à jour la base de données locale (Laravel)
         $user->password = Hash::make($newPassword);
-        $user->must_change_password = true; // Forcer le changement à la connexion si implémenté
+        $user->must_change_password = \Illuminate\Support\Facades\DB::raw('true'); // Workaround PostgreSQL boolean cast
         $user->save();
 
         // 4. Envoyer l'email

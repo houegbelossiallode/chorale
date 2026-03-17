@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 class RequestPasswordResetScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class _RequestPasswordResetScreenState extends State<RequestPasswordResetScreen>
     });
 
     try {
-      final String baseUrl = const String.fromEnvironment('BACKEND_URL', defaultValue: 'https://chorale.onrender.com');
+      final String baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://romero-38dc.onrender.com';
       final response = await http.post(
         Uri.parse('$baseUrl/api/mobile/password/reset'),
         headers: {
