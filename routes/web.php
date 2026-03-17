@@ -42,11 +42,12 @@ Route::get('/api/profile', [\App\Http\Controllers\Auth\AuthSyncController::class
 Route::get('/api/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class , 'getStats'])->middleware('auth');
 Route::post('/api/sondages', [\App\Http\Controllers\Api\SondageController::class , 'update'])->middleware('auth');
 Route::post('/api/user/fcm-token', [\App\Http\Controllers\Auth\AuthSyncController::class , 'updateFcmToken']);
+Route::post('/api/mobile/password/reset', [\App\Http\Controllers\Api\MobilePasswordResetController::class , 'reset']);
 
 // Password reset routes
 Route::get('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class , 'showRequestForm'])->name('password.request');
 Route::post('/password/email', [\App\Http\Controllers\Auth\PasswordResetController::class , 'sendResetLink'])->name('password.email');
-Route::get('/password/reset/{token}', [\App\Http\Controllers\Auth\PasswordResetController::class , 'showResetForm'])->name('password.reset')->where('token', '.*');
+Route::get('/password/reset/confirm', [\App\Http\Controllers\Auth\PasswordResetController::class , 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class , 'resetPassword'])->name('password.update');
 Route::post('/api/supabase-register', [\App\Http\Controllers\Auth\AuthSyncController::class , 'register']);
 Route::post('/logout', [\App\Http\Controllers\Auth\AuthSyncController::class , 'logout'])->name('logout');

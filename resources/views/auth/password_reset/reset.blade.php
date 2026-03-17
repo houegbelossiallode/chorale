@@ -89,29 +89,11 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('password.update') }}" class="space-y-5">
+                        <form method="POST" action="{{ route('password.update') }}" id="resetForm" class="space-y-5">
                             @csrf
-                            <input type="hidden" name="token" value="{{ $token }}">
+                            {{-- Le token est extrait du hash URL (#access_token=...) par le script JS ci-dessous --}}
+                            <input type="hidden" name="access_token" id="access_token_field">
 
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-[0.15em]">Adresse
-                                    Email</label>
-                                <div class="relative group">
-                                    <input type="email" name="email" required placeholder="votre@email.com"
-                                        value="{{ old('email') }}"
-                                        class="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-2xl focus:ring-0 focus:border-amber-400 outline-none transition-all duration-300 text-sm font-medium placeholder:text-gray-300 group-hover:border-gray-200">
-                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                @error('email')
-                                    <span class="text-red-500 text-xs font-bold mt-2 block">{{ $message }}</span>
-                                @enderror
-                            </div>
 
                             <div>
                                 <label
@@ -169,3 +151,45 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const STORAGE_KEY = 'supabase_reset_token';
+
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const hashToken = params.get('access_token');
+
+        const tokenInput = document.getElementById('access_token_field');
+        const form = document.getElementById('resetForm');
+
+        let accessToken = null;
+
+        if (hashToken) {
+            // Token is in the URL hash (first visit from email link)
+            accessToken = hashToken;
+            sessionStorage.setItem(STORAGE_KEY, hashToken);
+            // Clean hash from URL without reloading
+            history.replaceState(null, '', window.location.pathname);
+        } else {
+            // Try to recover from sessionStorage (after page reload due to validation error)
+            accessToken = sessionStorage.getItem(STORAGE_KEY);
+        }
+
+        if (accessToken) {
+            tokenInput.value = accessToken;
+            // Clear sessionStorage when the form is submitted successfully
+            form.addEventListener('submit', function () {
+                sessionStorage.removeItem(STORAGE_KEY);
+            });
+        } else {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium';
+            errorDiv.innerHTML = 'Ce lien de réinitialisation est invalide ou a expiré. <a href="{{ route("password.request") }}" class="underline font-bold">Demander un nouveau lien</a>.';
+            form.prepend(errorDiv);
+            form.querySelectorAll('input, button').forEach(el => el.disabled = true);
+        }
+    });
+</script>
+@endpush

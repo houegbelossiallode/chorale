@@ -19,15 +19,19 @@ class DashboardController extends Controller
         $chantsAppris = \App\Models\Chant::count();
 
         // Taux de présence
-        $totalPresences = $user->presences()->count();
-        $presencesPresentes = $user->presences()->where('status', 'present')->count();
+        $presences = $user->presences()
+            ->selectRaw('COUNT(*) as total, SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as presentes')
+            ->first();
+
+        $totalPresences = $presences->total ?? 0;
+        $presencesPresentes = $presences->presentes ?? 0;
 
         $tauxPresence = $totalPresences > 0
             ? round(($presencesPresentes / $totalPresences) * 100)
             : 100;
 
         // Activité récente (Prochain événement)
-        $currentDate = date('Y-m-d H:i:s');
+        $currentDate = now();
         $nextEvent = \App\Models\Event::where('start_at', '>=', $currentDate)
             ->where('actif', 'OUI')
             ->orderBy('start_at')
@@ -40,24 +44,19 @@ class DashboardController extends Controller
             ->first();
 
         // Chant du moment (recommandation du jour, change chaque jour)
-        $count = \App\Models\Chant::count();
+        // Use cache to avoid count() and skip() on every request if possible, 
+        // but for now, just optimize the date generation.
         $chantDuMoment = null;
-        if ($count > 0) {
-            $dayOfYear = date('z'); // 0 to 365
-            $chantDuMoment = \App\Models\Chant::orderBy('id')->skip($dayOfYear % $count)->first();
+        if ($chantsAppris > 0) {
+            $dayOfYear = $currentDate->dayOfYear; // 0 to 365
+            $chantDuMoment = \App\Models\Chant::orderBy('id')->skip($dayOfYear % $chantsAppris)->first();
         }
 
         // Derniers chants ajoutés
-        $derniersChants = \App\Models\Chant::orderBy('created_at', 'desc')
+        $derniersChants = \App\Models\Chant::select('id', 'title', 'composer')
+            ->orderBy('created_at', 'desc')
             ->take(5)
-            ->get()
-            ->map(function ($chant) {
-            return [
-            'id' => $chant->id,
-            'title' => $chant->title,
-            'composer' => $chant->composer,
-            ];
-        });
+            ->get();
 
         return response()->json([
             'status' => 'success',
