@@ -33,9 +33,13 @@ class DashboardController extends Controller
         $totalRecettes = \App\Models\TransactionFinanciere::where('type', 'recette')->sum('montant');
         $totalDepenses = \App\Models\TransactionFinanciere::where('type', 'depense')->sum('montant');
 
+        // Calcul du taux de présence Global (Réel)
+        $presenceStats = \App\Models\Presence::selectRaw('COUNT(*) as total, SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as presentes')->first();
+        $presenceRate = $presenceStats->total > 0 ? round(($presenceStats->presentes / $presenceStats->total) * 100) : 100;
+
         $stats = [
             'my_events_count' => Event::where('start_at', '>=', now())->count(),
-            'presence_rate' => rand(80, 100),
+            'presence_rate' => $presenceRate,
             'next_event' => Event::where('start_at', '>=', now())->orderBy('start_at')->first(),
             'total_members' => User::count(),
             'upcoming_events' => Event::where('start_at', '>=', now())->count(),
