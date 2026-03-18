@@ -19,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<Map<String, dynamic>?> _profileFuture;
   bool _isEditing = false;
   bool _isSaving = false;
+  bool _isChangingPassword = false;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -342,6 +343,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildSectionTitle("Cœur de choriste"),
           _buildInfoCard("Ce que j'aime dans la chorale", _loveChoirController.text, const Color(0xFFEA5455)),
         ],
+
+        const SizedBox(height: 30),
+        _buildSectionTitle("Sécurité"),
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 20),
+          child: OutlinedButton.icon(
+            onPressed: _showPasswordChangeDialog,
+            icon: const Icon(Icons.lock_outline_rounded, size: 20),
+            label: const Text("Changer le mot de passe"),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              side: BorderSide(color: const Color(0xFF7367F0).withAlpha(50)),
+              foregroundColor: const Color(0xFF7367F0),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -532,5 +551,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       return dateStr;
     }
+  }
+
+  void _showPasswordChangeDialog() {
+    final TextEditingController newPasswordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text("Changer le mot de passe", 
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildDialogField("Nouveau mot de passe", newPasswordController, isPassword: true),
+                const SizedBox(height: 15),
+                _buildDialogField("Confirmer le mot de passe", confirmPasswordController, isPassword: true),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler", style: GoogleFonts.outfit(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: _isChangingPassword ? null : () async {
+                if (formKey.currentState!.validate()) {
+                  if (newPasswordController.text != confirmPasswordController.text) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Les mots de passe ne correspondent pas"), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+
+                  setDialogState(() => _isChangingPassword = true);
+                  try {
+                    await _profileService.changePassword(newPasswordController.text);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Mot de passe mis à jour avec succès"), backgroundColor: Colors.green),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Erreur: $e"), backgroundColor: Colors.red),
+                      );
+                    }
+                  } finally {
+                    setDialogState(() => _isChangingPassword = false);
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7367F0),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: _isChangingPassword 
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text("Mettre à jour", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogField(String label, TextEditingController controller, {bool isPassword = false}) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isPassword,
+      style: GoogleFonts.outfit(fontSize: 14),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
+        filled: true,
+        fillColor: const Color(0xFFF8F7FA),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Champ requis";
+        if (value.length < 8) return "Minimum 8 caractères";
+        return null;
+      },
+    );
   }
 }

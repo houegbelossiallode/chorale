@@ -261,16 +261,14 @@
                 <!-- Financial Distribution Chart -->
                 <div class="card-material p-5 sm:p-6">
                     <div class="flex items-center justify-between mb-4 md:mb-6">
-                        <h4 class="text-[14px] sm:text-[15px] font-semibold text-[#444050]">Répartition Recettes</h4>
+                        <h4 class="text-[14px] sm:text-[15px] font-semibold text-[#444050]">Répartition des Présences (Global)</h4>
                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div class="h-48 flex items-center justify-center">
-                        <canvas id="financialDistributionChart"></canvas>
+                        <canvas id="presenceDistributionChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -281,7 +279,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('financialDistributionChart').getContext('2d');
+                const ctx = document.getElementById('presenceDistributionChart').getContext('2d');
                 const labels = {!! json_encode($chartData['labels']) !!};
                 const data = {!! json_encode($chartData['data']) !!};
 
@@ -293,7 +291,7 @@
                             datasets: [{
                                 data: data,
                                 backgroundColor: [
-                                    '#7367F0', '#28C76F', '#FF9F43', '#EA5455', '#00CFE8', '#444050'
+                                    '#28C76F', '#EA5455', '#FF9F43', '#7367F0', '#00CFE8', '#444050'
                                 ],
                                 borderWidth: 0,
                                 hoverOffset: 4
@@ -317,7 +315,7 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
-                                            return ' ' + context.label + ': ' + context.raw.toLocaleString() + ' €';
+                                            return ' ' + context.label + ': ' + context.raw.toLocaleString();
                                         }
                                     }
                                 }
@@ -326,7 +324,7 @@
                         }
                     });
                 } else {
-                    ctx.canvas.parentNode.innerHTML = '<div class="text-slate-300 italic text-[12px] bg-slate-50 rounded-2xl border border-dashed border-slate-200 w-full h-full flex items-center justify-center">Aucune donnée transactionnelle</div>';
+                    ctx.canvas.parentNode.innerHTML = '<div class="text-slate-300 italic text-[12px] bg-slate-50 rounded-2xl border border-dashed border-slate-200 w-full h-full flex items-center justify-center">Aucune donnée de présence</div>';
                 }
             });
         </script>

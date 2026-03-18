@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,10 +19,10 @@ class DashboardController extends Controller
         $role = strtolower($user->role->libelle ?? '');
 
         return match (true) {
-            str_contains($role, 'admin') || str_contains($role, 'administrateur') => $this->adminDashboard(),
-            str_contains($role, 'choriste') => $this->choristeDashboard($user),
-            default => $this->choristeDashboard($user),
-        };
+                str_contains($role, 'admin') || str_contains($role, 'administrateur') => $this->adminDashboard(),
+                str_contains($role, 'choriste') => $this->choristeDashboard($user),
+                default => $this->choristeDashboard($user),
+            };
     }
 
     /**
@@ -45,15 +46,15 @@ class DashboardController extends Controller
             'solde' => ($caisse = \App\Models\Caisse::where('nom', 'Caisse Principale')->first()) ? $caisse->solde : ($totalRecettes - $totalDepenses),
         ];
 
-        $recettesParCategorie = \App\Models\TransactionFinanciere::where('type', 'recette')
-            ->select('categorie_id', \DB::raw('sum(montant) as total'))
-            ->groupBy('categorie_id')
-            ->with('categorie')
+        // Distribution des présences pour le graphique (Remplace les finances)
+        $presenceDist = \App\Models\Presence::select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->orderByRaw("CASE WHEN status = 'present' THEN 1 WHEN status = 'absent' THEN 2 ELSE 3 END")
             ->get();
 
         $chartData = [
-            'labels' => $recettesParCategorie->map(fn($r) => $r->categorie->libelle),
-            'data' => $recettesParCategorie->map(fn($r) => $r->total),
+            'labels' => $presenceDist->map(fn($p) => ucfirst($p->status)),
+            'data' => $presenceDist->map(fn($p) => $p->total),
         ];
 
         return view('dashboard.admin', compact('stats', 'chartData'));
@@ -67,32 +68,46 @@ class DashboardController extends Controller
         $role = $user->role;
         $pupitre = $user->pupitre;
 
+        // Taux de présence (Logique identique au Mobile)
+        $presences = $user->presences()
+            ->selectRaw('COUNT(*) as total, SUM(CASE WHEN status = \'present\' THEN 1 ELSE 0 END) as presentes')
+            ->first();
+
+        $tauxPresence = ($presences && $presences->total > 0)
+            ? round(($presences->presentes / $presences->total) * 100)
+            : 100;
+
+        // Dernière présence (Remplace la série simulée)
+        $lastPresence = $user->presences()
+            ->join('repetitions', 'presences.repetition_id', '=', 'repetitions.id')
+            ->orderBy('repetitions.start_time', 'desc')
+            ->select('presences.*')
+            ->first();
+
         $choristeStats = [
             'next_rehearsals' => \App\Models\Repetition::with(['repertoires.chant', 'repertoires.partieEvent'])
-                ->where('start_time', '>=', now())
-                ->orderBy('start_time')
-                ->take(3)
-                ->get(),
+            ->where('start_time', '>=', now())
+            ->orderBy('start_time')
+            ->take(3)
+            ->get(),
             'monthly_events' => Event::whereMonth('start_at', now()->month)
-                ->whereYear('start_at', now()->year)
-                ->orderBy('start_at')
-                ->get(),
+            ->whereYear('start_at', now()->year)
+            ->orderBy('start_at')
+            ->get(),
             'recent_announcements' => Post::latest()
-                ->take(5)
-                ->get(),
-            'my_presence_rate' => $user->presences()->count() > 0
-                ? round(($user->presences()->where('status', 'présent')->count() / $user->presences()->count()) * 100)
-                : 100,
+            ->take(5)
+            ->get(),
+            'my_presence_rate' => $tauxPresence,
             'pupitre' => $pupitre,
-            'pupitre_members' => $pupitre ? User::where('pupitre_id', $pupitre->id)->where('id', '!=', $user->id)->take(5)->get() : collect(),
+            'pupitre_members' => $pupitre ?User::where('pupitre_id', $pupitre->id)->where('id', '!=', $user->id)->take(5)->get() : collect(),
             'latest_chants' => \App\Models\Chant::latest()->take(4)->get(),
             'upcoming_birthdays' => User::whereMonth('date_naissance', now()->month)
-                ->orWhereMonth('date_naissance', now()->addMonth()->month)
-                ->take(3)
-                ->get(),
+            ->orWhereMonth('date_naissance', now()->addMonth()->month)
+            ->take(3)
+            ->get(),
             'total_chants_count' => \App\Models\Chant::count(),
-            'attendance_streak' => rand(3, 8), // Simulé pour l'instant
-            'notifications' => $user->notifications->take(5), // Utilisation des vraies notifications
+            'last_presence' => $lastPresence,
+            'notifications' => $user->notifications->take(5),
         ];
 
         return view('dashboard.choriste', compact('choristeStats'));

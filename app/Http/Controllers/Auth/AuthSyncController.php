@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\SupabaseService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class AuthSyncController extends Controller
 {
@@ -218,6 +220,47 @@ class AuthSyncController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'FCM token updated successfully'
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        $request->validate([
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        \Log::info('Mobile password change attempt for user', ['email' => $user->email]);
+
+        // 1. Mise à jour dans Supabase Auth
+        $supabaseSuccess = $this->supabase->updateUserPasswordByEmail($user->email, $request->password);
+
+        if (!$supabaseSuccess) {
+            \Log::error('Supabase password update failed for mobile user', ['email' => $user->email]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de la mise à jour sur Supabase.'
+            ], 500);
+        }
+
+        // 2. Mise à jour locale
+        \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+            'password' => Hash::make($request->password),
+            'must_change_password' => \Illuminate\Support\Facades\DB::raw('false'),
+            'updated_at' => now(),
+        ]);
+
+        \Log::info('Local password update successful for mobile user', ['email' => $user->email]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Votre mot de passe a été mis à jour avec succès.'
         ]);
     }
 }

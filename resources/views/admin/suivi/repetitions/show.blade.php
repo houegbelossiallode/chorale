@@ -141,7 +141,7 @@
                                         <td class="px-8 py-4">
                                             <span
                                                 class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-bold uppercase tracking-widest border border-slate-100">
-                                                {{ $member->pupitre->name ?? 'NON DÃ‰FINI' }}
+                                                {{ $member->pupitre->name ?? 'NON DEFINI' }}
                                             </span>
                                         </td>
                                         <td class="px-8 py-4">
@@ -166,7 +166,7 @@
                                                             d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
                                                 </button>
-                                                <button @click="updatePresence({{ $member->id }}, 'justifie')" title="JustifiÃ©"
+                                                <!-- <button @click="updatePresence({{ $member->id }}, 'justifie')" title="JustifiÃ©"
                                                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all border outline-none"
                                                     :class="presences[{{ $member->id }}].status === 'justifie' ?
                                                                                                                                                                                             'bg-[#FF9F43] text-white border-[#FF9F43] shadow-sm' :
@@ -175,7 +175,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                </button>
+                                                </button> -->
                                             </div>
                                         </td>
                                     </tr>

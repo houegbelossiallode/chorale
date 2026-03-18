@@ -150,4 +150,32 @@ class ProfileService {
       throw Exception("Impossible d'uploader la photo : $e");
     }
   }
+
+  Future<void> changePassword(String newPassword) async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw Exception("Utilisateur non connecté");
+
+    try {
+      debugPrint("ProfileService: Changing password via Laravel API...");
+      final response = await LaravelService().post('$_baseUrl/api/user/change-password', {
+        'password': newPassword,
+        'password_confirmation': newPassword,
+      });
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['status'] == 'success') {
+          debugPrint("ProfileService: Password updated successfully via Laravel.");
+          return;
+        }
+        throw Exception(decoded['message'] ?? "Erreur lors du changement de mot de passe.");
+      } else {
+        final decoded = jsonDecode(response.body);
+        throw Exception(decoded['message'] ?? "Erreur Serveur (Code ${response.statusCode})");
+      }
+    } catch (e) {
+      debugPrint("ProfileService: changePassword error: $e");
+      rethrow;
+    }
+  }
 }

@@ -48,20 +48,26 @@
                 </div>
             </div>
 
-            <!-- Streak Stat -->
+            <!-- Last Presence (Replaces simulated streak) -->
             <div class="card-material p-5">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-[#DFF7E9] text-[#28C76F] rounded-lg flex items-center justify-center shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="min-w-0">
-                        <p class="text-[13px] text-slate-500 font-medium truncate">Série</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[13px] text-slate-500 font-medium truncate">Dernière Présence</p>
                         <div class="flex items-center gap-2">
-                            <span class="text-xl font-bold text-[#444050]">{{ $choristeStats['attendance_streak'] }}</span>
-                            <span class="text-[11px] font-semibold text-slate-400">🔥</span>
+                            @if($choristeStats['last_presence'])
+                                <span
+                                    class="text-md font-bold {{ $choristeStats['last_presence']->status === 'present' ? 'text-[#28C76F]' : ($choristeStats['last_presence']->status === 'absent' ? 'text-[#EA5455]' : 'text-[#FF9F43]') }}">
+                                    {{ $choristeStats['last_presence']->status === 'present' ? 'Présent' : ($choristeStats['last_presence']->status === 'absent' ? 'Absent' : 'Justifié') }}
+                                </span>
+                            @else
+                                <span class="text-[14px] font-semibold text-slate-400">N/A</span>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -42,6 +42,7 @@ Route::get('/api/profile', [\App\Http\Controllers\Auth\AuthSyncController::class
 Route::get('/api/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class , 'getStats'])->middleware('auth');
 Route::post('/api/sondages', [\App\Http\Controllers\Api\SondageController::class , 'update'])->middleware('auth');
 Route::post('/api/user/fcm-token', [\App\Http\Controllers\Auth\AuthSyncController::class , 'updateFcmToken']);
+Route::post('/api/user/change-password', [\App\Http\Controllers\Auth\AuthSyncController::class , 'changePassword'])->middleware('auth');
 Route::post('/api/mobile/password/reset', [\App\Http\Controllers\Api\MobilePasswordResetController::class , 'reset']);
 
 // Password reset routes
