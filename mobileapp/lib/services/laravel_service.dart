@@ -10,11 +10,13 @@ class LaravelService {
   factory LaravelService() => _instance;
   LaravelService._internal();
 
-  final String _baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://chorale.onrender.com';
+  final String _baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://romero-38dc.onrender.com';
   String? _cookies;
   String? _csrfToken;
+  bool _mustChangePassword = false;
 
   String get baseUrl => _baseUrl;
+  bool get mustChangePassword => _mustChangePassword;
 
   /// Extract and store cookies from a set-cookie header string
   void _parseCookies(String? rawCookie) {
@@ -57,6 +59,13 @@ class LaravelService {
 
       if (response.statusCode == 200) {
         _parseCookies(response.headers['set-cookie']);
+        
+        final decoded = jsonDecode(response.body);
+        if (decoded['user'] != null) {
+          _mustChangePassword = decoded['user']['must_change_password'] == true;
+          debugPrint("LaravelService: Session synced, mustChangePassword: $_mustChangePassword");
+        }
+        
         debugPrint("LaravelService: Session synced, cookies: $_cookies, csrf: $_csrfToken");
         return true;
       } else {

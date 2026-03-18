@@ -50,7 +50,7 @@ class MobilePasswordResetController extends Controller
         }
 
         // 1. Générer un nouveau mot de passe aléatoire (par ex. 10 caractères)
-        $newPassword = Str::random(5);
+        $newPassword = Str::random(6);
 
         // 2. Mettre à jour Supabase via l'API Admin
         if (!$user->supabase_id) {
@@ -70,13 +70,7 @@ class MobilePasswordResetController extends Controller
                 }
             }
 
-        // if (!$user->supabase_id) {
-        //     Log::error('MobilePasswordReset: User has no supabase_id in local DB and not found in Supabase.', ['email' => $user->email]);
-        //     return response()->json([
-        //         'status' => 'error',
-        //         'message' => 'Erreur de synchronisation avec le service d\'authentification.'
-        //     ], 500);
-        // }
+       
         }
 
         $targetId = $user->supabase_id;
