@@ -49,8 +49,8 @@ class MobilePasswordResetController extends Controller
             ]);
         }
 
-        // 1. Générer un nouveau mot de passe aléatoire (par ex. 10 caractères)
-        $newPassword = Str::random(6);
+        // 1. Générer un nouveau mot de passe aléatoire (10 caractères pour satisfaire Supabase)
+        $newPassword = Str::random(10);
 
         // 2. Mettre à jour Supabase via l'API Admin
         if (!$user->supabase_id) {
@@ -70,7 +70,7 @@ class MobilePasswordResetController extends Controller
                 }
             }
 
-       
+
         }
 
         $targetId = $user->supabase_id;
