@@ -13,39 +13,27 @@ class MobilePasswordResetMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public string $newPassword;
+
+    public function __construct(string $newPassword)
     {
-        //
+        $this->newPassword = $newPassword;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Mobile Password Reset Mail',
+            subject: "Votre nouveau mot de passe — Chorale Saint Oscar Romero",
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: "emails.mobile_password_reset",
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

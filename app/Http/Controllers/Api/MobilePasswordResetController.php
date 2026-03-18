@@ -70,13 +70,13 @@ class MobilePasswordResetController extends Controller
                 }
             }
 
-            // if (!$user->supabase_id) {
-            //     Log::error('MobilePasswordReset: User has no supabase_id in local DB and not found in Supabase.', ['email' => $user->email]);
-            //     return response()->json([
-            //         'status' => 'error',
-            //         'message' => 'Erreur de synchronisation avec le service d\'authentification.'
-            //     ], 500);
-            // }
+        // if (!$user->supabase_id) {
+        //     Log::error('MobilePasswordReset: User has no supabase_id in local DB and not found in Supabase.', ['email' => $user->email]);
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Erreur de synchronisation avec le service d\'authentification.'
+        //     ], 500);
+        // }
         }
 
         $targetId = $user->supabase_id;
@@ -116,7 +116,8 @@ class MobilePasswordResetController extends Controller
             // mais idéalement il faut avertir l'utilisateur.
             return response()->json([
                 'status' => 'error',
-                'message' => 'Le mot de passe a été réinitialisé mais l\'email n\'a pas pu être envoyé.'
+                'message' => 'Le mot de passe a été réinitialisé mais l\'email n\'a pas pu être envoyé.',
+                'error_detail' => $e->getMessage()
             ], 500);
         }
 
