@@ -16,11 +16,9 @@ class RepetitionController extends Controller
      */
     public function index()
     {
-        $repetitions = Repetition::orderBy('updated_at', 'desc')->with(['repertoires.chant', 'repertoires.partieEvent'])
+        $repetitions = Repetition::where('actif', 'OUI')->orderBy('updated_at', 'desc')->with(['repertoires.chant', 'repertoires.partieEvent'])
             ->withCount('presences')
-            // ->where('start_time', '>=', now()->startOfDay())
-            // ->orderBy('start_time', 'desc')
-            ->paginate(6);
+            ->get();
 
         return view('choriste.repetitions.index', compact('repetitions'));
     }

@@ -41,6 +41,17 @@
                         </div>
 
                         <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Catégorie / Style</label>
+                            <select name="categorie_chant_id" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all">
+                                <option value="">Aucune catégorie</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ old('categorie_chant_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('categorie_chant_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Paroles /
                                 Texte</label>
                             <div class="space-y-2">

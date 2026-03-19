@@ -7,7 +7,7 @@
         <!-- Header Greeting -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
             <div class="text-center md:text-left">
-                <h1 class="text-lg sm:text-2xl font-semibold text-[#444050]">Dashboard</h1>
+                <h1 class="text-lg sm:text-2xl font-semibold text-[#444050]">Tableau de bord</h1>
                 <p class="text-[12px] sm:text-[14px] text-slate-400 font-medium">Gestion de la chorale</p>
             </div>
             <div class="grid grid-cols-2 md:flex items-center gap-2 sm:gap-3">

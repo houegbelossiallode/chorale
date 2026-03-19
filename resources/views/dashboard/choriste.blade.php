@@ -66,7 +66,7 @@
                                     {{ $choristeStats['last_presence']->status === 'present' ? 'Présent' : ($choristeStats['last_presence']->status === 'absent' ? 'Absent' : 'Justifié') }}
                                 </span>
                             @else
-                                <span class="text-[14px] font-semibold text-slate-400">N/A</span>
+                                <span class="text-[14px] font-semibold text-slate-400">Néant</span>
                             @endif
                         </div>
                     </div>

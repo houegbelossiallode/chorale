@@ -240,7 +240,7 @@
                                     : route('choriste.dashboard');
                             @endphp
                             <a href="{{ $dashboardRoute }}" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-500"
-                               :class="scrolled ? 'text-[#7367F0] hover:bg-[#7367F0]/5 border border-[#7367F0]/10' : 'text-white border border-white/20 hover:bg-white/10'">Dashboard</a>
+                               :class="scrolled ? 'text-[#7367F0] hover:bg-[#7367F0]/5 border border-[#7367F0]/10' : 'text-white border border-white/20 hover:bg-white/10'">Tableau de bord</a>
                         @else
                             <a href="/login" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-500"
                                :class="scrolled ? 'text-gray-600 hover:text-amber-700 hover:bg-amber-50' : 'text-white/80 hover:text-white hover:bg-white/10'">Connexion</a>
@@ -303,7 +303,7 @@
                             @endphp
                             <a href="{{ $dashboardRoute }}" class="block px-6 py-4 rounded-2xl font-bold text-center transition active:scale-95 shadow-lg shadow-amber-500/10"
                                :class="scrolled ? 'bg-[#7367F0]/10 text-[#7367F0]' : 'bg-white/10 text-amber-300'">
-                                Dashboard
+                                 Tableau de bord
                             </a>
                         @else
                             <a href="/login" class="block px-6 py-4 rounded-2xl font-semibold text-center transition active:scale-95" 

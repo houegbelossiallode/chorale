@@ -9,14 +9,23 @@
                 <h1 class="text-2xl font-bold text-gray-900">Newsletter</h1>
                 <p class="text-sm text-gray-500 mt-1">Gérez vos abonnés et envoyez des communications par email.</p>
             </div>
-            <a href="{{ route('admin.newsletter.create') }}"
-                class="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2 shrink-0">
-                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Composer une Newsletter
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ route('admin.newsletter.history') }}"
+                    class="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Voir l'historique
+                </a>
+                <a href="{{ route('admin.newsletter.create') }}"
+                    class="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2 shrink-0">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Composer une Newsletter
+                </a>
+            </div>
         </div>
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg flex items-center gap-3">

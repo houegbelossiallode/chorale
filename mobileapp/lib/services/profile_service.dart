@@ -151,13 +151,14 @@ class ProfileService {
     }
   }
 
-  Future<void> changePassword(String newPassword) async {
+  Future<void> changePassword(String currentPassword, String newPassword) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception("Utilisateur non connecté");
 
     try {
       debugPrint("ProfileService: Changing password via Laravel API...");
       final response = await LaravelService().post('$_baseUrl/api/user/change-password', {
+        'current_password': currentPassword,
         'password': newPassword,
         'password_confirmation': newPassword,
       });

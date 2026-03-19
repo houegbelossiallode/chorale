@@ -12,6 +12,7 @@ class ForcePasswordChangeScreen extends StatefulWidget {
 
 class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _currentPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _profileService = ProfileService();
@@ -29,7 +30,7 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _profileService.changePassword(_passwordController.text);
+      await _profileService.changePassword(_currentPasswordController.text, _passwordController.text);
       if (mounted) {
         // Success! We can now proceed to the app
         // The parent (AuthWrapper) should rebuild and show the dashboard
@@ -80,6 +81,8 @@ class _ForcePasswordChangeScreenState extends State<ForcePasswordChangeScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      _buildField("Mot de passe actuel (temporaire)", _currentPasswordController),
+                      const SizedBox(height: 15),
                       _buildField("Nouveau mot de passe", _passwordController),
                       const SizedBox(height: 15),
                       _buildField("Confirmer le mot de passe", _confirmPasswordController),

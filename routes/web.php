@@ -52,6 +52,7 @@ Route::get('/password/reset/confirm', [\App\Http\Controllers\Auth\PasswordResetC
 Route::post('/password/reset', [\App\Http\Controllers\Auth\PasswordResetController::class , 'resetPassword'])->name('password.update');
 Route::post('/api/supabase-register', [\App\Http\Controllers\Auth\AuthSyncController::class , 'register']);
 Route::post('/logout', [\App\Http\Controllers\Auth\AuthSyncController::class , 'logout'])->name('logout');
+Route::get('/logout', [\App\Http\Controllers\Auth\AuthSyncController::class , 'logout']);
 
 // Password change routes (forced)
 Route::middleware('auth')->group(function () {
@@ -68,6 +69,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class , 'index'])->name('audit-logs.index');
     Route::resource('pupitres', \App\Http\Controllers\Admin\PupitreController::class);
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+    Route::resource('categories-chants', \App\Http\Controllers\Admin\CategorieChantController::class);
     Route::resource('chants', \App\Http\Controllers\Admin\ChantController::class);
     Route::get('chants/{chant}/download', [\App\Http\Controllers\Admin\ChantController::class , 'downloadMain'])->name('chants.download');
 
@@ -110,6 +112,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // Newsletter
         Route::get('newsletter', [\App\Http\Controllers\Admin\NewsletterController::class , 'index'])->name('newsletter.index');
+        Route::get('newsletter/history', [\App\Http\Controllers\Admin\NewsletterController::class , 'history'])->name('newsletter.history');
         Route::get('newsletter/create', [\App\Http\Controllers\Admin\NewsletterController::class , 'create'])->name('newsletter.create');
         Route::post('newsletter/send', [\App\Http\Controllers\Admin\NewsletterController::class , 'send'])->name('newsletter.send');
         Route::delete('newsletter/{subscription}', [\App\Http\Controllers\Admin\NewsletterController::class , 'destroy'])->name('newsletter.destroy');

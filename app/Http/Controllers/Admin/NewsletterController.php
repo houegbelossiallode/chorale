@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\NewsletterSubscription;
-use App\Mail\NewsletterMail;
+use App\Models\NewsletterHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use App\Models\NewsletterSubscription;
+use App\Mail\NewsletterMail;
 
 class NewsletterController extends Controller
 {
@@ -15,6 +17,12 @@ class NewsletterController extends Controller
     {
         $subscribers = NewsletterSubscription::orderBy('created_at', 'desc')->paginate(20);
         return view('admin.newsletter.index', compact('subscribers'));
+    }
+
+    public function history()
+    {
+        $histories = NewsletterHistory::with('sender')->latest()->paginate(15);
+        return view('admin.newsletter.history', compact('histories'));
     }
 
     public function create()
@@ -40,7 +48,15 @@ class NewsletterController extends Controller
             Mail::to($subscriber->email)->send(new NewsletterMail($request->subject, $request->content));
         }
 
-        return back()->with('success', 'Newsletter envoyée avec succès à ' . $subscribers->count() . ' abonnés.');
+        // Log to history
+        NewsletterHistory::create([
+            'subject' => $request->subject,
+            'content' => $request->content,
+            'recipient_count' => $subscribers->count(),
+            'sent_by' => Auth::id(),
+        ]);
+
+        return redirect()->route('admin.newsletter.history')->with('success', 'Newsletter envoyée avec succès à ' . $subscribers->count() . ' abonnés.');
     }
 
     public function destroy(NewsletterSubscription $subscription)

@@ -231,8 +231,16 @@ class AuthSyncController extends Controller
         }
 
         $request->validate([
+            'current_password' => ['required', 'string'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'L\'ancien mot de passe est incorrect.'
+            ], 422);
+        }
 
         \Log::info('Mobile password change attempt for user', ['email' => $user->email]);
 

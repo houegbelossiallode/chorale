@@ -20,7 +20,7 @@ class RepetitionController extends Controller
      */
     public function index()
     {
-        $repetitions = Repetition::orderBy('updated_at', 'desc')->with(['repertoires.chant', 'repertoires.partieEvent'])
+        $repetitions = Repetition::where('actif','OUI')->orderBy('updated_at', 'desc')->with(['repertoires.chant', 'repertoires.partieEvent'])
             ->withCount('presences')
             ->latest()
             ->paginate(10);
@@ -118,8 +118,14 @@ class RepetitionController extends Controller
 
     public function destroy(Repetition $repetition)
     {
-        $repetition->delete();
-        return back()->with('success', 'Répétition annulée.');
+        if($repetition->actif === 'OUI'){
+            $repetition->actif = 'NON';
+            $repetition->save();
+        }else{
+            $repetition->actif = 'OUI';
+            $repetition->save();
+        }
+        return back()->with('success', 'Répétition supprimée.');
     }
 
     public function automate(Request $request)

@@ -554,6 +554,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showPasswordChangeDialog() {
+    final TextEditingController currentPasswordController = TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
     final TextEditingController confirmPasswordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -570,6 +571,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildDialogField("Mot de passe actuel", currentPasswordController, isPassword: true),
+                const SizedBox(height: 15),
                 _buildDialogField("Nouveau mot de passe", newPasswordController, isPassword: true),
                 const SizedBox(height: 15),
                 _buildDialogField("Confirmer le mot de passe", confirmPasswordController, isPassword: true),
@@ -593,12 +596,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   setDialogState(() => _isChangingPassword = true);
                   try {
-                    await _profileService.changePassword(newPasswordController.text);
+                    await _profileService.changePassword(
+                      currentPasswordController.text,
+                      newPasswordController.text
+                    );
                     if (mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Mot de passe mis à jour avec succès"), backgroundColor: Colors.green),
+                        const SnackBar(
+                          content: Text("Mot de passe mis à jour. Veuillez vous reconnecter."), 
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 3),
+                        ),
                       );
+                      
+                      // Déconnexion automatique après changement de mot de passe
+                      Future.delayed(const Duration(seconds: 1), () {
+                        Supabase.instance.client.auth.signOut();
+                      });
                     }
                   } catch (e) {
                     if (mounted) {

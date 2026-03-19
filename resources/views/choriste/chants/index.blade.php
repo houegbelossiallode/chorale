@@ -3,32 +3,47 @@
 @section('title', 'Bibliothèque Musicale')
 
 @section('content')
-    <div class="w-full">
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-[#444050]">Bibliothèque Musicale</h1>
-            <p class="text-slate-500 text-sm">Consultez le répertoire et accédez à vos ressources (Soprano, Alto, etc.)</p>
+    <div class="w-full" x-data="{ 
+        searchQuery: '',
+        init() {
+            const searchInput = document.getElementById('global-search');
+            if (searchInput) {
+                searchInput.placeholder = 'Rechercher un chant ou un compositeur...';
+                searchInput.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value;
+                });
+            }
+        }
+    }">
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4" x-data="{ categoryFilter: '' }">
+            <div>
+                <h1 class="text-2xl font-bold text-[#444050]">Bibliothèque Musicale</h1>
+                <p class="text-slate-500 text-sm">Consultez le répertoire et accédez à vos ressources (Soprano, Alto, etc.)</p>
+            </div>
+
+            <div class="w-full md:w-64">
+                <select x-model="categoryFilter" @change="$dispatch('filter-category', categoryFilter)"
+                        class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#7367F0] outline-none transition-all shadow-sm">
+                    <option value="">Tous les styles</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
-        {{-- Barre de recherche rapide --}}
-        <!-- <div class="mb-8 bg-white p-4 rounded-xl shadow-material flex items-center gap-4">
-            <div class="relative flex-1">
-                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input type="text" id="chantSearch" placeholder="Rechercher un chant ou un compositeur..."
-                    class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all text-sm">
-            </div>
-            <div class="text-sm text-slate-400 font-medium">
-                <span id="chantCount">{{ $chants->count() }}</span> chants disponibles
-            </div>
-        </div> -->
-
         {{-- Grille de chants --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="chantGrid">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="chantGrid" 
+             x-data="{ categoryFilter: '' }" 
+             @filter-category.window="categoryFilter = $event.detail">
             @forelse($chants as $chant)
-                <div
+                <div x-show="(searchQuery === '' || 
+                    '{{ strtolower(addslashes($chant->title)) }}'.includes(searchQuery.toLowerCase()) || 
+                    '{{ strtolower(addslashes($chant->composer ?? '')) }}'.includes(searchQuery.toLowerCase())) &&
+                    (categoryFilter === '' || '{{ $chant->categorie_chant_id }}' === categoryFilter)"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
                     class="chant-card bg-white rounded-xl shadow-material border border-transparent hover:border-[#7367F0]/30 hover:shadow-lg transition-all overflow-hidden group">
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
@@ -45,13 +60,18 @@
                             @endif
                         </div>
 
-                        <h3 class="text-lg font-bold text-[#444050] mb-1 truncate chant-title">{{ $chant->title }}</h3>
-                        <p class="text-sm text-slate-400 mb-6 flex items-center gap-1.5 chant-composer">
+                        <h3 class="text-lg font-bold text-[#444050] mb-1 truncate">{{ $chant->title }}</h3>
+                        <p class="text-sm text-slate-400 mb-6 flex flex-wrap items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            {{ $chant->composer ?? 'Compositeur inconnu' }}
+                            <span class="truncate">{{ $chant->composer ?? 'Compositeur inconnu' }}</span>
+                            @if($chant->categorieChant)
+                                <span class="px-2 py-0.5 bg-[#7367F0]/10 text-[#7367F0] rounded text-[10px] font-bold">
+                                    {{ $chant->categorieChant->name }}
+                                </span>
+                            @endif
                         </p>
 
                         <div class="flex items-center gap-3 mb-6">
@@ -103,32 +123,14 @@
                 </div>
             @endforelse
         </div>
+
+        <!-- No Results Message
+        <div x-show="searchQuery !== '' && [...$el.querySelectorAll('.chant-card')].filter(el => el.style.display !== 'none').length === 0"
+            class="text-center py-12">
+            <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p class="text-slate-400 font-medium">Aucun chant ne correspond à votre recherche.</p>
+        </div> -->
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('chantSearch');
-            const cards = document.querySelectorAll('.chant-card');
-            const countDisplay = document.getElementById('chantCount');
-
-            searchInput.addEventListener('input', function (e) {
-                const term = e.target.value.toLowerCase();
-                let visibleCount = 0;
-
-                cards.forEach(card => {
-                    const title = card.querySelector('.chant-title').textContent.toLowerCase();
-                    const composer = card.querySelector('.chant-composer').textContent.toLowerCase();
-
-                    if (title.includes(term) || composer.includes(term)) {
-                        card.style.display = 'block';
-                        visibleCount++;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                countDisplay.textContent = visibleCount;
-            });
-        });
-    </script>
 @endsection

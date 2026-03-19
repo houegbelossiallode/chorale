@@ -194,7 +194,55 @@
                         @endforeach
                     </div>
                 @endif
-               <br>
+            <div class="bg-white rounded-xl shadow-material p-6 mt-6">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-gray-100 pb-3 mb-4">Ajouter une ressource</h3>
+
+                <form action="{{ route('admin.fichier-chants.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="chant_id" value="{{ $chant->id }}">
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Type de ressource</label>
+                        <select name="type" id="res_type" class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
+                            <option value="partition">Partition (PDF)</option>
+                            <option value="audio">Fichier Audio (MP3...)</option>
+                            <option value="youtube">Lien YouTube</option>
+                            <option value="histoire">Histoire / Historique</option>
+                        </select>
+                    </div>
+
+                    <div id="pupitre_input_container">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pupitre concerné</label>
+                        <select name="pupitre_id" class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
+                            <option value="">Tous les pupitres</option>
+                            @foreach($pupitres as $pupitre)
+                                <option value="{{ $pupitre->id }}">{{ $pupitre->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div id="file_input_container">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fichier</label>
+                        <input type="file" name="file" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#7367F0]/10 file:text-[#7367F0] hover:file:bg-[#7367F0]/20">
+                    </div>
+
+                    <div id="url_input_container" class="hidden">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">URL YouTube</label>
+                        <input type="url" name="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
+                    </div>
+
+                    <div id="content_input_container" class="hidden">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Histoire du chant</label>
+                        <textarea name="content" rows="6" placeholder="Écrivez l'histoire du chant ici..." class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">{{ $chant->histoire }}</textarea>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">Cette information sera enregistrée directement sur la fiche du chant.</p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-900 transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Enregistrer / Ajouter
+                    </button>
+                </form>
+            </div>
                 {{-- Enregistrement (Recorder) --}}
             <div class="bg-white rounded-xl shadow-material p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-[#7367F0]/5 rounded-bl-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
@@ -253,6 +301,29 @@
                 </div>
             </div>
             <br>
+                @if($chant->parole)
+                    <div class="bg-white rounded-3xl shadow-material p-8 border border-slate-100">
+                        <h3 class="text-xs font-black text-[#7367F0] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <div class="w-6 h-[2px] bg-[#7367F0]"></div>
+                            Paroles & Texte
+                        </h3>
+                        <div class="text-slate-600 leading-relaxed font-serif italic whitespace-pre-line">
+                            {!! $chant->parole !!}
+                        </div>
+                    </div>
+                @endif
+
+                @if($chant->histoire)
+                    <div class="bg-white rounded-3xl shadow-material p-8 border border-slate-100 mt-8">
+                        <h3 class="text-xs font-black text-amber-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <div class="w-6 h-[2px] bg-amber-500"></div>
+                            Histoire / Contexte
+                        </h3>
+                        <div class="text-slate-600 leading-relaxed italic whitespace-pre-line">
+                            {!! nl2br(e($chant->histoire)) !!}
+                        </div>
+                    </div>
+                @endif
             {{-- Infos rapides --}}
             <div class="bg-white rounded-xl shadow-material p-6">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-gray-100 pb-3 mb-4">Informations</h3>
@@ -298,6 +369,34 @@
     const uploadBtn = document.getElementById('uploadBtn');
     const discardBtn = document.getElementById('discardBtn');
     const pupitreSelect = document.getElementById('pupitre_id');
+
+    // Gestion du formulaire de ressources
+    const resType = document.getElementById('res_type');
+    const fileContainer = document.getElementById('file_input_container');
+    const urlContainer = document.getElementById('url_input_container');
+    const contentContainer = document.getElementById('content_input_container');
+    const pupitreContainer = document.getElementById('pupitre_input_container');
+
+    if (resType) {
+        resType.addEventListener('change', function() {
+            if (this.value === 'youtube') {
+                fileContainer.classList.add('hidden');
+                urlContainer.classList.remove('hidden');
+                contentContainer.classList.add('hidden');
+                pupitreContainer.classList.remove('hidden');
+            } else if (this.value === 'histoire') {
+                fileContainer.classList.add('hidden');
+                urlContainer.classList.add('hidden');
+                contentContainer.classList.remove('hidden');
+                pupitreContainer.classList.add('hidden');
+            } else {
+                fileContainer.classList.remove('hidden');
+                urlContainer.classList.add('hidden');
+                contentContainer.classList.add('hidden');
+                pupitreContainer.classList.remove('hidden');
+            }
+        });
+    }
 
     // Détection du format supporté
     if (MediaRecorder.isTypeSupported('audio/webm')) {

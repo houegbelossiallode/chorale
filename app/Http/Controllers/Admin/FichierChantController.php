@@ -23,12 +23,15 @@ class FichierChantController extends Controller
     {
         $request->validate([
             'chant_id' => 'required|exists:chants,id',
-            'type' => 'required|in:partition,audio,video,youtube',
+            'type' => 'required|in:partition,audio,video,youtube,histoire',
             'pupitre_id' => 'nullable|exists:pupitres,id',
-            'file' => 'required_unless:type,youtube|file|mimes:pdf,mp3,wav,m4a,ogg,aac,mp4,mov|max:40960',
-            'url' => 'nullable|url',
+            'file' => 'required_if:type,partition,audio,video|file|mimes:pdf,mp3,wav,m4a,ogg,aac,mp4,mov|max:40960',
+            'url' => 'required_if:type,youtube|nullable|url',
+            'content' => 'required_if:type,histoire|nullable|string',
         ], [
-            'file.required_unless' => 'Un fichier est requis pour ce type de ressource.',
+            'file.required_if' => 'Un fichier est requis pour ce type de ressource.',
+            'url.required_if' => 'Une URL YouTube est requise.',
+            'content.required_if' => 'Le texte de l\'histoire est requis.',
             'file.mimes' => 'Le fichier doit être de type : pdf, mp3, wav, m4a, ogg, aac, mp4 ou mov.',
             'file.max' => 'Le fichier ne doit pas dépasser 40 Mo.',
             'file.uploaded' => 'Le téléchargement du fichier a échoué. Il est possible que le fichier soit trop volumineux pour le serveur.',
@@ -47,7 +50,12 @@ class FichierChantController extends Controller
             // Cas YouTube : on stocke directement l'URL, pas d'upload
             $filePath = $request->url;
             \Log::info('FichierChant: YouTube URL = ' . $filePath);
-        } else {
+        }
+        elseif ($request->type === 'histoire') {
+            $chant->update(['histoire' => $request->content]);
+            return back()->with('success', 'Histoire du chant mise à jour avec succès.');
+        }
+        else {
             $file = $request->file('file');
             $folder = $request->type . 's';
             $path = "chants/{$chant->id}/{$folder}/" . Str::slug($chant->title) . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -62,6 +70,7 @@ class FichierChantController extends Controller
                 'pupitre_id' => $request->pupitre_id ?: null,
                 'type' => $request->type,
                 'file_path' => $filePath,
+                'content' => $request->content,
             ]);
             \Log::info('FichierChant created: id=' . $record->id);
 
@@ -132,7 +141,8 @@ class FichierChantController extends Controller
                 'Content-Type' => $contentType,
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Log::error('Erreur lors du téléchargement du fichier: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du téléchargement du fichier.');
         }
@@ -140,7 +150,7 @@ class FichierChantController extends Controller
 
     public function destroy(FichierChant $fichierChant)
     {
-        if ($fichierChant->type !== 'youtube') {
+        if ($fichierChant->type !== 'youtube' && $fichierChant->type !== 'histoire') {
             // Extraire le chemin relatif à partir de l'URL publique
             // L'URL ressemble à : https://xxx.supabase.co/storage/v1/object/public/imgs/path/to/file
             $urlPrefix = $this->supabase->url . '/storage/v1/object/public/imgs/';

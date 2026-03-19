@@ -15,6 +15,11 @@ class Chant extends Model
 
     public function repertoireEvents()
     {
-        return $this->belongsToMany(Event::class, 'repertoire')->withPivot('partie_event_id')->withTimestamps();
+        return $this->belongsToMany(Event::class , 'repertoire')->withPivot('partie_event_id')->withTimestamps();
+    }
+
+    public function categorieChant()
+    {
+        return $this->belongsTo(CategorieChant::class);
     }
 }

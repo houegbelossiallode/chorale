@@ -44,6 +44,17 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Catégorie / Style</label>
+                        <select name="categorie_chant_id" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#7367F0] focus:ring-2 focus:ring-[#7367F0]/20 outline-none transition-all">
+                            <option value="">Aucune catégorie</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('categorie_chant_id', $chant->categorie_chant_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('categorie_chant_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-widest">Paroles / Texte</label>
                         <div class="space-y-2">
                             <div id="editor-container" class="h-64 bg-white rounded-lg border border-slate-200"></div>
@@ -147,50 +158,6 @@
                     @endforelse
                 </div>
 
-                {{-- Formulaire d'ajout de ressources (HORS du formulaire principal) --}}
-                <div class="pt-4 border-t border-gray-100">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Ajouter une ressource</h4>
-
-                    <form action="{{ route('admin.fichier-chants.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="chant_id" value="{{ $chant->id }}">
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Type de ressource</label>
-                            <select name="type" id="res_type" class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
-                                <option value="partition">Partition (PDF)</option>
-                                <option value="audio">Fichier Audio (MP3...)</option>
-                                <!-- <option value="video">Fichier Vidéo (MP4...)</option> -->
-                                <option value="youtube">Lien YouTube</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pupitre concerné</label>
-                            <select name="pupitre_id" class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
-                                <option value="">Tous les pupitres</option>
-                                @foreach($pupitres as $pupitre)
-                                    <option value="{{ $pupitre->id }}">{{ $pupitre->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div id="file_input_container">
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fichier</label>
-                            <input type="file" name="file" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#7367F0]/10 file:text-[#7367F0] hover:file:bg-[#7367F0]/20">
-                        </div>
-
-                        <div id="url_input_container" class="hidden">
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">URL YouTube</label>
-                            <input type="url" name="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full text-sm border border-slate-200 rounded-lg focus:border-[#7367F0] focus:ring-0 px-3 py-2.5">
-                        </div>
-
-                        <button type="submit" class="w-full py-3 bg-slate-800 text-white rounded-lg text-sm font-bold hover:bg-slate-900 transition-all flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Ajouter à la liste
-                        </button>
-                    </form>
-                </div>
 
             </div>
         </div>

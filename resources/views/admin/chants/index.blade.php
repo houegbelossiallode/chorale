@@ -11,41 +11,38 @@
             </div>
             
             <div class="flex flex-col sm:flex-row items-center gap-3">
-                <!-- <form action="{{ route('admin.chants.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                    <div class="relative group w-full sm:w-64">
-                        <input type="text" name="search" value="{{ request('search') }}"
-                            placeholder="Rechercher un chant..."
-                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#7367F0] focus:ring-4 focus:ring-[#7367F0]/10 transition-all outline-none">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#7367F0] transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
+                <form action="{{ route('admin.chants.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                    
 
-                    <select name="type" onchange="this.form.submit()"
+                    <select name="categorie_chant_id" onchange="this.form.submit()"
                         class="w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#7367F0] transition-all outline-none">
-                        <option value="">Toutes les ressources</option>
-                        <option value="partition" {{ request('type') == 'partition' ? 'selected' : '' }}>Partitions</option>
-                        <option value="audio" {{ request('type') == 'audio' ? 'selected' : '' }}>Audio</option>
-                        <option value="youtube" {{ request('type') == 'youtube' ? 'selected' : '' }}>YouTube</option>
-                        <option value="video" {{ request('type') == 'video' ? 'selected' : '' }}>Vidéo</option>
+                        <option value="">Tous les styles</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ request('categorie_chant_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @endforeach
                     </select>
 
-                    @if(request()->anyFilled(['search', 'type']))
+                    @if(request()->anyFilled(['search', 'categorie_chant_id', 'type']))
                         <a href="{{ route('admin.chants.index') }}" class="text-xs text-slate-400 hover:text-red-500 transition-colors whitespace-nowrap">
                             Effacer
                         </a>
                     @endif
-                </form> -->
+                </form>
 
-                <button onclick="window.location.href='{{ route('admin.chants.create') }}'"
-                    class="btn-primary flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center shadow-lg shadow-[#7367F0]/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Ajouter un chant
-                </button>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('admin.categories-chants.index') }}" 
+                        class="p-2.5 bg-white border border-slate-200 text-slate-600 hover:text-[#7367F0] rounded-xl transition-all"
+                        title="Gérer les catégories">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    </a>
+                    <button onclick="window.location.href='{{ route('admin.chants.create') }}'"
+                        class="btn-primary flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center shadow-lg shadow-[#7367F0]/20 px-4 py-2.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Ajouter
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -78,7 +75,12 @@
                                             <a href="{{ route('admin.chants.show', $chant->id) }}" class="font-bold text-[#444050] hover:text-[#7367F0] transition-colors block">
                                                 {{ $chant->title }}
                                             </a>
-                                            <p class="text-xs text-slate-400">{{ $chant->composer ?? 'Compositeur inconnu' }}
+                                            <p class="text-xs text-slate-400">
+                                                {{ $chant->composer ?? 'Compositeur inconnu' }}
+                                                @if($chant->categorieChant)
+                                                    <span class="mx-1 text-slate-300">•</span>
+                                                    <span class="text-[#7367F0] font-medium">{{ $chant->categorieChant->name }}</span>
+                                                @endif
                                             </p>
                                         </div>
                                     </div>

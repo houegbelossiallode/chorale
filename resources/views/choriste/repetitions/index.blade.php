@@ -3,7 +3,18 @@
 @section('title', 'Agenda des Répétitions')
 
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-6" x-data="{ 
+        searchQuery: '',
+        init() {
+            const searchInput = document.getElementById('global-search');
+            if (searchInput) {
+                searchInput.placeholder = 'Rechercher une répétition par titre ou lieu...';
+                searchInput.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value;
+                });
+            }
+        }
+    }">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-bold text-[#444050]">Agenda des Répétitions</h1>
@@ -14,8 +25,21 @@
         <!-- Events Grid (Premium Card Design) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($repetitions as $rep)
-                <div
-                    class="bg-white rounded-[2rem] shadow-material-sm border border-slate-100 hover:border-[#7367F0]/30 transition-all group overflow-hidden flex flex-col hover:shadow-material-lg">
+                @php
+                    $isUpcoming = \Carbon\Carbon::parse($rep->start_time)->isFuture() || \Carbon\Carbon::parse($rep->start_time)->isToday();
+                    $matchesSearch = "searchQuery === '' || 
+                        '".strtolower(addslashes($rep->titre))."'.includes(searchQuery.toLowerCase()) || 
+                        '".strtolower(addslashes($rep->lieu ?? ''))."'.includes(searchQuery.toLowerCase()) ||
+                        '".strtolower(addslashes($rep->description ?? ''))."'.includes(searchQuery.toLowerCase())";
+                    
+                    // Logic: Show if it matches search AND (either we are searching OR it's upcoming)
+                    $xShowLogic = "($matchesSearch) && (searchQuery !== '' || ".($isUpcoming ? 'true' : 'false').")";
+                @endphp
+                <div x-show="{{ $xShowLogic }}"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    class="repetition-card bg-white rounded-[2rem] shadow-material-sm border border-slate-100 hover:border-[#7367F0]/30 transition-all group overflow-hidden flex flex-col hover:shadow-material-lg">
                     <!-- Top Section with Date & Icon -->
                     <div
                         class="h-28 bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden shrink-0 group-hover:from-[#7367F0]/5 group-hover:to-[#7367F0]/10 transition-colors">
@@ -118,12 +142,15 @@
             @endforelse
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-12 flex justify-center">
-            <div class="bg-white px-6 py-4 rounded-[2rem] shadow-material-sm border border-slate-100">
-                {{ $repetitions->links() }}
-            </div>
-        </div>
+        <!-- No Results Message -->
+        <!-- <div x-show="searchQuery !== '' && [...$el.querySelectorAll('.repetition-card')].filter(el => el.style.display !== 'none').length === 0"
+            class="text-center py-12">
+            <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p class="text-slate-400 font-medium">Aucune répétition ne correspond à votre recherche.</p>
+        </div> -->
+
 
     </div>
 @endsection

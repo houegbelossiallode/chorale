@@ -5,6 +5,16 @@
 @section('content')
     <div class="space-y-6" x-data="{ 
                             view: 'grid',
+                            searchQuery: '',
+                            init() {
+                                const searchInput = document.getElementById('global-search');
+                                if (searchInput) {
+                                    searchInput.placeholder = 'Rechercher un événement...';
+                                    searchInput.addEventListener('input', (e) => {
+                                        this.searchQuery = e.target.value;
+                                    });
+                                }
+                            },
                             calendarInitialized: false,
                             initCalendar() {
                                 if (this.calendarInitialized) return;
@@ -94,11 +104,25 @@
             </div>
         </div>
 
+
         <div x-show="view === 'grid'" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($events as $event)
-                    <div
+                    @php
+                        $isUpcoming = $event->start_at->isFuture() || $event->start_at->isToday();
+                        $matchesSearch = "searchQuery === '' || 
+                            '".strtolower(addslashes($event->title))."'.includes(searchQuery.toLowerCase()) || 
+                            '".strtolower(addslashes($event->type->libelle ?? ''))."'.includes(searchQuery.toLowerCase()) || 
+                            '".strtolower(addslashes($event->location ?? ''))."'.includes(searchQuery.toLowerCase())";
+                        
+                        // Logic: Show if it matches search AND (either we are searching OR it's upcoming)
+                        $xShowLogic = "($matchesSearch) && (searchQuery !== '' || ".($isUpcoming ? 'true' : 'false').")";
+                    @endphp
+                    <div x-show="{{ $xShowLogic }}"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
                         class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group hover:shadow-material transition-all duration-300">
                         <div class="h-40 relative overflow-hidden">
                             <img src="{{ $event->thumbnail ?? 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=2070&auto=format&fit=crop' }}"
@@ -155,6 +179,15 @@
                     </div>
                 @endforeach
             </div>
+
+            <!-- No Results Message -->
+            <!-- <div x-show="searchQuery !== '' && [...$el.parentElement.querySelectorAll('.repetition-card, [x-show*=matchesSearch]')].filter(el => el.style.display !== 'none').length === 0"
+                class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <p class="text-slate-400 font-medium">Aucun événement ne correspond à votre recherche.</p>
+            </div> -->
         </div>
         <!-- Calendar View -->
         <div x-show="view === 'calendar'" x-cloak x-transition:enter="transition ease-out duration-300"

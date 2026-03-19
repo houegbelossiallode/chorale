@@ -28,6 +28,12 @@
                                 {{ $chant->composer }}
                             </span>
                         @endif
+                        @if($chant->categorieChant)
+                            <span
+                                class="px-3 py-1 bg-[#7367F0]/10 border border-[#7367F0]/20 text-[#7367F0] text-[10px] md:text-xs font-bold rounded-full shadow-sm whitespace-nowrap">
+                                {{ $chant->categorieChant->name }}
+                            </span>
+                        @endif
                     </div>
                 </div>
 
@@ -80,6 +86,21 @@
                             </h3>
                             <div class="text-base md:text-lg text-slate-700 leading-relaxed font-serif italic text-center max-w-2xl mx-auto px-4 break-words">
                                 {!! $chant->parole !!}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if($chant->histoire)
+                    <div class="bg-white rounded-3xl shadow-material-lg p-6 md:p-10 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="relative z-10">
+                            <h3 class="text-xs font-black text-amber-600 uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                                <div class="w-8 h-[2px] bg-amber-500"></div>
+                                Histoire du Chant
+                            </h3>
+                            <div class="text-base text-slate-600 leading-relaxed italic max-w-2xl mx-auto px-4 break-words whitespace-pre-line">
+                                {!! nl2br(e($chant->histoire)) !!}
                             </div>
                         </div>
                     </div>

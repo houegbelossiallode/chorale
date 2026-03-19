@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Services\SupabaseService;
+use App\Models\CategorieChant;
 
 class ChantController extends Controller
 {
@@ -42,7 +43,8 @@ class ChantController extends Controller
                 'Content-Type' => $contentType,
                 'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             \Log::error('Erreur lors du téléchargement de la partition principale: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du téléchargement.');
         }
@@ -50,7 +52,7 @@ class ChantController extends Controller
 
     public function index(Request $request)
     {
-        $query = Chant::query()->with(['fichiers']);
+        $query = Chant::query()->with(['fichiers', 'categorieChant']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -60,6 +62,10 @@ class ChantController extends Controller
             });
         }
 
+        if ($request->filled('categorie_chant_id')) {
+            $query->where('categorie_chant_id', $request->categorie_chant_id);
+        }
+
         if ($request->filled('type')) {
             $type = $request->type;
             $query->whereHas('fichiers', function ($q) use ($type) {
@@ -67,8 +73,9 @@ class ChantController extends Controller
             });
         }
 
-        $chants = $query->orderBy('updated_at','desc')->paginate(7)->withQueryString();
-        return view('admin.chants.index', compact('chants'));
+        $chants = $query->where('actif', 'OUI')->orderBy('updated_at', 'desc')->paginate(7)->withQueryString();
+        $categories = CategorieChant::orderBy('name')->get();
+        return view('admin.chants.index', compact('chants', 'categories'));
     }
 
     /**
@@ -77,7 +84,8 @@ class ChantController extends Controller
     public function create()
     {
         $pupitres = Pupitre::all();
-        return view('admin.chants.create', compact('pupitres'));
+        $categories = CategorieChant::orderBy('name')->get();
+        return view('admin.chants.create', compact('pupitres', 'categories'));
     }
 
     /**
@@ -89,10 +97,12 @@ class ChantController extends Controller
             'title' => 'required|string|max:255',
             'composer' => 'nullable|string|max:255',
             'parole' => 'nullable|string',
+            'histoire' => 'nullable|string',
+            'categorie_chant_id' => 'nullable|exists:categorie_chants,id',
             'partition' => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
-        $chant = Chant::create($request->only(['title', 'composer', 'parole']));
+        $chant = Chant::create($request->only(['title', 'composer', 'parole', 'histoire', 'categorie_chant_id']));
 
         if ($request->hasFile('partition')) {
             $file = $request->file('partition');
@@ -102,11 +112,11 @@ class ChantController extends Controller
             if ($imageUrl) {
                 $chant->update(['file_path' => $imageUrl]);
 
-                // FichierChant::create([
-                //     'chant_id' => $chant->id,
-                //     'type' => 'partition',
-                //     'file_path' => $imageUrl
-                // ]);
+            // FichierChant::create([
+            //     'chant_id' => $chant->id,
+            //     'type' => 'partition',
+            //     'file_path' => $imageUrl
+            // ]);
             }
         }
 
@@ -129,8 +139,9 @@ class ChantController extends Controller
     public function edit(Chant $chant)
     {
         $pupitres = Pupitre::all();
+        $categories = CategorieChant::orderBy('name')->get();
         $chant->load('fichiers');
-        return view('admin.chants.edit', compact('chant', 'pupitres'));
+        return view('admin.chants.edit', compact('chant', 'pupitres', 'categories'));
     }
 
     /**
@@ -142,9 +153,11 @@ class ChantController extends Controller
             'title' => 'required|string|max:255',
             'composer' => 'nullable|string|max:255',
             'parole' => 'nullable|string',
+            'histoire' => 'nullable|string',
+            'categorie_chant_id' => 'nullable|exists:categorie_chants,id',
         ]);
 
-        $chant->update($request->only(['title', 'composer', 'parole']));
+        $chant->update($request->only(['title', 'composer', 'parole', 'histoire', 'categorie_chant_id']));
 
         if ($request->hasFile('partition')) {
             $file = $request->file('partition');
@@ -154,12 +167,12 @@ class ChantController extends Controller
             if ($imageUrl) {
                 $chant->update(['file_path' => $imageUrl]);
 
-                // Pour l'instant on ajoute, on pourra gérer le remplacement plus tard
-                // FichierChant::create([
-                //     'chant_id' => $chant->id,
-                //     'type' => 'partition',
-                //     'file_path' => $imageUrl
-                // ]);
+            // Pour l'instant on ajoute, on pourra gérer le remplacement plus tard
+            // FichierChant::create([
+            //     'chant_id' => $chant->id,
+            //     'type' => 'partition',
+            //     'file_path' => $imageUrl
+            // ]);
             }
         }
 

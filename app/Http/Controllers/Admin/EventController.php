@@ -22,7 +22,7 @@ class EventController extends Controller
     }
     public function index()
     {
-        $events = Event::with(['type', 'images'])->latest()->paginate(10);
+        $events = Event::where('actif','OUI')->with(['type', 'images'])->latest()->paginate(10);
         return view('admin.events.index', compact('events'));
     }
 
