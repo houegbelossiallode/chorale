@@ -398,13 +398,13 @@
         });
     }
 
-    // Détection du format supporté
-    if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-        fileExtension = 'webm';
-    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+    // Détection du format supporté (Priorité à MP4 pour iOS)
+    if (MediaRecorder.isTypeSupported('audio/mp4')) {
         mimeType = 'audio/mp4';
         fileExtension = 'mp4';
+    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+        fileExtension = 'webm';
     } else if (MediaRecorder.isTypeSupported('audio/mpeg')) {
         mimeType = 'audio/mpeg';
         fileExtension = 'mp3';

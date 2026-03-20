@@ -148,9 +148,13 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
     // Ensure absolute URL
     String finalUrl = _currentAudioUrl!;
     if (!finalUrl.startsWith('http')) {
-      final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+      final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://romero-38dc.onrender.com/";
       finalUrl = "$baseUrl/$finalUrl";
     }
+
+    // Fix for iOS: Percent-encode special characters in the URL
+    finalUrl = Uri.encodeFull(finalUrl);
+    debugPrint("ChantDetail: Loading audio from URL: $finalUrl");
 
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -163,6 +167,15 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
         await _audioPlayer.play();
       } catch (e) {
         debugPrint("ChantDetail: Error playing audio: $e");
+        if (mounted) {
+          String message = "Erreur lors de la lecture";
+          if (e.toString().contains("-11828") || finalUrl.endsWith(".webm")) {
+            message = "Format non supporté sur iPhone (.webm). Veuillez utiliser un fichier MP3 ou M4A.";
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message), backgroundColor: Colors.red),
+          );
+        }
       }
     }
   }

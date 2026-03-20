@@ -439,9 +439,14 @@ class _CarnetDeChantsScreenState extends State<CarnetDeChantsScreen> {
                 try {
                   String finalUrl = filePath;
                   if (!finalUrl.startsWith('http')) {
-                    final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+                    final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://romero-38dc.onrender.com";
                     finalUrl = "$baseUrl/$finalUrl";
                   }
+                  
+                  // Fix for iOS: Percent-encode special characters in the URL
+                  finalUrl = Uri.encodeFull(finalUrl);
+                  debugPrint("CarnetDeChants: Loading recording from URL: $finalUrl");
+
                   await _audioPlayer!.setUrl(finalUrl);
                   await _audioPlayer!.play();
                   _audioPlayer!.playerStateStream.listen((state) {

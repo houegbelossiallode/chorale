@@ -71,13 +71,27 @@ class _MediaModalState extends State<MediaModal> {
     try {
       String finalUrl = widget.url;
       if (!finalUrl.startsWith('http') && !finalUrl.startsWith('https') && !finalUrl.startsWith('asset')) {
-        final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://chorale.onrender.com";
+        final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://romero-38dc.onrender.com";
         finalUrl = "$baseUrl/$finalUrl";
       }
+      
+      // Fix for iOS: Percent-encode special characters in the URL
+      finalUrl = Uri.encodeFull(finalUrl);
+      debugPrint("MediaModal: Loading audio from URL: $finalUrl");
+
       await _audioPlayer.setUrl(finalUrl);
       await _audioPlayer.play();
     } catch (e) {
       debugPrint("MediaModal: Audio error: $e");
+      if (mounted) {
+        String message = "Erreur de lecture";
+        if (e.toString().contains("-11828") || widget.url.endsWith(".webm")) {
+          message = "Format non supporté sur iPhone (.webm).";
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
