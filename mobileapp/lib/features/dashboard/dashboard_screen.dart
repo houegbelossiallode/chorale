@@ -446,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: const Icon(Icons.notes_rounded),
         onPressed: () => Scaffold.of(context).openDrawer(),
       ),
-      title: Text("Dashboard", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+      title: Text("Tableau de Bord", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
       centerTitle: true,
       actions: [
         StreamBuilder(

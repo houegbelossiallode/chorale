@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../services/recording_service.dart';
 import '../../services/profile_service.dart';
+import '../../services/download_service.dart';
 
 class ChantDetailScreen extends StatefulWidget {
   final dynamic chant;
@@ -37,6 +39,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
   List<dynamic> _personalRecordings = [];
   String? _playingRecordingId;
   bool _isLoadingRecordings = false;
+  Map<String, bool> _downloadingStatus = {}; // To track progress per URL
 
   @override
   void initState() {
@@ -168,15 +171,74 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
       } catch (e) {
         debugPrint("ChantDetail: Error playing audio: $e");
         if (mounted) {
-          String message = "Erreur lors de la lecture";
-          if (e.toString().contains("-11828") || finalUrl.endsWith(".webm")) {
-            message = "Format non supporté sur iPhone (.webm). Veuillez utiliser un fichier MP3 ou M4A.";
+          String message = "Erreur de lecture : ${e.toString()}";
+          
+          if (Platform.isIOS) {
+            if (e.toString().contains("-11828") || finalUrl.endsWith(".webm")) {
+              message = "Format non supporté sur iPhone (.webm). Veuillez utiliser un fichier MP3 ou M4A.";
+            }
           }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(message), backgroundColor: Colors.red),
           );
         }
       }
+    }
+  }
+
+  Future<void> _handleDownload(String? rawUrl, String label) async {
+    if (rawUrl == null) return;
+
+    // 1. Prepare final URL
+    String finalUrl = rawUrl;
+    if (!finalUrl.startsWith('http')) {
+      final baseUrl = dotenv.env['BACKEND_URL'] ?? "https://romero-38dc.onrender.com";
+      finalUrl = "$baseUrl/$finalUrl".replaceAll(RegExp(r'(?<!:)/+'), '/');
+    }
+    finalUrl = Uri.encodeFull(finalUrl);
+
+    // 2. Start download
+    setState(() => _downloadingStatus[rawUrl] = true);
+    try {
+      final downloadService = DownloadService();
+      final result = await downloadService.downloadFile(finalUrl);
+      
+      if (mounted && result != null) {
+        final String location = result['locationDescription'] ?? "votre téléphone";
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Téléchargement réussi : $label", style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text("Emplacement : $location", style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            backgroundColor: const Color(0xFF28C76F),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: "OK",
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur de téléchargement : $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _downloadingStatus[rawUrl] = false);
     }
   }
 
@@ -376,6 +438,22 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                     elevation: 0,
                   ),
                 ),
+                const SizedBox(height: 10),
+                TextButton.icon(
+                  onPressed: _downloadingStatus[_partitions.firstWhere((p) => p['id'] == _activePartitionId)['file_path']] == true
+                      ? null
+                      : () {
+                          final p = _partitions.firstWhere((p) => p['id'] == _activePartitionId);
+                          _handleDownload(p['file_path'], p['label']);
+                        },
+                  icon: _downloadingStatus[_partitions.firstWhere((p) => p['id'] == _activePartitionId)['file_path']] == true
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7367F0)))
+                      : const Icon(Icons.download_rounded, size: 18),
+                  label: const Text("Télécharger la partition"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF7367F0),
+                  ),
+                ),
               ],
             ),
           ),
@@ -477,7 +555,7 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(icon: const Icon(Icons.replay_10_rounded, color: Color(0xFF7367F0)), onPressed: () => _audioPlayer.seek(_position - const Duration(seconds: 10))),
+              IconButton(icon: const Icon(Icons.replay_5_rounded, color: Color(0xFF7367F0)), onPressed: () => _audioPlayer.seek(_position - const Duration(seconds: 5))),
               const SizedBox(width: 20),
               GestureDetector(
                 onTap: _togglePlay,
@@ -493,7 +571,25 @@ class _ChantDetailScreenState extends State<ChantDetailScreen> {
                 ),
               ),
               const SizedBox(width: 20),
-              IconButton(icon: const Icon(Icons.forward_10_rounded, color: Color(0xFF7367F0)), onPressed: () => _audioPlayer.seek(_position + const Duration(seconds: 10))),
+              IconButton(icon: const Icon(Icons.forward_5_rounded, color: Color(0xFF7367F0)), onPressed: () => _audioPlayer.seek(_position + const Duration(seconds: 5))),
+              const SizedBox(width: 10),
+               IconButton(
+                icon: _downloadingStatus[_currentAudioUrl] == true
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7367F0)))
+                    : const Icon(Icons.download_for_offline_rounded, color: Color(0xFF7367F0)),
+                onPressed: _currentAudioUrl != null && _downloadingStatus[_currentAudioUrl] != true
+                    ? () {
+                        dynamic currentFile;
+                        try {
+                          currentFile = _audioFiles.firstWhere((a) => a['file_path'] == _currentAudioUrl);
+                        } catch (_) {
+                          currentFile = null;
+                        }
+                        final label = currentFile != null ? "Audio ${currentFile['pupitres']?['name'] ?? 'Tutti'}" : "Audio";
+                        _handleDownload(_currentAudioUrl, label);
+                      }
+                    : null,
+              ),
             ],
           ),
           if (_audioFiles.length > 1) ...[

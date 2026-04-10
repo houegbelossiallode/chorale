@@ -15,6 +15,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
   bool _isLoading = true;
   List<dynamic> _chants = [];
   List<dynamic> _filteredChants = [];
+  bool _isAscending = true;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -44,6 +45,16 @@ class _ChantsScreenState extends State<ChantsScreen> {
     }
   }
 
+  void _sortChants() {
+    setState(() {
+      _filteredChants.sort((a, b) {
+        final titleA = a['title']?.toString().toLowerCase() ?? "";
+        final titleB = b['title']?.toString().toLowerCase() ?? "";
+        return _isAscending ? titleA.compareTo(titleB) : titleB.compareTo(titleA);
+      });
+    });
+  }
+
   void _filterChants(String query) {
     setState(() {
       _filteredChants = _chants
@@ -51,6 +62,7 @@ class _ChantsScreenState extends State<ChantsScreen> {
               (chant['title']?.toString().toLowerCase() ?? "").contains(query.toLowerCase()) ||
               (chant['composer']?.toString().toLowerCase() ?? "").contains(query.toLowerCase()))
           .toList();
+      _sortChants(); // Maintain sort after filtering
     });
   }
 
@@ -88,7 +100,15 @@ class _ChantsScreenState extends State<ChantsScreen> {
       centerTitle: true,
       title: Text("Bibliothèque Musicale", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
       actions: [
-        IconButton(icon: const Icon(Icons.sort_by_alpha_rounded), onPressed: () {}),
+        IconButton(
+          icon: Icon(_isAscending ? Icons.sort_by_alpha_rounded : Icons.sort_by_alpha_outlined),
+          onPressed: () {
+            setState(() {
+              _isAscending = !_isAscending;
+              _sortChants();
+            });
+          },
+        ),
         const SizedBox(width: 10),
       ],
     );

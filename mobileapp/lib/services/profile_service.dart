@@ -17,7 +17,14 @@ class ProfileService {
   static Map<String, dynamic>? _cachedProfile;
 
   Future<Map<String, dynamic>?> fetchProfile({bool forceRefresh = false}) async {
+    // 1. Check local memory cache
     if (!forceRefresh && _cachedProfile != null) {
+      return _cachedProfile;
+    }
+
+    // 2. Check LaravelService memory cache (from syncSession)
+    if (!forceRefresh && LaravelService().cachedUser != null) {
+      _cachedProfile = LaravelService().cachedUser;
       return _cachedProfile;
     }
 
@@ -34,7 +41,7 @@ class ProfileService {
 
     Map<String, dynamic>? profileData;
 
-    // 1. Attempt Laravel API
+    // 3. Attempt Laravel API
     try {
       debugPrint("ProfileService: Syncing and fetching from Laravel...");
       bool synced = await LaravelService().syncSession();
@@ -42,21 +49,22 @@ class ProfileService {
         throw Exception("Échec de synchronisation de la session (Vérifiez les logs réseau ou CORS)");
       }
 
-      final response = await LaravelService().get('$_baseUrl/api/profile');
-      
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        if (decoded['status'] == 'success' && decoded['user'] != null) {
-          profileData = Map<String, dynamic>.from(decoded['user']);
-          debugPrint("ProfileService: Laravel RAW user data: ${jsonEncode(profileData)}");
-        } else {
-          throw Exception("Serveur: JSON invalide ou inattendu -> ${response.body}");
-        }
+      // Check if syncSession populated the cache
+      if (!forceRefresh && LaravelService().cachedUser != null) {
+        profileData = LaravelService().cachedUser;
       } else {
-        throw Exception("Erreur de récupération Laravel (Code ${response.statusCode}) -> ${response.body}");
+        final response = await LaravelService().get('$_baseUrl/api/profile');
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          if (decoded['status'] == 'success' && decoded['user'] != null) {
+            profileData = Map<String, dynamic>.from(decoded['user']);
+          }
+        }
       }
     } catch (e) {
       debugPrint("ProfileService: Laravel fetch error: $e");
+      // If we have a cached version even if stale, we might return it as fallback if not forceRefresh
+      if (_cachedProfile != null) return _cachedProfile;
       throw Exception("Défaut bloquant connexion Web/Base : $e");
     }
 
@@ -70,6 +78,15 @@ class ProfileService {
 
   /// Helper to get only the integer ID of the current user
   Future<int?> getIntegerUserId() async {
+    // Synchronous check if possible
+    if (_cachedProfile != null && _cachedProfile!['id'] != null) {
+      return int.tryParse(_cachedProfile!['id'].toString());
+    }
+    
+    if (LaravelService().cachedUser != null && LaravelService().cachedUser!['id'] != null) {
+      return int.tryParse(LaravelService().cachedUser!['id'].toString());
+    }
+
     final profile = await fetchProfile();
     if (profile != null && profile['id'] != null) {
       return int.tryParse(profile['id'].toString());

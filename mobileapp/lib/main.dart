@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:choralia/services/push_notification_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:http/http.dart' as http;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -49,6 +50,10 @@ void main() async {
   // Request permissions immediately on startup (for first launch after install)
   // We don't await this to avoid blocking the initial UI frame (prevents white screen)
   pushService.requestPermissions();
+
+  // Wake up backend early (unawaited)
+  final backendUrl = dotenv.env['BACKEND_URL'] ?? 'https://romero-38dc.onrender.com';
+  http.get(Uri.parse('$backendUrl/api/ping')).catchError((_) => http.Response('', 500));
 
   runApp(const MyApp());
 }

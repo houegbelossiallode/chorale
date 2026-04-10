@@ -14,9 +14,11 @@ class LaravelService {
   String? _cookies;
   String? _csrfToken;
   bool _mustChangePassword = false;
+  Map<String, dynamic>? _cachedUser;
 
   String get baseUrl => _baseUrl;
   bool get mustChangePassword => _mustChangePassword;
+  Map<String, dynamic>? get cachedUser => _cachedUser;
 
   /// Extract and store cookies from a set-cookie header string
   void _parseCookies(String? rawCookie) {
@@ -62,8 +64,9 @@ class LaravelService {
         
         final decoded = jsonDecode(response.body);
         if (decoded['user'] != null) {
+          _cachedUser = Map<String, dynamic>.from(decoded['user']);
           _mustChangePassword = decoded['user']['must_change_password'] == true;
-          debugPrint("LaravelService: Session synced, mustChangePassword: $_mustChangePassword");
+          debugPrint("LaravelService: Session synced, user cached, mustChangePassword: $_mustChangePassword");
         }
         
         debugPrint("LaravelService: Session synced, cookies: $_cookies, csrf: $_csrfToken");

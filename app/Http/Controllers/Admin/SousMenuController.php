@@ -14,7 +14,7 @@ class SousMenuController extends Controller
     public function index()
     {
         $menus = \App\Models\Menu::all();
-        $sousMenus = SousMenu::with('menu')->latest()->paginate(10);
+        $sousMenus = SousMenu::with('menu')->orderBy('updated_at','desc')->latest()->paginate(10);
         return view('admin.sousmenus.index', compact('sousMenus', 'menus'));
     }
 

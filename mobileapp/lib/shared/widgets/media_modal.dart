@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:just_audio/just_audio.dart' as ja;
@@ -84,10 +85,14 @@ class _MediaModalState extends State<MediaModal> {
     } catch (e) {
       debugPrint("MediaModal: Audio error: $e");
       if (mounted) {
-        String message = "Erreur de lecture";
-        if (e.toString().contains("-11828") || widget.url.endsWith(".webm")) {
-          message = "Format non supporté sur iPhone (.webm).";
+        String message = "Erreur de lecture : ${e.toString()}";
+        
+        if (Platform.isIOS) {
+          if (e.toString().contains("-11828") || widget.url.endsWith(".webm")) {
+            message = "Format non supporté sur iPhone (.webm).";
+          }
         }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message), backgroundColor: Colors.red),
         );

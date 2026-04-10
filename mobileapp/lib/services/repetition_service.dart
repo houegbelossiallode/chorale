@@ -116,16 +116,23 @@ class RepetitionService {
 
   /// Fetches all repertoire items for a repetition, grouped by their associated event title.
   Future<Map<String, List<Map<String, dynamic>>>> fetchRepertoireGroupedByEvent(String repetitionId) async {
-    // Get pivot rows for this repetition
-    final List<dynamic> pivotData = await _client
-        .from('repertoire_repetition')
-        .select('repertoire_id')
-        .eq('repetition_id', repetitionId);
+    // 1. Start fetching everything in parallel
+    final profileService = ProfileService();
+    
+    final results = await Future.wait<dynamic>([
+      // A. Get pivot rows
+      _client.from('repertoire_repetition').select('repertoire_id').eq('repetition_id', repetitionId),
+      // B. Get user ID (likely cached)
+      profileService.getIntegerUserId(),
+    ]);
+
+    final List<dynamic> pivotData = results[0] as List<dynamic>;
+    final int? internalUserId = results[1] as int?;
 
     final List<int> repertoireIds = pivotData.map((e) => e['repertoire_id'] as int).toList();
     if (repertoireIds.isEmpty) return {};
 
-    // Fetch repertoire items with event info and chant info
+    // 2. Fetch repertoire items with joins
     final List<dynamic> data = await _client
         .from('repertoire')
         .select('''
@@ -152,10 +159,7 @@ class RepetitionService {
       return orderA.compareTo(orderB);
     });
 
-    // Fetch user recordings using the Laravel integer ID
-    final profileService = ProfileService();
-    final internalUserId = await profileService.getIntegerUserId();
-
+    // 3. Fetch user recordings if we have the ID
     if (internalUserId != null && data.isNotEmpty) {
       try {
         final List<dynamic> recordings = await _client
